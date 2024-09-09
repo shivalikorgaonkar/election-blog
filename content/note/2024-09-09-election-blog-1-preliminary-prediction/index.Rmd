@@ -18,10 +18,9 @@ library(dplyr)
 library(readr)
 
 ```
-Introduction: Analyzing Past Presidential Elections
-September 9, 2024
 
-```{r}
+
+```{r setup, include=FALSE}
 
 ####----------------------------------------------------------#
 #### Read and clean presidential popular vote.
@@ -51,7 +50,9 @@ d_popvote_wide |>
   summarise(races = n())
 
 ```
-```{r}
+
+
+```{r setup, include=FALSE}
 
 ####----------------------------------------------------------#
 #### Extension 1: Creating My Custom Blog Theme
@@ -102,7 +103,6 @@ ggplot(data = d_popvote, aes(x = year, y = pv2p, color = party)) +
 
 ```{r}
 
-
 ####----------------------------------------------------------#
 #### State-by-state map of presidential popular votes.
 ####----------------------------------------------------------#
@@ -151,9 +151,10 @@ d_pvstate_wide |>
   theme(strip.text = element_text(size = 12),
         aspect.ratio=1) +
   my_blog_theme()
+
 ```
 
-```{r}
+```{r setup, include=FALSE}
 
 ####----------------------------------------------------------#
 #### Forecast: simplified electoral cycle model. 
@@ -199,6 +200,7 @@ pv2p_2024_states |>
 
 ```
 
+
 ```{r}
 
 ####----------------------------------------------------------#
@@ -220,9 +222,9 @@ pv2p_2024_states |>
   group_by(winner) |>
   summarise(electoral_votes = sum(electors))
 
-
 ```
-```{r}
+
+```{r setup, include=FALSE}
 
 ####----------------------------------------------------------#
 #### Extension 2: Who actually won each election? 
@@ -246,7 +248,7 @@ d_ec_wide <- d_pvstate_wide |>
   I removed 1948 from the data set because there is only 19% of popular vote accounted for in Alabama, which is not historically accurate. Also, the electoral college data set does not have an elector count recorded for 1948.
   1960 is also not included in the electoral college data set, so the election results are not represented. 
 
-```{r}
+```{r setup, include=FALSE}
 
 ec <- read_csv("~/Downloads/ec_full.csv")
 
@@ -259,7 +261,6 @@ pv2p_2024_states |>
   summarize(electoral_votes = sum(electors.x))
 
 ```
-
 
 ```{r}
 
