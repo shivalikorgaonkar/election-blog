@@ -20,7 +20,7 @@ library(readr)
 ```
 
 
-```{r setup, include=FALSE}
+```{r clean, include=FALSE}
 
 ####----------------------------------------------------------#
 #### Read and clean presidential popular vote.
@@ -52,7 +52,7 @@ d_popvote_wide |>
 ```
 
 
-```{r setup, include=FALSE}
+```{r extension 1, include=FALSE}
 
 ####----------------------------------------------------------#
 #### Extension 1: Creating My Custom Blog Theme
@@ -154,7 +154,7 @@ d_pvstate_wide |>
 
 ```
 
-```{r setup, include=FALSE}
+```{r forecast, include=FALSE}
 
 ####----------------------------------------------------------#
 #### Forecast: simplified electoral cycle model. 
@@ -224,7 +224,7 @@ pv2p_2024_states |>
 
 ```
 
-```{r setup, include=FALSE}
+```{r extension 2, include=FALSE}
 
 ####----------------------------------------------------------#
 #### Extension 2: Who actually won each election? 
@@ -248,7 +248,7 @@ d_ec_wide <- d_pvstate_wide |>
   I removed 1948 from the data set because there is only 19% of popular vote accounted for in Alabama, which is not historically accurate. Also, the electoral college data set does not have an elector count recorded for 1948.
   1960 is also not included in the electoral college data set, so the election results are not represented. 
 
-```{r setup, include=FALSE}
+```{r ec, include=FALSE}
 
 ec <- read_csv("~/Downloads/ec_full.csv")
 
