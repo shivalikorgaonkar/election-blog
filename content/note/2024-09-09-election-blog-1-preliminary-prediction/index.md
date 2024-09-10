@@ -37,6 +37,7 @@ ggplot(data = d_popvote, aes(x = year, y = pv2p, color = party)) +
 ```
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-1-1.png" width="672" />
+  
   Some notable trends exist over the past century, many of which can be credited to significant historical events. It's clear that the difference between the two party's vote share was much more drastic decades ago. Today, elections are likely to be within a ten point margin, whereas in the late 20th century, they would exceed 20 point differences. In recent decades, elections have become tighter, reflecting increased polarization and more closely divided public opinions on key issues. This tightening is often attributed to growing ideological divisions between the parties and heightened partisan engagement among voters.
 
 
@@ -100,7 +101,7 @@ d_pvstate_wide |>
   geom_polygon(aes(fill=winner), color = "white") +
   scale_fill_manual(values = c("dodgerblue3", "firebrick3")) +
   labs(title = "Presidential Election Winner by State",
-       subtitle = "1948-2020",
+       subtitle = "1980-2020",
        y = "Latitude", x = "Longitude") +
   guides(fill=guide_legend(title = "Election Winner")) +
   theme(strip.text = element_text(size = 12),
@@ -201,7 +202,7 @@ pv2p_2024_states |>
 
 
 ```r
-# Joining electoral college vote data with d_ec_wide dataset
+# Joining electoral college vote data with d_ec_wide datas et
 
 d_ec_wide <- d_ec_wide |>
   left_join(ec_DC, by = c("state","year")) 
@@ -219,32 +220,44 @@ d_ec_wide <- d_ec_wide |>
 ```
 
 ```r
-d_ec_wide |>
+ec_winners <- d_ec_wide |>
   pivot_wider(names_from = state_winner, values_from = electoral_votes) |>
-  mutate(election_winner = ifelse(D >= 270, "D", "R"))
+  mutate(election_winner = ifelse(D >= 270, "D", "R")) 
+```
+
+```r
+####----------------------------------------------------------#
+#### Extension 3: Mapping Swing States Over Time
+####----------------------------------------------------------#
+
+d_pvstate_wide_more <-  d_pvstate_wide |>
+  filter(year >= 1976) |>
+  mutate(swing = (D_pv2p / (D_pv2p + R_pv2p)) - (D_pv2p_lag1 / (D_pv2p_lag1 + R_pv2p_lag1))) |>
+  mutate(region = tolower(state))
+
+d_pvstate_wide_more |>
+  filter(year >= 1980) |>
+  left_join(states_map, by = "region") |>
+  ggplot(aes(long, lat, group = group)) +
+  facet_wrap(facets = year ~.) +
+  geom_polygon(aes(fill = swing), color = "white") +
+  scale_fill_gradient2(low = "firebrick3",
+                      high = "dodgerblue3",
+                      mid = "white",
+                      name = "Voter Swing",
+                      breaks = c(-0.2, -0.15, -0.1, 0, 0.1, 0.15, 0.2),
+                      limits = c(-0.2, 0.2)) +
+  labs(title = "Presidential Election Voter Swing") +
+  my_blog_theme()
 ```
 
 ```
-## # A tibble: 18 × 4
-## # Groups:   year [18]
-##     year     D     R election_winner
-##    <dbl> <dbl> <dbl> <chr>          
-##  1  1952    82   446 R              
-##  2  1956    71   457 R              
-##  3  1960    NA    NA <NA>           
-##  4  1964   481    57 D              
-##  5  1968   197   341 R              
-##  6  1972    15   523 R              
-##  7  1976   292   246 D              
-##  8  1980    82   456 R              
-##  9  1984    13   525 R              
-## 10  1988   112   426 R              
-## 11  1992   386   152 D              
-## 12  1996   386   152 D              
-## 13  2000   278   260 D              
-## 14  2004   270   268 D              
-## 15  2008   370   168 D              
-## 16  2012   338   202 D              
-## 17  2016   229   311 R              
-## 18  2020   309   231 D
+## Warning in left_join(filter(d_pvstate_wide_more, year >= 1980), states_map, : Detected an unexpected many-to-many relationship between `x` and `y`.
+## ℹ Row 1 of `x` matches multiple rows in `y`.
+## ℹ Row 1 of `y` matches multiple rows in `x`.
+## ℹ If a many-to-many relationship is expected, set `relationship =
+##   "many-to-many"` to silence this warning.
 ```
+
+<img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-6-1.png" width="672" />
+

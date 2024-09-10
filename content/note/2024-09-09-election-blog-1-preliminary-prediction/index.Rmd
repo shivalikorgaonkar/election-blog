@@ -99,6 +99,7 @@ ggplot(data = d_popvote, aes(x = year, y = pv2p, color = party)) +
   my_blog_theme()
 
 ```
+  
   Some notable trends exist over the past century, many of which can be credited to significant historical events. It's clear that the difference between the two party's vote share was much more drastic decades ago. Today, elections are likely to be within a ten point margin, whereas in the late 20th century, they would exceed 20 point differences. In recent decades, elections have become tighter, reflecting increased polarization and more closely divided public opinions on key issues. This tightening is often attributed to growing ideological divisions between the parties and heightened partisan engagement among voters.
 
 ```{r}
@@ -145,7 +146,7 @@ d_pvstate_wide |>
   geom_polygon(aes(fill=winner), color = "white") +
   scale_fill_manual(values = c("dodgerblue3", "firebrick3")) +
   labs(title = "Presidential Election Winner by State",
-       subtitle = "1948-2020",
+       subtitle = "1980-2020",
        y = "Latitude", x = "Longitude") +
   guides(fill=guide_legend(title = "Election Winner")) +
   theme(strip.text = element_text(size = 12),
@@ -264,7 +265,7 @@ pv2p_2024_states |>
 
 ```{r}
 
-# Joining electoral college vote data with d_ec_wide dataset
+# Joining electoral college vote data with d_ec_wide datas et
 
 d_ec_wide <- d_ec_wide |>
   left_join(ec_DC, by = c("state","year")) 
@@ -275,8 +276,37 @@ d_ec_wide <- d_ec_wide |>
   group_by(year, state_winner)|>
   summarize(electoral_votes = sum(electors)) 
 
-d_ec_wide |>
+ec_winners <- d_ec_wide |>
   pivot_wider(names_from = state_winner, values_from = electoral_votes) |>
-  mutate(election_winner = ifelse(D >= 270, "D", "R"))
+  mutate(election_winner = ifelse(D >= 270, "D", "R")) 
+
 
 ```
+```{r}
+
+####----------------------------------------------------------#
+#### Extension 3: Mapping Swing States Over Time
+####----------------------------------------------------------#
+
+d_pvstate_wide_more <-  d_pvstate_wide |>
+  filter(year >= 1976) |>
+  mutate(swing = (D_pv2p / (D_pv2p + R_pv2p)) - (D_pv2p_lag1 / (D_pv2p_lag1 + R_pv2p_lag1))) |>
+  mutate(region = tolower(state))
+
+d_pvstate_wide_more |>
+  filter(year >= 1980) |>
+  left_join(states_map, by = "region") |>
+  ggplot(aes(long, lat, group = group)) +
+  facet_wrap(facets = year ~.) +
+  geom_polygon(aes(fill = swing), color = "white") +
+  scale_fill_gradient2(low = "firebrick3",
+                      high = "dodgerblue3",
+                      mid = "white",
+                      name = "Voter Swing",
+                      breaks = c(-0.2, -0.15, -0.1, 0, 0.1, 0.15, 0.2),
+                      limits = c(-0.2, 0.2)) +
+  labs(title = "Presidential Election Voter Swing") +
+  my_blog_theme()
+
+```
+

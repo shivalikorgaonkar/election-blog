@@ -51,7 +51,7 @@ ggplot(data = d_popvote, aes(x = year, y = pv2p, color = party)) +
   my_blog_theme()
 </code></pre>
 <img src="https://example.org/note/2024/09/09/election-blog-1-preliminary-prediction/index_files/figure-html/unnamed-chunk-1-1.png" width="672" />
-  Some notable trends exist over the past century, many of which can be credited to significant historical events. It's clear that the difference between the two party's vote share was much more drastic decades ago. Today, elections are likely to be within a ten point margin, whereas in the late 20th century, they would exceed 20 point differences. In recent decades, elections have become tighter, reflecting increased polarization and more closely divided public opinions on key issues. This tightening is often attributed to growing ideological divisions between the parties and heightened partisan engagement among voters.
+<p>Some notable trends exist over the past century, many of which can be credited to significant historical events. It&rsquo;s clear that the difference between the two party&rsquo;s vote share was much more drastic decades ago. Today, elections are likely to be within a ten point margin, whereas in the late 20th century, they would exceed 20 point differences. In recent decades, elections have become tighter, reflecting increased polarization and more closely divided public opinions on key issues. This tightening is often attributed to growing ideological divisions between the parties and heightened partisan engagement among voters.</p>
 <pre><code class="language-r">####----------------------------------------------------------#
 #### State-by-state map of presidential popular votes.
 ####----------------------------------------------------------#
@@ -104,7 +104,7 @@ pv_win_map |&gt;
   geom_polygon(aes(fill=winner), color = &quot;white&quot;) +
   scale_fill_manual(values = c(&quot;dodgerblue3&quot;, &quot;firebrick3&quot;)) +
   labs(title = &quot;Presidential Election Winner by State&quot;,
-       subtitle = &quot;1948-2020&quot;,
+       subtitle = &quot;1980-2020&quot;,
        y = &quot;Latitude&quot;, x = &quot;Longitude&quot;) +
   guides(fill=guide_legend(title = &quot;Election Winner&quot;)) +
   theme(strip.text = element_text(size = 12),
@@ -177,7 +177,7 @@ pv2p_2024_states |&gt;
 </code></pre>
 <p>I removed 1948 from the data set because there is only 19% of popular vote accounted for in Alabama, which is not historically accurate. Also, the electoral college data set does not have an elector count recorded for 1948.
 1960 is also not included in the electoral college data set, so the election results are not represented.</p>
-<pre><code class="language-r"># Joining electoral college vote data with d_ec_wide dataset
+<pre><code class="language-r"># Joining electoral college vote data with d_ec_wide datas et
 
 d_ec_wide &lt;- d_ec_wide |&gt;
   left_join(ec_DC, by = c(&quot;state&quot;,&quot;year&quot;)) 
@@ -191,33 +191,41 @@ d_ec_wide &lt;- d_ec_wide |&gt;
 <pre><code>## `summarise()` has grouped output by 'year'. You can override using the
 ## `.groups` argument.
 </code></pre>
-<pre><code class="language-r">d_ec_wide |&gt;
+<pre><code class="language-r">ec_winners &lt;- d_ec_wide |&gt;
   pivot_wider(names_from = state_winner, values_from = electoral_votes) |&gt;
-  mutate(election_winner = ifelse(D &gt;= 270, &quot;D&quot;, &quot;R&quot;))
+  mutate(election_winner = ifelse(D &gt;= 270, &quot;D&quot;, &quot;R&quot;)) 
 </code></pre>
-<pre><code>## # A tibble: 18 × 4
-## # Groups:   year [18]
-##     year     D     R election_winner
-##    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;          
-##  1  1952    82   446 R              
-##  2  1956    71   457 R              
-##  3  1960    NA    NA &lt;NA&gt;           
-##  4  1964   481    57 D              
-##  5  1968   197   341 R              
-##  6  1972    15   523 R              
-##  7  1976   292   246 D              
-##  8  1980    82   456 R              
-##  9  1984    13   525 R              
-## 10  1988   112   426 R              
-## 11  1992   386   152 D              
-## 12  1996   386   152 D              
-## 13  2000   278   260 D              
-## 14  2004   270   268 D              
-## 15  2008   370   168 D              
-## 16  2012   338   202 D              
-## 17  2016   229   311 R              
-## 18  2020   309   231 D
+<pre><code class="language-r">####----------------------------------------------------------#
+#### Extension 3: Mapping Swing States Over Time
+####----------------------------------------------------------#
+
+d_pvstate_wide_more &lt;-  d_pvstate_wide |&gt;
+  filter(year &gt;= 1976) |&gt;
+  mutate(swing = (D_pv2p / (D_pv2p + R_pv2p)) - (D_pv2p_lag1 / (D_pv2p_lag1 + R_pv2p_lag1))) |&gt;
+  mutate(region = tolower(state))
+
+d_pvstate_wide_more |&gt;
+  filter(year &gt;= 1980) |&gt;
+  left_join(states_map, by = &quot;region&quot;) |&gt;
+  ggplot(aes(long, lat, group = group)) +
+  facet_wrap(facets = year ~.) +
+  geom_polygon(aes(fill = swing), color = &quot;white&quot;) +
+  scale_fill_gradient2(low = &quot;firebrick3&quot;,
+                      high = &quot;dodgerblue3&quot;,
+                      mid = &quot;white&quot;,
+                      name = &quot;Voter Swing&quot;,
+                      breaks = c(-0.2, -0.15, -0.1, 0, 0.1, 0.15, 0.2),
+                      limits = c(-0.2, 0.2)) +
+  labs(title = &quot;Presidential Election Voter Swing&quot;) +
+  my_blog_theme()
 </code></pre>
+<pre><code>## Warning in left_join(filter(d_pvstate_wide_more, year &gt;= 1980), states_map, : Detected an unexpected many-to-many relationship between `x` and `y`.
+## ℹ Row 1 of `x` matches multiple rows in `y`.
+## ℹ Row 1 of `y` matches multiple rows in `x`.
+## ℹ If a many-to-many relationship is expected, set `relationship =
+##   &quot;many-to-many&quot;` to silence this warning.
+</code></pre>
+<img src="https://example.org/note/2024/09/09/election-blog-1-preliminary-prediction/index_files/figure-html/unnamed-chunk-6-1.png" width="672" />
 
 </main>
 
