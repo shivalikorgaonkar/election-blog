@@ -260,4 +260,5 @@ d_pvstate_wide_more |>
 ```
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-6-1.png" width="672" />
+  Oftentimes, presidential candidates will focus their campaigning on a handful of states, including Arizona, Georgia, Michigan, Pennsylvania, and more. The map grid displayed showcases why this is the case. States shaded a darker color had greater shift in how individuals voted. This is important because candidates will focus their attention, knowing that voters are persuadable year to year. 
 
