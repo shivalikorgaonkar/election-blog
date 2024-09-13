@@ -1,0 +1,378 @@
+---
+title: 'Blog #2: Economic Predictors'
+author: Shivali Korgaonkar
+date: '2024-09-12'
+slug: blog-2-economic-predictors
+categories: []
+tags: []
+---
+
+
+
+```{r setup, include = FALSE}
+
+####----------------------------------------------------------#
+#### Preamble
+####----------------------------------------------------------#
+
+# Load libraries.
+## install via `install.packages("name")`
+library(car)
+library(tidyverse)
+
+```
+
+
+```{r merge, include = FALSE}
+
+#### Read, merge, and process data.
+####----------------------------------------------------------#
+
+# Load popular vote data. 
+d_popvote <- read_csv("~/Downloads/popvote_1948-2020.csv")
+
+#insert my blog theme
+
+my_blog_theme <- function() {
+  theme(
+    panel.border = element_blank(),
+    panel.background = element_rect(fill = "gray92"),
+    plot.title = element_text(size = 18, hjust = 0.8, color = "gray16", face = "bold", family = "Times New Roman"), 
+    plot.subtitle = element_text(size = 14, color = "black", hjust = 0.5, family = "Times New Roman"),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    axis.text = element_text(size = 10, family = "Times New Roman"),
+    axis.line = element_line(colour = "black"),
+    axis.title = element_text(size = 12, family = "Times New Roman"),
+    legend.position = "right",
+    legend.text = element_text(size = 12))
+}
+
+
+```
+
+
+```{r fred, include = FALSE}
+
+# Load economic data from FRED: https://fred.stlouisfed.org. 
+# Variables, units, & ranges: 
+# GDP, billions $, 1947-2024
+# GDP_growth_quarterly, %
+# RDPI, $, 1959-2024
+# RDPI_growth_quarterly, %
+# CPI, $ index, 1947-2024
+# unemployment, %, 1948-2024
+# sp500_, $, 1927-2024 
+d_fred <- read_csv("~/Downloads/fred_econ.csv")
+
+```
+
+
+
+```{r bea, include = FALSE}
+# Load economic data from the BEA: https://apps.bea.gov/iTable/?reqid=19&step=2&isuri=1&categories=survey#eyJhcHBpZCI6MTksInN0ZXBzIjpbMSwyLDMsM10sImRhdGEiOltbImNhdGVnb3JpZXMiLCJTdXJ2ZXkiXSxbIk5JUEFfVGFibGVfTGlzdCIsIjI2NCJdLFsiRmlyc3RfWWVhciIsIjE5NDciXSxbIkxhc3RfWWVhciIsIjIwMjQiXSxbIlNjYWxlIiwiMCJdLFsiU2VyaWVzIiwiUSJdXX0=.
+# GDP, 1947-2024 (all)
+# GNP
+# RDPI
+# Personal consumption expenditures
+# Goods
+# Durable goods
+# Nondurable goods
+# Services 
+# Population (midperiod, thousands)
+d_bea <- read_csv("~/Downloads/bea_econ.csv") |> 
+  rename(year = "Year",
+         quarter = "Quarter", 
+         gdp = "Gross domestic product", 
+         gnp = "Gross national product", 
+         dpi = "Disposable personal income", 
+         consumption = "Personal consumption expenditures", 
+         goods = "Goods", 
+         durables = "Durable goods", 
+         nondurables = "Nondurable goods", 
+         services = "Services", 
+         pop = "Population (midperiod, thousands)")
+
+# Filter and merge data. 
+d_inc_econ <- d_popvote |> 
+  filter(incumbent_party == TRUE) |> 
+  select(year, pv, pv2p, winner) |> 
+  left_join(d_fred |> filter(quarter == 2)) |> 
+  left_join(d_bea |> filter(quarter == "Q2") |> select(year, dpi))
+  # N.B. two different sources of data to use, FRED & BEA. 
+  # We are using second-quarter data since that is the latest 2024 release. 
+  # Feel free to experiment with different data/combinations!
+```
+  An incumbent president running for re-election reaps both benefits and barriers. For one, they are a candidate that the American people are familiar with and normalized to. That being said, the American people also have four years of work to analyze and interpret. The condition of the United States is put on the sitting Commander-in-Chief who is already in the position to lead the economy, culture, and social circumstances of their country. In the past decade, we've seen Former President Barack Obama benefit in his re-election campaign against Mitt Romney, having been in a post-Hurricane Sandy relief era and reviving the economy after a significant bump during his mid-terms. On the other end, we saw Former President Donald Trump face the repercussions of controversial foreign relations, poor COVID-19 relief, and high unemployment in 2020.
+  With this in mind, my second blog post will focus on different independent variables that can be used to predict the outcome of the 2024 election. Specifically, I will use economic variables to analyze their predictive abilities in elections between 1948 and 2020, in order to see the variable(s) best suited to predict the election in November. 
+
+```{r}
+####----------------------------------------------------------#
+#### Understanding the relationship between economy and vote share. 
+####----------------------------------------------------------#
+
+# Create scatterplot to visualize relationship between Q2 GDP growth and 
+# incumbent vote share. 
+d_inc_econ |> 
+  ggplot(aes(x = GDP_growth_quarterly, y = pv2p, label = year)) + 
+  geom_text() + 
+  geom_hline(yintercept = 50, lty = 2) + 
+  geom_vline(xintercept = 0.01, lty = 2) +
+  labs(title = "Relationship Between GDP Growth and Incumbent Voter Share",
+       subtitle = "1948-2020",
+       x = "Second Quarter GDP Growth (%)", 
+       y = "Incumbent Party's National Popular Vote Share") + 
+  my_blog_theme()
+```
+
+
+```{r no 2020, include = FALSE}
+
+# Remove 2020 from plot.
+d_inc_econ_2 <- d_inc_econ |>
+  filter(year != 2020)
+
+d_inc_econ_2 |> 
+  ggplot(aes(x = GDP_growth_quarterly, y = pv2p, label = year)) + 
+  geom_text() + 
+  geom_hline(yintercept = 50, lty = 2) + 
+  geom_vline(xintercept = 0.01, lty = 2) + 
+  labs(x = "Second Quarter GDP Growth (%)", 
+       y = "Incumbent Party's National Popular Vote Share") + 
+  my_blog_theme()
+
+```
+
+
+```{r cor, include = FALSE}
+
+# Compute correlations between Q2 GDP growth and incumbent vote 2-party vote share.
+cor(d_inc_econ$GDP_growth_quarterly, 
+    d_inc_econ$pv2p)
+cor(d_inc_econ_2$GDP_growth_quarterly, 
+    d_inc_econ_2$pv2p)
+
+# Fit bivariate OLS. 
+reg_econ <- lm(pv2p ~ GDP_growth_quarterly, 
+               data = d_inc_econ)
+reg_econ |> summary()
+
+reg_econ_2 <- lm(pv2p ~ GDP_growth_quarterly, 
+                         data = d_inc_econ_2)
+reg_econ_2 |> summary()
+
+
+```
+
+
+
+```{r}
+
+# Can add bivariate regression lines to our scatterplots. 
+d_inc_econ |> 
+  ggplot(aes(x = GDP_growth_quarterly, y = pv2p, label = year)) + 
+  geom_text() + 
+  geom_smooth(method = "lm", formula = y ~ x) +
+  geom_hline(yintercept = 50, lty = 2) + 
+  geom_vline(xintercept = 0.01, lty = 2) + 
+  labs(x = "Second Quarter GDP Growth (%)", 
+       y = "Incumbent Party's National Popular Vote Share", 
+       title = "Y = 51.25 + 0.274 * X") + 
+  my_blog_theme() + 
+  theme(plot.title = element_text(size = 18))
+
+d_inc_econ_2 |> 
+  ggplot(aes(x = GDP_growth_quarterly, y = pv2p, label = year)) + 
+  geom_text() + 
+  geom_smooth(method = "lm", formula = y ~ x) +
+  geom_hline(yintercept = 50, lty = 2) + 
+  geom_vline(xintercept = 0.01, lty = 2) + 
+  labs(x = "Second Quarter GDP Growth (%)", 
+       y = "Incumbent Party's National Popular Vote Share", 
+       title = "Y = 49.38 + 0.737 * X") + 
+  my_blog_theme() + 
+  theme(plot.title = element_text(size = 18))
+
+# Evaluate the in-sample fit of your preferred model.
+
+summary(reg_econ)$r.squared
+summary(reg_econ_2)$r.squared
+
+
+```
+
+  The first data set has a R squared value of 0.1881,while the second data set, which excludes the 2020 election year, has a R squared value of 0.3248. The R squared value helps identify how strongly the independent variable can be predicted by the dependent variable. In this case, the regression seeks to find out the relationship between GDP growth in the second quarter and the incumbent party's popular vote share. The Y variable (vote share) can be better predicted based on the X variable (GDP growth) when 2020 is excluded.
+
+
+```{r}
+
+plot(d_inc_econ$year, d_inc_econ$pv2p, type="l", 
+  main = "True Y (Line), Predicted Y (Dot) for each year")
+points(d_inc_econ$year, predict(reg_econ_2, d_inc_econ))
+
+```
+```{r}
+
+# Summarize mean squared error
+
+mse <- mean((reg_econ_2$model$pv2p - reg_econ_2$fitted.values)^2)
+mse
+
+```
+
+```{r model}
+
+# Model Testing: Leave-One-Out
+(out_samp_pred <- predict(reg_econ_2, d_inc_econ[d_inc_econ$year == 2020,]))
+(out_samp_truth <- d_inc_econ |> filter(year == 2020) |> select(pv2p))
+out_samp_pred - out_samp_truth # Dangers of fundamentals-only model!
+# https://www.nytimes.com/2020/07/30/business/economy/q2-gdp-coronavirus-economy.html
+
+# Model Testing: Cross-Validation (One Run)
+years_out_samp <- sample(d_inc_econ_2$year, 9) 
+mod <- lm(pv2p ~ GDP_growth_quarterly, 
+          d_inc_econ_2[!(d_inc_econ_2$year %in% years_out_samp),])
+out_samp_pred <- predict(mod, d_inc_econ_2[d_inc_econ_2$year %in% years_out_samp,])
+out_samp_truth <- d_inc_econ_2$pv2p[d_inc_econ_2$year %in% years_out_samp]
+mean(out_samp_pred - out_samp_truth)
+
+# Model Testing: Cross-Validation (1000 Runs)
+out_samp_errors <- sapply(1:1000, function(i) {
+  # TODO
+})
+
+```
+
+```{r}
+
+####----------------------------------------------------------#
+#### Predicting 2024 results using simple economy model. 
+####----------------------------------------------------------#
+# Sequester 2024 data.
+GDP_new <- d_fred |> 
+  filter(year == 2024 & quarter == 2) |> 
+  select(GDP_growth_quarterly)
+
+# Predict.
+predict(reg_econ_2, GDP_new) 
+predict(reg_econ_2, GDP_new, interval = "prediction") #provides 95% confidence interval
+
+
+# Predict uncertainty.
+# TODO 
+
+```
+
+
+```{r CPI cor}
+
+### Relationship between CPI and vote share
+
+# Create scatterplot to visualize relationship between CPI and incumbent vote share. 
+d_inc_econ |> 
+  ggplot(aes(x = CPI, y = pv2p, label = year)) + 
+  geom_text() + 
+  geom_hline(yintercept = 50, lty = 2) + 
+  labs(title = "Relationship between CPI and Incumbent Vote Share",
+       subtitle = "1948-2020",
+       x = "Consumer Price Index (CPI)", 
+       y = "Incumbent Party's National Popular Vote Share") + 
+  my_blog_theme()
+
+d_inc_econ |> 
+  ggplot(aes(x = CPI, y = pv2p, label = year)) + 
+  geom_text() + 
+  geom_smooth(method = "lm", formula = y ~ x) +
+  geom_hline(yintercept = 50, lty = 2) + 
+  labs(title = "Relationship between CPI and Incumbent Vote Share",
+       subtitle = "Y = 53.76 - 0.017 * X",
+       x = "Consumer Price Index (CPI)", 
+       y = "Incumbent Party's National Popular Vote Share") + 
+  my_blog_theme() + 
+  theme(plot.title = element_text(size = 18))
+
+# Compute correlations between CPI and incumbent vote 2-party vote share.
+cor(d_inc_econ$CPI, 
+    d_inc_econ$pv2p)
+cor(d_inc_econ_2$CPI, 
+    d_inc_econ_2$pv2p)
+
+# Fit bivariate OLS. 
+reg_cpi <- lm(pv2p ~ CPI, 
+               data = d_inc_econ)
+reg_cpi |> summary()
+
+reg_cpi_2 <- lm(pv2p ~ CPI, 
+                         data = d_inc_econ_2)
+reg_cpi_2 |> summary()
+
+#2024 Prediction
+# Sequester 2024 data.
+CPI_new <- d_inc_econ |>
+  filter (year == 2020 & quarter == 2) |>
+  select(CPI)
+
+# Predict.
+predict(reg_cpi, CPI_new) 
+predict(reg_cpi, CPI_new, interval = "prediction") #provides 95% confidence interval
+
+```
+```{r}
+
+### Relationship between unemployment and vote share
+
+# Create scatterplot to visualize relationship between CPI and incumbent vote share. 
+d_inc_econ |> 
+  ggplot(aes(x = unemployment, y = pv2p, label = year)) + 
+  geom_text() + 
+  geom_hline(yintercept = 50, lty = 2) + 
+  geom_vline(xintercept = 0.01, lty = 2) +
+  labs(title = "Relationship between Unemployment and Incumbent Vote Share",
+       subtitle = "1948-2020",
+       x = "Unemployment Rate (%)", 
+       y = "Incumbent Party's National Popular Vote Share") + 
+  my_blog_theme()
+
+d_inc_econ |> 
+  ggplot(aes(x = unemployment, y = pv2p, label = year)) + 
+  geom_text() + 
+  geom_smooth(method = "lm", formula = y ~ x) +
+  geom_hline(yintercept = 50, lty = 2) + 
+  labs(title = "Relationship between Unemployment and Incumbent Vote Share",
+       subtitle = "Y = 53.63 - 0.312 * X",
+       x = "Unemployment Rate (%)", 
+       y = "Incumbent Party's National Popular Vote Share") + 
+  my_blog_theme() + 
+  theme(plot.title = element_text(size = 18))
+
+# Compute correlations between CPI and incumbent vote 2-party vote share.
+cor(d_inc_econ$unemployment, 
+    d_inc_econ$pv2p)
+cor(d_inc_econ_2$unemployment, 
+    d_inc_econ_2$pv2p)
+
+# Fit bivariate OLS. 
+reg_unemp <- lm(pv2p ~ unemployment, 
+               data = d_inc_econ)
+reg_unemp |> summary()
+
+reg_unemp_2 <- lm(pv2p ~ unemployment, 
+                         data = d_inc_econ_2)
+reg_unemp_2 |> summary()
+
+#2024 Prediction
+# Sequester 2024 data.
+unemp_new <- d_inc_econ |>
+  filter (year == 2020 & quarter == 2) |>
+  select(unemployment)
+
+# Predict.
+predict(reg_unemp_2, unemp_new) 
+predict(reg_unemp_2, unemp_new, interval = "prediction") #provides 95% confidence interval
+
+```
+```{r}
+lm(formula = pv2p ~ GDP_growth_quarterly + 
+     dpi,
+   data = d_inc_econ)
+```
+
