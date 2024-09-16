@@ -34,15 +34,14 @@
 </div>
 
 <main>
-<p>An incumbent president running for re-election reaps both benefits and barriers. For one, they are a candidate that the American people are familiar with and normalized to. That being said, the American people also have four years of work to analyze and interpret. The condition of the United States is put on the sitting Commander-in-Chief who is already in the position to lead the economy, culture, and social circumstances of their country. In the past decade, we&rsquo;ve seen Former President Barack Obama benefit in his re-election campaign against Mitt Romney, having been in a post-Hurricane Sandy relief era and reviving the economy after a significant bump during his mid-terms. On the other end, we saw Former President Donald Trump face the repercussions of controversial foreign relations, poor COVID-19 relief, and high unemployment in 2020.
-With this in mind, my second blog post will focus on different independent variables that can be used to predict the outcome of the 2024 election. Specifically, I will use economic variables to analyze their predictive abilities in elections between 1948 and 2020, in order to see the variable(s) best suited to predict the election in November.</p>
-<pre><code class="language-r">####----------------------------------------------------------#
-#### Understanding the relationship between economy and vote share. 
-####----------------------------------------------------------#
+<pre><code>An incumbent president running for re-election reaps both benefits and barriers. For one, they are a candidate that the American people are familiar with and normalized to. That being said, the American people also have four years of work to analyze and interpret. The condition of the United States is put on the sitting Commander-in-Chief who is already in the position to lead the economy, culture, and social circumstances of their country. In the past decade, we've seen Former President Barack Obama benefit in his re-election campaign against Mitt Romney, having been in a post-Hurricane Sandy relief era and reviving the economy after a significant bump during his mid-terms. On the other end, we saw Former President Donald Trump face the repercussions of controversial foreign relations, poor COVID-19 relief, and high unemployment in 2020.
 
-# Create scatterplot to visualize relationship between Q2 GDP growth and 
-# incumbent vote share. 
-d_inc_econ |&gt; 
+With this in mind, my second blog post will focus on different independent variables that can be used to predict the outcome of the 2024 election. Specifically, I will use economic variables to analyze their predictive abilities in elections between 1948 and 2020, in order to see the variable(s) best suited to predict the election in November. 
+</code></pre>
+<p><strong>Growth Domestic Product</strong></p>
+<pre><code>First, I will look at the relationship between GDP and the incumbent party's vote share. Gross Domestic Product (GDP) measures the total value of all goods and services produced within a country. It is a crucial indicator for assessing the overall strength of the economy, showing whether it is expanding or contracting.
+</code></pre>
+<pre><code class="language-r">d_inc_econ |&gt; 
   ggplot(aes(x = GDP_growth_quarterly, y = pv2p, label = year)) + 
   geom_text() + 
   geom_hline(yintercept = 50, lty = 2) + 
@@ -54,7 +53,11 @@ d_inc_econ |&gt;
   my_blog_theme()
 </code></pre>
 <img src="https://example.org/note/2024/09/12/blog-2-economic-predictors/index_files/figure-html/unnamed-chunk-1-1.png" width="672" />
+<pre><code>It's clear that 2020 is a significant outlier in this plot, having an extreme decrease in GDP growth, due to the pandemic. The dashed lines organize the information to showcase election years where there was growth versus loss, as well as popular vote victory versus losses for the incumbent party. A majority of election years where there was GDP growth also presented popular vote victories.
+The plot below better exemplifies this trend with a regression line drawn to show the positive correlation between GDP growth and vote share.
+</code></pre>
 <pre><code class="language-r"># Can add bivariate regression lines to our scatterplots. 
+
 d_inc_econ |&gt; 
   ggplot(aes(x = GDP_growth_quarterly, y = pv2p, label = year)) + 
   geom_text() + 
@@ -74,108 +77,19 @@ d_inc_econ |&gt;
 ##   variable into a factor?
 </code></pre>
 <img src="https://example.org/note/2024/09/12/blog-2-economic-predictors/index_files/figure-html/unnamed-chunk-2-1.png" width="672" />
-<pre><code class="language-r">d_inc_econ_2 |&gt; 
-  ggplot(aes(x = GDP_growth_quarterly, y = pv2p, label = year)) + 
-  geom_text() + 
-  geom_smooth(method = &quot;lm&quot;, formula = y ~ x) +
-  geom_hline(yintercept = 50, lty = 2) + 
-  geom_vline(xintercept = 0.01, lty = 2) + 
-  labs(x = &quot;Second Quarter GDP Growth (%)&quot;, 
-       y = &quot;Incumbent Party's National Popular Vote Share&quot;, 
-       title = &quot;Y = 49.38 + 0.737 * X&quot;) + 
-  my_blog_theme() + 
-  theme(plot.title = element_text(size = 18))
-</code></pre>
-<pre><code>## Warning: The following aesthetics were dropped during statistical transformation: label
-## ℹ This can happen when ggplot fails to infer the correct grouping structure in
-##   the data.
-## ℹ Did you forget to specify a `group` aesthetic or to convert a numerical
-##   variable into a factor?
-</code></pre>
-<img src="https://example.org/note/2024/09/12/blog-2-economic-predictors/index_files/figure-html/unnamed-chunk-2-2.png" width="672" />
-<pre><code class="language-r"># Evaluate the in-sample fit of your preferred model.
-
-summary(reg_econ)$r.squared
+<pre><code class="language-r">summary(reg_econ)$r.squared
 </code></pre>
 <pre><code>## [1] 0.1880919
 </code></pre>
-<pre><code class="language-r">summary(reg_econ_2)$r.squared
+<pre><code>I ran the same model twice, to see the impact of including 2020 despite it being an outlier. The first data set has a R squared value of 0.1881, while the second data set, which excludes the 2020 election year, has a R squared value of 0.3248. The R squared value helps identify how strongly the independent variable can be predicted by the dependent variable. In this case, the regression seeks to find out the relationship between GDP growth in the second quarter and the incumbent party's popular vote share. The Y variable (vote share) can be better predicted based on the X variable (GDP growth) when 2020 is excluded.
+However, for the rest of the blog I will continue to use data that includes the 2020 election year, due to its proximity in relevance in this year's election with the impact of issues like COVID-19, race relations, and economic discourse still relevant. While the predictions may have a lower R-squared value in aligning previous elections, the inclusion of 2020 will be a better predictor for the 2024 election.
 </code></pre>
-<pre><code>## [1] 0.3248066
-</code></pre>
-<p>The first data set has a R squared value of 0.1881,while the second data set, which excludes the 2020 election year, has a R squared value of 0.3248. The R squared value helps identify how strongly the independent variable can be predicted by the dependent variable. In this case, the regression seeks to find out the relationship between GDP growth in the second quarter and the incumbent party&rsquo;s popular vote share. The Y variable (vote share) can be better predicted based on the X variable (GDP growth) when 2020 is excluded.</p>
-<pre><code class="language-r">plot(d_inc_econ$year, d_inc_econ$pv2p, type=&quot;l&quot;, 
-  main = &quot;True Y (Line), Predicted Y (Dot) for each year&quot;)
-points(d_inc_econ$year, predict(reg_econ_2, d_inc_econ))
-</code></pre>
-<img src="https://example.org/note/2024/09/12/blog-2-economic-predictors/index_files/figure-html/unnamed-chunk-3-1.png" width="672" />
-<pre><code class="language-r"># Summarize mean squared error
-
-mse &lt;- mean((reg_econ_2$model$pv2p - reg_econ_2$fitted.values)^2)
-mse
-</code></pre>
-<pre><code>## [1] 17.7027
-</code></pre>
-<pre><code class="language-r"># Model Testing: Leave-One-Out
-(out_samp_pred &lt;- predict(reg_econ_2, d_inc_econ[d_inc_econ$year == 2020,]))
-</code></pre>
-<pre><code>##        1 
-## 28.75101
-</code></pre>
-<pre><code class="language-r">(out_samp_truth &lt;- d_inc_econ |&gt; filter(year == 2020) |&gt; select(pv2p))
-</code></pre>
-<pre><code>## # A tibble: 1 × 1
-##    pv2p
-##   &lt;dbl&gt;
-## 1  47.7
-</code></pre>
-<pre><code class="language-r">out_samp_pred - out_samp_truth # Dangers of fundamentals-only model!
-</code></pre>
-<pre><code>##        pv2p
-## 1 -18.97913
-</code></pre>
-<pre><code class="language-r"># https://www.nytimes.com/2020/07/30/business/economy/q2-gdp-coronavirus-economy.html
-
-# Model Testing: Cross-Validation (One Run)
-years_out_samp &lt;- sample(d_inc_econ_2$year, 9) 
-mod &lt;- lm(pv2p ~ GDP_growth_quarterly, 
-          d_inc_econ_2[!(d_inc_econ_2$year %in% years_out_samp),])
-out_samp_pred &lt;- predict(mod, d_inc_econ_2[d_inc_econ_2$year %in% years_out_samp,])
-out_samp_truth &lt;- d_inc_econ_2$pv2p[d_inc_econ_2$year %in% years_out_samp]
-mean(out_samp_pred - out_samp_truth)
-</code></pre>
-<pre><code>## [1] 2.262913
-</code></pre>
-<pre><code class="language-r"># Model Testing: Cross-Validation (1000 Runs)
-out_samp_errors &lt;- sapply(1:1000, function(i) {
-  # TODO
-})
-</code></pre>
-<pre><code class="language-r">####----------------------------------------------------------#
-#### Predicting 2024 results using simple economy model. 
-####----------------------------------------------------------#
-# Sequester 2024 data.
-GDP_new &lt;- d_fred |&gt; 
-  filter(year == 2024 &amp; quarter == 2) |&gt; 
-  select(GDP_growth_quarterly)
-
-# Predict.
-predict(reg_econ_2, GDP_new) 
-</code></pre>
-<pre><code>##        1 
-## 51.58486
-</code></pre>
-<pre><code class="language-r">predict(reg_econ_2, GDP_new, interval = &quot;prediction&quot;) #provides 95% confidence interval
-</code></pre>
-<pre><code>##        fit      lwr     upr
-## 1 51.58486 41.85982 61.3099
-</code></pre>
-<pre><code class="language-r"># Predict uncertainty.
-# TODO 
+<p><strong>Consumer Price Index</strong></p>
+<pre><code>The Consumer Price Index (CPI) is a measure that examines the average change over time in the prices paid by urban consumers for goods and services. It's a key indicator of inflation and reflects changes in the cost of living. In the context of elections, the CPI can significantly impact the incumbent party’s chances of re-election. When inflation is high, as indicated by a rising CPI, the cost of living increases, which leads to economic dissatisfactio as people must use more of their income on basic needs. This dissatisfaction often translates into political discontent, as voters may blame the incumbent administration for not effectively managing the economy. Conversely, if the CPI shows stable or low inflation, it suggests that the cost of living is relatively manageable, which can uplift the incumbent party's vote share in re-election.
 </code></pre>
 <pre><code class="language-r">### Relationship between CPI and vote share
 
-# Create scatterplot to visualize relationship between CPI and incumbent vote share. 
+# Create scatter plot to visualize relationship between CPI and incumbent vote share. 
 d_inc_econ |&gt; 
   ggplot(aes(x = CPI, y = pv2p, label = year)) + 
   geom_text() + 
@@ -264,26 +178,14 @@ reg_cpi_2 |&gt; summary()
 ## Multiple R-squared:  0.04921,	Adjusted R-squared:  -0.01021 
 ## F-statistic: 0.8281 on 1 and 16 DF,  p-value: 0.3763
 </code></pre>
-<pre><code class="language-r">#2024 Prediction
-# Sequester 2024 data.
-CPI_new &lt;- d_inc_econ |&gt;
-  filter (year == 2020 &amp; quarter == 2) |&gt;
-  select(CPI)
-
-# Predict.
-predict(reg_cpi, CPI_new) 
+<pre><code>As CPI increased, incumbent party vote share also decreases, which aligns with my original hypothesis, as voter satisfaction decreases with increased cost of living. 2020 does not stand as an outlier, despite the pandemic's impact. The R-squared value for this regression is 0.049.
 </code></pre>
-<pre><code>##        1 
-## 49.31611
-</code></pre>
-<pre><code class="language-r">predict(reg_cpi, CPI_new, interval = &quot;prediction&quot;) #provides 95% confidence interval
-</code></pre>
-<pre><code>##        fit      lwr      upr
-## 1 49.31611 37.32375 61.30847
+<p><strong>Unemployment</strong></p>
+<pre><code>The unemployment rate measures the percentage of people actively seeking work but unable to find jobs. A high unemployment rate may lead voters to favor the opposite party, if they are promising better job creation and economic policies.
 </code></pre>
 <pre><code class="language-r">### Relationship between unemployment and vote share
 
-# Create scatterplot to visualize relationship between CPI and incumbent vote share. 
+# Create scatter plot to visualize relationship between CPI and incumbent vote share. 
 d_inc_econ |&gt; 
   ggplot(aes(x = unemployment, y = pv2p, label = year)) + 
   geom_text() + 
@@ -295,7 +197,7 @@ d_inc_econ |&gt;
        y = &quot;Incumbent Party's National Popular Vote Share&quot;) + 
   my_blog_theme()
 </code></pre>
-<img src="https://example.org/note/2024/09/12/blog-2-economic-predictors/index_files/figure-html/unnamed-chunk-6-1.png" width="672" />
+<img src="https://example.org/note/2024/09/12/blog-2-economic-predictors/index_files/figure-html/unnamed-chunk-4-1.png" width="672" />
 <pre><code class="language-r">d_inc_econ |&gt; 
   ggplot(aes(x = unemployment, y = pv2p, label = year)) + 
   geom_text() + 
@@ -314,7 +216,7 @@ d_inc_econ |&gt;
 ## ℹ Did you forget to specify a `group` aesthetic or to convert a numerical
 ##   variable into a factor?
 </code></pre>
-<img src="https://example.org/note/2024/09/12/blog-2-economic-predictors/index_files/figure-html/unnamed-chunk-6-2.png" width="672" />
+<img src="https://example.org/note/2024/09/12/blog-2-economic-predictors/index_files/figure-html/unnamed-chunk-4-2.png" width="672" />
 <pre><code class="language-r"># Compute correlations between CPI and incumbent vote 2-party vote share.
 cor(d_inc_econ$unemployment, 
     d_inc_econ$pv2p)
@@ -373,13 +275,55 @@ reg_unemp_2 |&gt; summary()
 ## Multiple R-squared:  4.254e-05,	Adjusted R-squared:  -0.06245 
 ## F-statistic: 0.0006806 on 1 and 16 DF,  p-value: 0.9795
 </code></pre>
-<pre><code class="language-r">#2024 Prediction
+<pre><code>  As the unemployment rate increases, the incumcent party has a lower vote share. The R-value on this is extremely low though, so it would definitely not be a good predictor for this election.
+</code></pre>
+<p><strong>Predicting 20204 Election Results</strong></p>
+<pre><code class="language-r">####----------------------------------------------------------#
+#### Predicting 2024 results using simple economy model. 
+####----------------------------------------------------------#
+
+##GDP
+# Sequester 2024 data.
+GDP_new &lt;- d_fred |&gt; 
+  filter(year == 2024 &amp; quarter == 2) |&gt; 
+  select(GDP_growth_quarterly)
+
+# Predict with GDP
+predict(reg_econ_2, GDP_new) 
+</code></pre>
+<pre><code>##        1 
+## 51.58486
+</code></pre>
+<pre><code class="language-r">predict(reg_econ_2, GDP_new, interval = &quot;prediction&quot;) #provides 95% confidence interval
+</code></pre>
+<pre><code>##        fit      lwr     upr
+## 1 51.58486 41.85982 61.3099
+</code></pre>
+<pre><code class="language-r">##CPI
+# Sequester 2024 data.
+CPI_new &lt;- d_inc_econ |&gt;
+  filter (year == 2020 &amp; quarter == 2) |&gt;
+  select(CPI)
+
+# Predict with CPI
+predict(reg_cpi, CPI_new) 
+</code></pre>
+<pre><code>##        1 
+## 49.31611
+</code></pre>
+<pre><code class="language-r">predict(reg_cpi, CPI_new, interval = &quot;prediction&quot;) #provides 95% confidence interval
+</code></pre>
+<pre><code>##        fit      lwr      upr
+## 1 49.31611 37.32375 61.30847
+</code></pre>
+<pre><code class="language-r">## Unemployment 
 # Sequester 2024 data.
 unemp_new &lt;- d_inc_econ |&gt;
   filter (year == 2020 &amp; quarter == 2) |&gt;
   select(unemployment)
 
-# Predict.
+
+# Predict with Unemployment
 predict(reg_unemp_2, unemp_new) 
 </code></pre>
 <pre><code>##       1 
@@ -390,18 +334,14 @@ predict(reg_unemp_2, unemp_new)
 <pre><code>##       fit      lwr      upr
 ## 1 52.1712 34.30039 70.04202
 </code></pre>
-<pre><code class="language-r">lm(formula = pv2p ~ GDP_growth_quarterly + 
-     dpi,
-   data = d_inc_econ)
+<pre><code>With the GDP, CPI, and unemployment regressions all run, we can now use previous election trends to see the outcomes on vote share of the incumbent party for the 2024 election. The GDP data predicts that the Democratic party will receive 51.6% of the vote share. CPI predicts 49.3%, and unemployment predicts 52.1%.
 </code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = pv2p ~ GDP_growth_quarterly + dpi, data = d_inc_econ)
-## 
-## Coefficients:
-##          (Intercept)  GDP_growth_quarterly                   dpi  
-##            5.218e+01             2.523e-01            -3.289e-05
+<p><strong>Best Predictor</strong></p>
+<pre><code>GDP growth in the second quarter is the best predictor for the incumbent party's vote share in the 2024 election, since it has the highest R-squared value out of the three variables investigated in this blog. Using the variable, the Democratic party will win this election. However, the r-squared value is 0.3, so it is still not a great predictor. In a further investigation, I would continue to look at other variables and potentially run a multi-variable regression to better predict variability.
 </code></pre>
+<p><strong>Sources</strong></p>
+<p><a href="https://www.bls.gov/cpi/factsheets/averages-and-individual-experiences-differ.htm">https://www.bls.gov/cpi/factsheets/averages-and-individual-experiences-differ.htm</a></p>
+<p><a href="https://www.pewresearch.org/politics/2021/06/30/behind-bidens-2020-victory/">https://www.pewresearch.org/politics/2021/06/30/behind-bidens-2020-victory/</a></p>
 
 </main>
 
