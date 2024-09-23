@@ -24,11 +24,6 @@ Among the 2016 presidential election polls provided this week, letter grades wer
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-2-1.png" width="672" />
 In 2020, the most common letter grades for the polls provided was overwhelmingly C, with a distant second of B/C. The letters grades are significantly lower graded than in 2016, and the distribution is left skewed. 
 
-
-```
-## Warning: Removed 1438 rows containing non-finite values (`stat_bin()`).
-```
-
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-3-1.png" width="672" />
 The grading scheme changes for 2024 to a 1-3 scale with 3 being the highest rating. There's a heavy emphasis on the higher score between the 2 and 3 range.
 
@@ -60,26 +55,22 @@ The 2020 poll approval chart does not display extreme dips and peaks like in 201
 ## `geom_smooth()` using method = 'loess' and formula = 'y ~ x'
 ```
 
-```
-## Warning: Removed 4 rows containing non-finite values (`stat_smooth()`).
-```
-
-```
-## Warning: Removed 4 rows containing missing values (`geom_point()`).
-```
-
-```
-## Warning: Removed 4 rows containing missing values (`geom_smooth()`).
-```
-
 <img src="{{< blogdown/postref >}}index_files/figure-html/2024-1.png" width="672" />
 The chaos of 2024's polls represents the chaos that has undergone politics over the past year. The blue line represents President Biden's polls until July 21, 2024 when he drops out of the race and endorses Kamala Harris. Trump and Biden generally matched each other, staying between the 40-45% approval range. However, after a disastrous first debate at the end of June, Biden's polls sink to 35%. Immediately after he drops out in July, the Democratic Party jolts upwards and continues to have a comfortable lead above Trump, despite the age of Harris' campaign, especially following the Democratic National Convention.
 
 
 
+**Comparing Nate Silver and G. Elliott Morris**
 
-I collaborated with Sammy Duggasani and Nick Dominguez to create this week's blog and polling presentation.
+Nate Silver created the original FiveThirtyEight model that relies on looking at many different individual polls. Further away from Election Day, Silver relies on a prediction from the weighted average of the different polls, based on their pollster rating and sample size. Closer to Election Day, the trend line method puts greater emphasis, so polling averaging is less conservative. These adjustments for averaging include, likely voters, house effects, and age of polls. There's also adjustment to mitigate the upward bounce in polls following party conventions. Demographics are accounted for, but Silver believes fundamentals (ie. economic factors) cause too much noise to be heavily reliant on. This year, Silver made a few adjustments including the exclusion of COVID-related factors, serious third party candidates, "rematch elections", and ranked choice voting states.
+
+G. Elliott Morris, who currently runs the FiveThirtyEight model, also uses a weighted average for his polling prediction, but he changed the two factors deciding its weight. Morris uses the 538 pollster rating score and the frequency of surveys the pollster has released in a short period of time. This contrasts Silver who uses sample size instead of history. Morris also now uses the Bayesian multi-level dynamic linear model, meaning his model takes polls, weights polls, adjusts polls, and averages polls simultaneously. The adjustments Morris includes have some overlap to Silver in third party candidates, house effect, and likely voter effect. However, he also includes mode of survey and partisanship adjustment. Morris also introduced a state effect adjustment that essentially looks at individual state polls/trends, and uses them predict the effect on a neighboring state.
+
+Morris has greater emphasis on the fundamentals, which Silver labels as "too noisy." Morris has about a dozen political and economic indicators, which Silver worries about leading to "over-fitting," to address uncertainty that comes from just looking at polls.
+
 
 **Sources**
+
+I collaborated with Sammy Duggasani and Nick Dominguez to create this week's blog and polling presentation.
 
 (https://muslimadvocates.org/wp-content/uploads/2019/06/Timeline-of-Record-of-Bigotry.pdf).
