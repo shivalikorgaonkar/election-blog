@@ -7,7 +7,8 @@ categories: []
 tags: []
 ---
 
-```{r libraries, include=}
+```{r libraries, include= FALSE}
+
 library(car)
 library(caret)
 library(CVXR)
@@ -17,9 +18,9 @@ library(dplyr)
 library(lubridate)
 
 # Load in presidential poll ratings
-ratings_2016 <- read_csv('president_polls_2016.csv')
-ratings_2020 <- read_csv('president_polls_2020.csv')
-ratings_2024 <- read_csv('president_polls_2024.csv')
+ratings_2016 <- read_csv('~/Downloads/president_polls_2016.csv')
+ratings_2020 <- read_csv('~/Downloads/president_polls_2020.csv')
+ratings_2024 <- read_csv('~/Downloads/president_polls_2024.csv')
 
 # Personal Blog Theme
 my_blog_theme <- function() {
@@ -60,6 +61,9 @@ Among the 2016 presidential election polls provided this week, letter grades wer
 
 ```{r include=FALSE}
 # 2020 Histogram of Poll Ratings
+ratings_2020 <- ratings_2020 |>
+  rename(grade = fte_grade)
+
 ratings_2020$grade <- factor(ratings_2020$grade, levels = c("A+", "A", "A-", "A/B", "B+", "B", "B-", "B/C", "C+", "C", "C-", "C/D", "F", "NA"))
 bar_2020_pollratings <- ratings_2020|>
   ggplot(mapping = aes(x = grade)) + 
@@ -190,7 +194,7 @@ nat_pollagg_2024_plot <- nat_ratings_2024 |>
 nat_pollagg_2024_plot
 
 ```
-The chaos of 2024's polls represents the chaos that has undergone politics over the past year. The blue line represents President Biden's polls until July 21, 2024 when he drops out of the race and endorses Kamala Harris. Trump and Biden generally matched each other, staying between the 40-45% approval range. However, after a disatrous first debate at the end of June, Biden's polls sink to 35%. Immediately after he drops out in July, the Democratic Party jolts upwards and continues to have a comfortable lead above Trump, despite the age of Harris' campaign, especially following the Democratic National Convention.
+The chaos of 2024's polls represents the chaos that has undergone politics over the past year. The blue line represents President Biden's polls until July 21, 2024 when he drops out of the race and endorses Kamala Harris. Trump and Biden generally matched each other, staying between the 40-45% approval range. However, after a disastrous first debate at the end of June, Biden's polls sink to 35%. Immediately after he drops out in July, the Democratic Party jolts upwards and continues to have a comfortable lead above Trump, despite the age of Harris' campaign, especially following the Democratic National Convention.
 
 ```{r include=FALSE}
 ####----------------------------------------------------------#
@@ -215,7 +219,7 @@ combined_polls <- nat_ratings_2016 |>
 
 # Estimate models using polls alone, fundamentals alone, and combined fundamentals and polls.
 # Read economic data.
-d_econ <- read_csv("fred_econ.csv") |>
+d_econ <- read_csv("~/Downloads/fred_econ.csv") |>
   filter(quarter == 2)
 # 
 # # Combine datasets and create vote lags. 
