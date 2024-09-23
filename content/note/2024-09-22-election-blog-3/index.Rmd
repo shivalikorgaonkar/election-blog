@@ -7,6 +7,12 @@ categories: []
 tags: []
 ---
 
+**Introduction**
+
+There are numerous different resources that prospective voters can use to track an election. Almost every new outlet has their own poll, and major election tracking sites, like FiveThirtyEight, are publicly available for anyone to monitor. There's great debate surrounding the purpose and benefit of polls. These polls are especially useful for campaigns to track shifts in their support between states and districts. It can also allow citizens to see how fellow Americans are reacting to current events across the country. However, polls have significant limitations. Sampling errors, biased methodologies, and low response rates can skew results. Additionally, they may influence voter behavior who can see one candidate drastically succeeding in their state, convincing them to stay home on election day. Unexpected events or late voter shifts can drastically alter outcomes, making predictions unreliable, but they are still a useful resource for researchers to predict election outcomes based on history and voter preferences.
+
+In this week's blog, I will be using individual polling sites to see how outcomes differ over time, as well as creating my own model based on these polls.
+
 ```{r libraries, include=FALSE}
 
 library(car)
@@ -129,7 +135,8 @@ nat_pollagg_2016_plot
 
 
 ```
-The graph above tracks poll approval ratings for Trump and Clinton for about one year before election day. There a few notable trends in this chart. For starters, there is a drastic dip in December 2015 for Trump. This sink in polls can likely be attributed to Trump calling for a complete shutdown on Muslim people entering the United States seeking refuge or citizenship. Additionally, before February 2016, the candidates followed each other in poll approval, meaning they rose and sunk together. Afterwards, their votes began to diverge, so when Clinton did well, Trump did not, and vice versa. This is because the party primaries began in 2016, so both parties had great division between nominees. The Republicans lost a more moderate Ted Cruz and Marco Rubio, while the democrats lost a more progressive Bernie Sanders.
+
+The graph above tracks poll approval ratings for Trump and Clinton for about one year before election day. After averaging the different 2016 polls, I was able to mark a point for everyday over the year before Election Day to see how predictions changed. There a few notable trends in this chart. For starters, there is a drastic dip in December 2015 for Trump. This sink in polls can likely be attributed to Trump calling for a complete shutdown on Muslim people entering the United States seeking refuge or citizenship. Additionally, before February 2016, the candidates followed each other in poll approval, meaning they rose and sunk together. Afterwards, their votes began to diverge, so when Clinton did well, Trump did not, and vice versa. This is because the party primaries began in 2016, so both parties had great division between nominees. The Republicans lost a more moderate Ted Cruz and Marco Rubio, while the democrats lost a more progressive Bernie Sanders.
 
 ```{r 2020, echo=FALSE}
 
@@ -212,31 +219,7 @@ combined_polls <- nat_ratings_2016 |>
 ```
 
 
-```{r include=FALSE}
-####----------------------------------------------------------#
-#### Model ensembling.
-####----------------------------------------------------------#
-
-# Estimate models using polls alone, fundamentals alone, and combined fundamentals and polls.
-# Read economic data.
-d_econ <- read_csv("~/Downloads/fred_econ.csv") |>
-  filter(quarter == 2)
-# 
-# # Combine datasets and create vote lags. 
-# d_combined <- d_econ |> 
-#   left_join(d_poll_weeks, by = "year") |> 
-#   filter(year %in% c(unique(d_vote$year), 2024)) |> 
-#   group_by(party) |> 
-#   mutate(pv2p_lag1 = lag(pv2p, 1), 
-#          pv2p_lag2 = lag(pv2p, 2)) |> 
-#   ungroup() |> 
-#   mutate(gdp_growth_x_incumbent = GDP_growth_quarterly * incumbent, 
-#          rdpi_growth_quarterly = RDPI_growth_quarterly * incumbent,
-#          cpi_x_incumbent = CPI * incumbent,
-#          unemployment_x_incumbent = unemployment * incumbent,
-#          sp500_x_incumbent = sp500_close * incumbent) # Generate interaction effects.
-```
-
+I collaborated with Sammy Duggasani and Nick Dominguez to create this week's blog and polling presentation.
 
 **Sources**
 

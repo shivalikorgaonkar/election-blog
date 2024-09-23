@@ -7,6 +7,12 @@ categories: []
 tags: []
 ---
 
+**Introduction**
+
+There are numerous different resources that prospective voters can use to track an election. Almost every new outlet has their own poll, and major election tracking sites, like FiveThirtyEight, are publicly available for anyone to monitor. There's great debate surrounding the purpose and benefit of polls. These polls are especially useful for campaigns to track shifts in their support between states and districts. It can also allow citizens to see how fellow Americans are reacting to current events across the country. However, polls have significant limitations. Sampling errors, biased methodologies, and low response rates can skew results. Additionally, they may influence voter behavior who can see one candidate drastically succeeding in their state, convincing them to stay home on election day. Unexpected events or late voter shifts can drastically alter outcomes, making predictions unreliable, but they are still a useful resource for researchers to predict election outcomes based on history and voter preferences.
+
+In this week's blog, I will be using individual polling sites to see how outcomes differ over time, as well as creating my own model based on these polls.
+
 
 
 **Poll Ratings Grade Distribution**
@@ -34,7 +40,8 @@ The grading scheme changes for 2024 to a 1-3 scale with 3 being the highest rati
 ```
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/2016-1.png" width="672" />
-The graph above tracks poll approval ratings for Trump and Clinton for about one year before election day. There a few notable trends in this chart. For starters, there is a drastic dip in December 2015 for Trump. This sink in polls can likely be attributed to Trump calling for a complete shutdown on Muslim people entering the United States seeking refuge or citizenship. Additionally, before February 2016, the candidates followed each other in poll approval, meaning they rose and sunk together. Afterwards, their votes began to diverge, so when Clinton did well, Trump did not, and vice versa. This is because the party primaries began in 2016, so both parties had great division between nominees. The Republicans lost a more moderate Ted Cruz and Marco Rubio, while the democrats lost a more progressive Bernie Sanders.
+
+The graph above tracks poll approval ratings for Trump and Clinton for about one year before election day. After averaging the different 2016 polls, I was able to mark a point for everyday over the year before Election Day to see how predictions changed. There a few notable trends in this chart. For starters, there is a drastic dip in December 2015 for Trump. This sink in polls can likely be attributed to Trump calling for a complete shutdown on Muslim people entering the United States seeking refuge or citizenship. Additionally, before February 2016, the candidates followed each other in poll approval, meaning they rose and sunk together. Afterwards, their votes began to diverge, so when Clinton did well, Trump did not, and vice versa. This is because the party primaries began in 2016, so both parties had great division between nominees. The Republicans lost a more moderate Ted Cruz and Marco Rubio, while the democrats lost a more progressive Bernie Sanders.
 
 
 ```
@@ -71,8 +78,7 @@ The chaos of 2024's polls represents the chaos that has undergone politics over 
 
 
 
-
-
+I collaborated with Sammy Duggasani and Nick Dominguez to create this week's blog and polling presentation.
 
 **Sources**
 
