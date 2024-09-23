@@ -1,5 +1,5 @@
 ---
-title: 'Election Blog #3'
+title: 'Election Blog #3: Polling Predictions'
 author: Shivali Korgaonkar
 date: '2024-09-22'
 slug: election-blog-3
