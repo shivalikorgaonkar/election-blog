@@ -7,7 +7,7 @@ categories: []
 tags: []
 ---
 
-```{r libraries, include= FALSE}
+```{r libraries, include=FALSE}
 
 library(car)
 library(caret)
@@ -41,7 +41,7 @@ my_blog_theme <- function() {
 
 **Poll Ratings Grade Distribution**
 
-```{r include=FALSE}
+```{r echo=FALSE}
 ##Extension 1
 #Consider 2016-2024 pollster ratings from FiveThirtyEight. (1.) How much variation is there in pollster quality?
 
@@ -59,7 +59,7 @@ bar_2016_pollratings
 
 Among the 2016 presidential election polls provided this week, letter grades were designated to disclose their reliability. The most common poll grades were A-, B, and C-, respectively.
 
-```{r include=FALSE}
+```{r echo=FALSE}
 # 2020 Histogram of Poll Ratings
 ratings_2020 <- ratings_2020 |>
   rename(grade = fte_grade)
@@ -76,7 +76,7 @@ bar_2020_pollratings
 ```
 In 2020, the most common letter grades for the polls provided was overwhelmingly C, with a distant second of B/C. The letters grades are significantly lower graded than in 2016, and the distribution is left skewed. 
 
-```{r include=FALSE}
+```{r echo=FALSE}
 # 2024 Histogram of Poll Ratings
 hist_2024_pollratings <- ratings_2024|>
   ggplot(mapping = aes(x = numeric_grade)) + 
@@ -92,7 +92,7 @@ The grading scheme changes for 2024 to a 1-3 scale with 3 being the highest rati
 
 **Polling Averages**
 
-```{r 2016, include=FALSE}
+```{r 2016, echo=FALSE}
 # (2.) Using tools and knowledge you have gained so far, build a model (or ensemble model) that uses individual polls from 2016 (president_polls_2016.csv), 2020 (...2020.csv), and 2024 (...2024.csv). How does your model compare to the models this week in lab?
 
 # Finding the end date average in 2016 polls
@@ -131,7 +131,7 @@ nat_pollagg_2016_plot
 ```
 The graph above tracks poll approval ratings for Trump and Clinton for about one year before election day. There a few notable trends in this chart. For starters, there is a drastic dip in December 2015 for Trump. This sink in polls can likely be attributed to Trump calling for a complete shutdown on Muslim people entering the United States seeking refuge or citizenship. Additionally, before February 2016, the candidates followed each other in poll approval, meaning they rose and sunk together. Afterwards, their votes began to diverge, so when Clinton did well, Trump did not, and vice versa. This is because the party primaries began in 2016, so both parties had great division between nominees. The Republicans lost a more moderate Ted Cruz and Marco Rubio, while the democrats lost a more progressive Bernie Sanders.
 
-```{r 2020, include=FALSE}
+```{r 2020, echo=FALSE}
 
 # End date average
 election_day_2020 <- as.Date("2020-11-03")
@@ -164,7 +164,7 @@ nat_pollagg_2020_plot
 ```
 The 2020 poll approval chart does not display extreme dips and peaks like in 2016. There is a similar trend that follows before and after the primaries, but not as drastically, since there were no major candidates running against Trump in 2020. The polls find their predictions converge near election day, unlike in 2016 as well. Between April and July, Trump struggled to consistently raise his approval, as the COVID-19 pandemic was endangering millions of Americans everyday. George Floyd's death in May also sparked the beginning of the Black Lives Matter movement, which the former President had been unable to empathize with or address, explaining his low rating.
 
-```{r 2024, include=FALSE}
+```{r 2024, echo=FALSE}
 
 # Each enddate average
 election_day_2024 <- as.Date("2024-11-05")
