@@ -1,10 +1,11 @@
 ---
 title: 'Election Blog #4: Incumbency'
-author: Shivali Korgaonkar
-date: '2024-09-29'
-slug: election-blog-4-incumbency
+author: "Shivali Korgaonkar"
+date: "2024-09-29"
+output: pdf_document
 categories: []
 tags: []
+slug: "election-blog-4-incumbency"
 ---
 
 **Introduction**
@@ -23,22 +24,21 @@ In the context of this election, there are a few indicators that may impact the 
 Using data from all elections following World War II, we can look at how incumbent presidents and incumbent parties have performed in the past. There have been 18 elections in the time period, and the table below shows that six incumbent presidents won in these elections. 11 of these elections had an incumbent candidate running. Thus, 6 out of 11 incumbent presidents that have run for re-election, have won. In the 21st century, there have been three incumbents that ran (2004, 2012, and 2020), and two of them were successful. 
 
 
-```
-##   President Re-Elected? Number of Elections Percent
-## 1              Defeated                  12   66.67
-## 2            Re-Elected                   6   33.33
-```
+|President Re-Elected? | Number of Elections| Percent|
+|:---------------------|-------------------:|-------:|
+|Defeated              |                  12|   66.67|
+|Re-Elected            |                   6|   33.33|
 
 The table below indicates that the incumbent party has won 8 out of the 18 elections post-WWII. There seems to be a difference between an incumbent party and incumbent candidate running. One possible explanation could be that voters have party fatigue, meaning there has been too much of the same ideology, so either they are less motivated to vote without the dire need. Pew Research Center also reported in 2023 that only four percent of American adults believe their government is working extremely well or very well. With this in mind, any existing crises in the US are more likely to be blamed on the incumbent President who, by association, passes the blame into the hands of their successor. The party successor also doesn't benefit from the name recognition that an incumbent candidate has, so it makes sense that their campaigning process is more difficult. 
 
 For party successors, those who served in the previous administration have won 27.8 percent of the past 18 elections. This point applies to Kamala Harris, who formerly served in President Joe Biden's administration as Vice President.
 
 
-```
-##   Party Re-Elected? Number of Elections Percent
-## 1          Defeated                  10   55.56
-## 2        Re-Elected                   8   44.44
-```
+|Party Re-Elected? | Number of Elections| Percent|
+|:-----------------|-------------------:|-------:|
+|Defeated          |                  10|   55.56|
+|Re-Elected        |                   8|   44.44|
+
 **Pork Barrel Politics**
 
 Another distinction between incumbent parties and candidates falls in spending. Congress is infamously known for having the "power of the purse," but the President has the power of proposal, which they strategically allocate before an election. Interestingly, the graph below shows that incumbent presidents spend most on swing states when they are running for re-election. The spend about the same amount (~ $145M) on swing states during non-election years and on swing states when their successor is running for election.
@@ -67,6 +67,7 @@ Abramowitz also has a simplified model that he created in 2020 which only utiliz
 |:--------------------------------|-------------------------:|-----------:|-----------:|
 |Time for Change Model            |                  48.92874|    43.09807|    54.75942|
 |Simplified Time for Change Model |                  47.39554|    40.52536|    54.26573|
+
 **Looking Back at My Model**
 
 In the spirit of simplified models, I will call back to my predictive model from Blog 1, which used the popular vote share from 2016 and 2020 (vote_2024 = 3/4vote_2020 + 1/4vote_2016) to predict this election. Under this model, I predicted that the Democrats would receive 49.28 percent of the vote, and Republicans would receive 50.72 percent of the vote. However, upon reducing this to the state level, my model did predict that Harris would win the electoral college with 272 electors.
