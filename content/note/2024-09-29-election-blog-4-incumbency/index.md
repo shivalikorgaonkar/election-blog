@@ -73,7 +73,7 @@ In the spirit of simplified models, I will call back to my predictive model from
 
 Abramowitz has a much more basic model compared to other political scientists and organizations we've looked at, like FiveThirty Eight. My own model points out two issues with his model. First, his model is ineffective at predicting state level outcomes. Notably, however, it has generally done well in predicting national outcomes. Adding on, the ineffective state level prediction leaves the electoral college outcome unknown. This is significant, as many elections have defied the outcome shown by popular vote. In the future, it would be useful to have the Time for Change model improve its state level estimations.
          
-**Sources**
+**Sources** 
 
 https://slcc.pressbooks.pub/attenuateddemocracy/chapter/chapter-55/
 
