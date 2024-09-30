@@ -1,0 +1,316 @@
+---
+title: 'Election Blog #4: Incumbency'
+author: Shivali Korgaonkar
+date: '2024-09-29'
+slug: election-blog-4-incumbency
+categories: []
+tags: []
+---
+
+**Introduction**
+
+The 2024 Election holds a unique duel, being that it is between an incumbent president and a candidate from the incumbent administration. Many presidential models have special considerations when making election predictions based on incumbency adjustment. There are both advantages and disadvantages to incumbency. Generally, incumbents have an advantage when they have more media coverage (name recognition), campaign finance access, or "pork" (short term economic gains and credit-claiming). On the other hand, incumbents may be disadvantaged when there is a polarized electorate, recessions/disasters, or incumbency fatigue. 
+
+In the context of this election, there are a few indicators that may impact the results relative to the candidates' respective incumbencies. For starters, Trump benefits for the name recognition and media attention, as well as the financial backing from wealthy donors that support his tax break causes. On the other hand, he has been criminally convicted in the last year, and left his presidency following the January 6th riots, which left many Republicans distasteful of having him in power. Harris comes from the incumbent party and also picked up the campaign while Biden had already begun. Since she entered the race before the Democratic party elected a nominee, she has access to all of Biden's remaining campaign funds, since he never officially won the nomination. 
+
+
+```{r include=FALSE}
+####----------------------------------------------------------#
+#### Preamble
+####----------------------------------------------------------#
+
+# Load libraries.
+library(car)
+library(caret)
+library(CVXR)
+library(glmnet)
+library(kableExtra)
+library(maps)
+library(RColorBrewer)
+library(sf)
+library(tidyverse)
+library(viridis)
+
+my_blog_theme <- function() {
+  theme(
+    panel.border = element_blank(),
+    panel.background = element_rect(fill = "gray92"),
+    plot.title = element_text(size = 18, hjust = 0.8, color = "gray16", face = "bold", family = "Times New Roman"), 
+    plot.subtitle = element_text(size = 14, color = "black", hjust = 0.5, family = "Times New Roman"),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    axis.text = element_text(size = 10, family = "Times New Roman"),
+    axis.line = element_line(colour = "black"),
+    axis.title = element_text(size = 12, family = "Times New Roman"),
+    legend.position = "right",
+    legend.text = element_text(size = 12))
+}
+
+```
+
+
+```{r include=FALSE}
+## set working directory here
+
+####----------------------------------------------------------#
+#### Read, merge, and process data.
+####----------------------------------------------------------#
+
+# Read incumbency/vote data.
+d_vote <- read_csv("~/Downloads/popvote_1948-2020 (4).csv")
+d_state_vote <- read_csv("~/Downloads/state_popvote_1948_2020.csv")
+d_vote$party[d_vote$party == "democrat"] <- "DEM"
+d_vote$party[d_vote$party == "republican"] <- "REP"
+
+# Read economic data.
+d_econ <- read_csv("~/Downloads/fred_econ.csv") |> 
+  filter(quarter == 2)
+
+# Read polling and election results data. 
+d_pollav_natl <- read_csv("~/Downloads/national_polls_1968-2024.csv")
+d_pollav_state <- read_csv("~/Downloads/state_polls_1968-2024.csv")
+
+# Shape and merge polling and election data using November polls. 
+d_poll_nov <- d_vote |> 
+  left_join(d_pollav_natl |> 
+              group_by(year, party) |> 
+              top_n(1, poll_date) |> 
+              select(-candidate), 
+            by = c("year", "party")) |> 
+  rename(nov_poll = poll_support) |> 
+  filter(year <= 2020) |> 
+  drop_na()
+
+# Create dataset of polling average by week until the election. 
+d_poll_weeks <- d_pollav_natl |> 
+  group_by(year, party, weeks_left) |>
+  summarize(mean_poll_week = mean(poll_support)) |> 
+  filter(weeks_left <= 30) |> 
+  pivot_wider(names_from = weeks_left, values_from = mean_poll_week) |> 
+  left_join(d_vote, by = c("year", "party"))
+
+
+```
+**Historical Context to Incumbency Advantage**
+
+Using data from all elections following World War II, we can look at how incumbent presidents and incumbent parties have performed in the past. There have been 18 elections in the time period, and the table below shows that six incumbent presidents won in these elections. 11 of these elections had an incumbent candidate running. Thus, 6 out of 11 incumbent presidents that have run for re-election, have won. In the 21st century, there have been three incumbents that ran (2004, 2012, and 2020), and two of them were successful. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+####----------------------------------------------------------#
+#### Descriptive statistics on the incumbency advantage. 
+####----------------------------------------------------------#
+
+# How many post-war elections (1948 and 2024) have there been where an incumbent president won? 
+d_vote |> 
+  filter(winner) |>
+  select(year, win_party = party, win_cand = candidate) |> 
+  mutate(win_party_last = lag(win_party, order_by = year),
+         win_cand_last = lag(win_cand, order_by = year)) |> 
+  mutate(reelect_president = win_cand_last == win_cand) |> 
+  filter(year > 1948 & year < 2024) |> 
+  group_by(reelect_president) |> 
+  mutate(reelect_president = if_else(reelect_president == TRUE,
+                                     "Re-Elected",
+                                     "Defeated")) |>
+  summarize(N = n()) |> 
+  mutate(Percent = round(N/sum(N) * 100, 2)) |>
+  rename("President Re-Elected?" = "reelect_president",
+         "Number of Elections" = "N") |>
+  as.data.frame()
+
+```
+
+The table below indicates that the incumbent party has won 8 out of the 18 elections post-WWII. There seems to be a difference between an incumbent party and incumbent candidate running. One possible explanation could be that voters have party fatigue, meaning there has been too much of the same ideology, so either they are less motivated to vote without the dire need. Pew Research Center also reported in 2023 that only four percent of American adults believe their government is working extremely well or very well. With this in mind, any existing crises in the US are more likely to be blamed on the incumbent President who, by association, passes the blame into the hands of their successor. The party successor also doesn't benefit from the name recognition that an incumbent candidate has, so it makes sense that their campaigning process is more difficult. 
+
+For party successors, those who served in the previous administration have won 27.8 percent of the past 18 elections. This point applies to Kamala Harris, who formerly served in President Joe Biden's administration as Vice President.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+       
+# How many post-war elections have there been where the incumbent *party* won? 
+d_vote |> 
+  filter(winner) |> 
+  select(year, win_party = party, win_cand = candidate) |> 
+  mutate(win_party_last = lag(win_party, order_by = year),
+         win_cand_last = lag(win_cand, order_by = year)) |> 
+  mutate(reelect_party = win_party_last == win_party) |> 
+  filter(year > 1948 & year < 2024) |> 
+  group_by(reelect_party) |> 
+  mutate(reelect_party = if_else(reelect_party == TRUE,
+                                     "Re-Elected",
+                                     "Defeated")) |>
+  summarize(N = n()) |> 
+  mutate(Percent = round(N/sum(N) * 100, 2)) |>
+  rename("Party Re-Elected?" = "reelect_party",
+         "Number of Elections" = "N")|>
+  as.data.frame()
+                            
+```
+**Pork Barrel Politics**
+
+Another distinction between incumbent parties and candidates falls in spending. Congress is infamously known for having the "power of the purse," but the President has the power of proposal, which they strategically allocate before an election. Interestingly, the graph below shows that incumbent presidents spend most on swing states when they are running for re-election. The spend about the same amount (~ $145M) on swing states during non-election years and on swing states when their successor is running for election.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+####----------------------------------------------------------#
+#### Pork analysis. 
+####----------------------------------------------------------#
+ 
+# Read federal grants dataset from Kriner & Reeves (2008). 
+d_pork_state <- read_csv("~/Downloads/fedgrants_bystate_1988-2008.csv")
+
+# What strategy do presidents pursue? 
+d_pork_state |> 
+  filter(!is.na(state_year_type)) |> 
+  group_by(state_year_type) |>
+  summarize(mean_grant = mean(grant_mil, na.rm = T), se_grant = sd(grant_mil, na.rm = T)/sqrt(n())) |> 
+  ggplot(aes(x = state_year_type, y = mean_grant, ymin = mean_grant-1.96*se_grant, ymax = mean_grant+1.96*se_grant)) + 
+  coord_flip() + 
+  geom_bar(stat = "identity", fill = "indianred4") + 
+  geom_errorbar(width = 0.2) + 
+  labs(x = "Type of State & Year", 
+       y = "Federal Grant Spending (Millions)", 
+       title = "Federal Grant Spending (Millions) by State Election Type") + 
+  theme_minimal() + 
+  theme(plot.title = element_text(size = 20),
+        axis.title = element_text(size = 15),
+        axis.text = element_text(size = 12)) +
+  my_blog_theme()
+
+# Do presidents strategize for their successor as well? 
+d_pork_state |> 
+  filter(!is.na(state_year_type2)) |> 
+  group_by(state_year_type2) |>
+  summarize(mean_grant = mean(grant_mil, na.rm = T), se_grant = sd(grant_mil, na.rm = T)/sqrt(n())) |> 
+  ggplot(aes(x = state_year_type2, y = mean_grant, ymin = mean_grant-1.96*se_grant, ymax = mean_grant+1.96*se_grant)) + 
+  coord_flip() + 
+  geom_bar(stat = "identity", fill = "indianred4") + 
+  geom_errorbar(width = 0.2) + 
+  labs(x = "Type of State & Year", 
+       y = "Federal Grant Spending (Millions)", 
+       title = "Federal Grant Spending (Millions) by State Election Type") + 
+  theme_minimal() +
+  theme(plot.title = element_text(size = 20),
+        axis.title = element_text(size = 15),
+        axis.text = element_text(size = 12)) +
+  my_blog_theme()
+```
+
+A multivariate regression was run to further analyze the relationship between federal grant spending and an incumbent's vote share in swing states. Additional independent variables were added to strengthen the regression, including media appearances, change in per capita income, change in population, and more. The regression identifies a statistically significant positive correlation between grant spending in competitive states and the incumbent's vote share in these states. When running state-level regression, it is also apparent that in 1996 and 2004, Bush's and Clinton's re-election campaign respectively, there was a greater amount of pork barrel spending than normal.
+
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+# Pork county model. 
+d_pork_county <- read_csv("~/Downloads/fedgrants_bycounty_1988-2008.csv")
+
+pork_mod_county_1 <- lm(dvoteswing_inc  ~ dpct_grants*comp_state + as.factor(year), 
+                      d_pork_county)
+summary(pork_mod_county_1)
+
+
+pork_mod_county_2 <- lm(dvoteswing_inc ~ dpct_grants*comp_state + as.factor(year) +
+                          dpc_income + inc_ad_diff + inc_campaign_diff + 
+                          dhousevote_inc + iraq_cas2004 + iraq_cas2008 + 
+                          dpct_popl,
+                        data = d_pork_county)
+summary(pork_mod_county_2)
+```
+
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+# Pork state model. 
+d_pork_state_model <- d_state_vote |>
+  mutate(state_abb = state.abb[match(d_state_vote$state, state.name)]) |>
+  inner_join(d_pork_state, by = c("year", "state_abb")) |>
+  left_join(d_vote, by = "year") |>
+  filter(incumbent_party == TRUE) |>
+  mutate(inc_pv2p = ifelse(party == "REP", R_pv2p, D_pv2p)) |>
+  mutate(is_comp = case_when(state_year_type == "swing + election year" ~ 1,
+                             .default = 0)) |>
+  group_by(state) |>
+  mutate(change_grant_mil = (1-grant_mil/(lag(grant_mil, n = 1)))*100,
+         change_inc_pv2p = (1-inc_pv2p/(lag(inc_pv2p, n = 1)))*100) |>
+  ungroup() |>
+  select(state, year, is_comp, change_grant_mil, change_inc_pv2p)
+
+pork_state_mod <- lm(change_inc_pv2p ~ is_comp*change_grant_mil + as.factor(year),
+                     data = d_pork_state_model)
+summary(pork_state_mod)
+
+```
+
+**Using Incumbency Advantage to Predict the Election**
+
+Alan Abramowitz is a political scientist that uses incumbency advantage to predict election outcomes. His Time For Change model, which is his original model used to predict the 2016 race, also incorporates GDP and approval rating, alongside incumbency. I built a predictive model using Abramowitz's formula, and found that Harris was predicted to have 48.9 percent of the popular vote. 
+
+Abramowitz also has a simplified model that he created in 2020 which only utilizes the June approval rating to predict the election. This Simplified Time for Change model predicts that Harris will win 47.4 percent of the popular vote.
+
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+
+####----------------------------------------------------------#
+#### Time for a change model. 
+####----------------------------------------------------------#
+
+# Join data for time for change model.
+d_tfc_train <- d_vote |> 
+  left_join(d_econ, by = "year") |> 
+  filter(incumbent_party) |>
+  mutate(incumbent = as.numeric(incumbent))
+
+# Estimate time for change model through 2016.
+tfc_mod_2016 <- lm(pv2p ~ GDP_growth_quarterly + incumbent + juneapp, 
+                   data = subset(d_tfc_train, year < 2020))
+summary(tfc_mod_2016)
+
+# Estimate simplified time for change model for 2020. 
+# https://www-cambridge-org.ezp-prod1.hul.harvard.edu/core/services/aop-cambridge-core/content/view/47BBC0D5A2B7913DBB37FDA0542FD7E8/S1049096520001389a.pdf/its-the-pandemic-stupid-a-simplified-model-for-forecasting-the-2020-presidential-election.pdf
+tfc_mod_2020 <- lm(pv2p ~ juneapp, 
+                   data = subset(d_tfc_train, year < 2024))
+summary(tfc_mod_2020)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+#2024 Prediction
+#New Data Frame
+data_2024 <- d_tfc_train |> 
+  filter(year == 2024)
+
+new_data24 <- data_2024 |> 
+  select(GDP_growth_quarterly, incumbent, juneapp)
+
+new_data24pt2 <- data_2024 |> 
+  select(juneapp)
+
+#Predict
+predict2024 <- predict(tfc_mod_2016, newdata = new_data24, interval = "prediction", level = 0.95)
+predict202402 <- predict(tfc_mod_2020, newdata = new_data24pt2, interval = "prediction", level = 0.95)
+
+#Compile
+predict2024 <- data.frame(
+  "Prediction Models" = c("Time for Change Model", "Simplified Time for Change Model"),
+  "Predicted 2024 Vote Share" = c(predict2024[, "fit"], predict202402[, "fit"]),
+  "Lower Bound" = c(predict2024[, "lwr"], predict202402[, "lwr"]),
+  "Upper Bound" = c(predict2024[, "upr"], predict202402[, "upr"]),
+  check.names = FALSE
+)
+
+#Display 
+knitr::kable(predict2024)
+
+
+```
+**Looking Back at My Model**
+
+In the spirit of simplified models, I will call back to my predictive model from Blog 1, which used the popular vote share from 2016 and 2020 (vote_2024 = 3/4vote_2020 + 1/4vote_2016) to predict this election. Under this model, I predicted that the Democrats would receive 49.28 percent of the vote, and Republicans would receive 50.72 percent of the vote. However, upon reducing this to the state level, my model did predict that Harris would win the electoral college with 272 electors.
+
+Abramowitz has a much more basic model compared to other political scientists and organizations we've looked at, like FiveThirty Eight. My own model points out two issues with his model. First, his model is ineffective at predicting state level outcomes. Notably, however, it has generally done well in predicting national outcomes. Adding on, the ineffective state level prediction leaves the electoral college outcome unknown. This is significant, as many elections have defied the outcome shown by popular vote. In the future, it would be useful to have the Time for Change model improve its state level estimations.
+         
+**Sources**
+
+https://slcc.pressbooks.pub/attenuateddemocracy/chapter/chapter-55/
+
+https://hls.harvard.edu/today/can-kamala-harris-access-biden-campaign-funds/ 
+                             
+https://www.pewresearch.org/politics/2023/09/19/americans-dismal-views-of-the-nations-politics/ 
+                             
+                             
