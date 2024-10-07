@@ -1,0 +1,628 @@
+---
+title: 'Election Blog #5: Demographics'
+author: Shivali Korgaonkar
+date: '2024-10-06'
+slug: election-blog-5-demographics
+categories: []
+tags: []
+---
+
+**Introduction**
+
+There are many stereotypes surrounding voter demographics and how they can predict presidential candidate support. Whether it be sexuality, occupation, or immigration status, Americans often mentally associate different identities with different parties. In an attempt to break these stereotypes, we've seen groups like "Gays for Trump," which attempt to break oxymoronic identity alignments. We've also seen backlash to such beliefs among communities who believe that their specific needs won't get represented properly. 
+
+In this blog, I attempt to identify how demographic affects voter turnout, and I use this information to create an election prediction model.
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+
+####----------------------------------------------------------#
+#### Preamble
+####----------------------------------------------------------#
+
+# Load libraries.
+## install via `install.packages("name")`
+library(car)
+library(caret)
+library(CVXR)
+library(foreign)
+library(glmnet)
+library(haven)
+library(janitor)
+library(kableExtra)
+library(maps)
+library(mlr3)
+library(randomForest)
+library(ranger)
+library(RColorBrewer)
+library(sf)
+library(tidyverse)
+library(viridis)
+
+
+my_blog_theme <- function() {
+  theme(
+    panel.border = element_blank(),
+    panel.background = element_rect(fill = "gray92"),
+    plot.title = element_text(size = 18, hjust = 0.8, color = "gray16", face = "bold", family = "Times New Roman"), 
+    plot.subtitle = element_text(size = 14, color = "black", hjust = 0.5, family = "Times New Roman"),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    axis.text = element_text(size = 10, family = "Times New Roman"),
+    axis.line = element_line(colour = "black"),
+    axis.title = element_text(size = 12, family = "Times New Roman"),
+    legend.position = "right",
+    legend.text = element_text(size = 12))
+  
+}
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+## set working directory here
+# setwd("~")
+
+####----------------------------------------------------------#
+#### Read, merge, and process data.
+####----------------------------------------------------------#
+
+# Read popular vote datasets. 
+d_popvote <- read_csv("~/Downloads/popvote_1948_2020.csv")
+d_state_popvote <- read_csv("~/Downloads/state_popvote_1948_2020.csv")
+
+# Read elector distribution dataset. 
+d_ec <- read_csv("~/Downloads/corrected_ec_1948_2024.csv")
+
+# Read and merge demographics data. 
+d_demos <- read_csv("~/Downloads/demographics.csv")[,-1]
+
+# Read primary turnout data. 
+d_turnout <- read_csv("~/Downloads/turnout_1789_2020.csv")
+d_state_turnout <- read_csv("~/Downloads/state_turnout_1980_2022.csv")
+d_state_turnout <- d_state_turnout |> 
+  mutate(vep_turnout = as.numeric(str_remove(vep_turnout, "%"))/100) |> 
+  select(year, state, vep_turnout)
+
+# Read polling data. 
+d_polls <- read_csv("~/Downloads/national_polls_1968-2024.csv")
+d_state_polls <- read_csv("~/Downloads/state_polls_1968-2024.csv")
+
+# Process state-level polling data. 
+d_pollav_state <- d_state_polls |> 
+  group_by(year, state, party) |>
+  mutate(mean_pollav = mean(poll_support, na.rm = TRUE)) |>
+  top_n(1, poll_date) |> 
+  rename(latest_pollav = poll_support) |>
+  select(-c(weeks_left, days_left, poll_date, candidate, before_convention)) |>
+  pivot_wider(names_from = party, values_from = c(latest_pollav, mean_pollav))
+
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+                             
+####----------------------------------------------------------#
+#### Replication of Kim & Zilinsky (2023).
+####----------------------------------------------------------#
+                             
+# Read processed ANES data. 
+anes <- read_dta("~/Downloads/anes_timeseries_cdf_stata_20220916.dta") 
+
+anes <- anes |> 
+  mutate(year = VCF0004,
+         pres_vote = case_when(VCF0704a == 1 ~ 1, 
+                               VCF0704a == 2 ~ 2, 
+                               .default = NA), 
+         # Demographics
+         age = VCF0101, 
+         gender = VCF0104, # 1 = Male; 2 = Female; 3 = Other
+         race = VCF0105b, # 1 = White non-Hispanic; 2 = Black non-Hispanic, 3 == Hispanic; 4 = Other or multiple races, non-Hispanic; 9 = missing/DK
+         educ = VCF0110, # 0 = DK; 1 = Less than high school; 2. High school; 3 = Some college; 4 = College+ 
+         income = VCF0114, # 1 = 0-16 percentile; 2 = 17-33 percentile; 3 = 34-67; 4 = 68 to 95; 5 = 96 to 100. 
+         religion = VCF0128, # 0 = DK; 1 = Protestant; 2 = Catholic; 3 = Jewish; 4 = Other
+         attend_church = case_when(
+           VCF0004 < 1972 ~ as.double(as.character(VCF0131)),
+           TRUE ~ as.double(as.character(VCF0130))
+         ), # 1 = every week - regularly; 2 = almost every week - often; 3 = once or twice a month; 4 = a few times a year - seldom; 5 = never ; 6 = no religious preference
+         southern = VCF0113,
+         region = VCF0113, 
+         work_status = VCF0118,
+         homeowner = VCF0146, 
+         married = VCF0147,
+        
+         # 7-point PID
+         pid7 = VCF0301, # 0 = DK; 1 = Strong Democrat; 2 = Weak Democrat; 3 = Independent - Democrat; 4 = Independent - Independent; 5 = Independent - Republican; 6 = Weak Republican; 7 = Strong Republican
+         
+         # 3-point PID
+         pid3 = VCF0303, # 0 = DK; 1 = Democrats; 2 = Independents; 3 = Republicans. 
+         
+         # 3-point ideology. 
+         ideo = VCF0804 # 0, 9 = DK; 1 = Liberal; 2 = Moderate; 3 = Conservative
+         ) |> 
+  select(year, pres_vote, age, gender, race, educ, income, religion, attend_church, southern, 
+         region, work_status, homeowner, married, pid7, pid3, ideo)
+
+```
+
+**Demographics and Vote Choice**
+
+Using American National Voter File (ANES) data that was cleaned up by Matthew Dardet, we can begin investigating the relationship between voter demographic and their vote choice, and replicate Kim & Zilinsky's (2023) research. Using a logistic regression, a training dataset and testing data set were created. A training dataset teaches the model by allowing it to learn patterns and relationships from the given ANES data. A testing dataset is used to evaluate the model's performance on new, unseen data to ensure that it can generalize well beyond the training data. The summary displaying in-sample goodness of fit highlights an important conclusion that **gender, race, education, religion, and geography are the most significant indicators.**
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# How well do demographics predict vote choice? 
+anes_year <- anes[anes$year == 2016,] |> 
+  select(-c(year, pid7, pid3, ideo)) |>
+  mutate(pres_vote = factor(pres_vote, levels = c(1, 2), labels = c("Democrat", "Republican"))) |> 
+  filter(!is.na(pres_vote)) |>
+  clean_names()
+
+n_features <- length(setdiff(names(anes_year), "pres_vote"))
+
+set.seed(02138)
+train.ind <- createDataPartition(anes_year$pres_vote, p = 0.8, list = FALSE)
+
+anes_train <- anes_year[train.ind,]
+anes_test <- anes_year[-train.ind,]
+
+
+# LOGISTIC REGRESSION: 
+logit_fit <- glm(pres_vote ~ ., 
+                 family = "binomial", 
+                 data = anes_train)
+
+# In-sample goodness-of-fit. 
+summary(logit_fit)
+
+##shows that gender, race, education, religion, southern are more significant indicators
+
+```
+When measuring the accuracy of this machine learning model, we can use a Confusion Matrix to examine how the testing dataset performed. In both the in-sample and out-of-sample accuracy measures, there was a 67 percent accuracy. The number of trues positives and false negatives can be seen below. 
+
+```{r}
+# In-sample accuracy.
+logit.is <- factor(ifelse(predict(logit_fit, type = "response") > 0.5, 2, 1), 
+                   levels = c(1, 2), labels = c("Democrat", "Republican"))
+cm_table <- (cm.rf.logit.is <- confusionMatrix(logit.is, anes_train$pres_vote))
+cm_table <- as.table(cm.rf.logit.is$table)
+cm_df <- as.data.frame(cm_table)
+kable(cm_df, caption = "Confusion Matrix for Logistic Regression (In-Sample)")
+
+
+## diagonals are false positives/negatives, and the truth positives/negatives
+##results shows that there is 67% accuracy in Kim & Zilinsky's 2016 prediction 
+# 746 true democrats predicted and 660 true republicans
+# 346 dems incorrectly predicted as republican and 336 reps incorrectly predicted as dems
+
+# Out-of-sample accuracy. 
+logit_pred <- factor(ifelse(predict(logit_fit, anes_test, type = "response") > 0.5, 2, 1), 
+                     levels = c(1, 2), labels = c("Democrat", "Republican"))
+cm_out<- (cm.rf.logit.oos <- confusionMatrix(logit_pred, anes_test$pres_vote))
+cm_out <- as.table(cm.rf.logit.is$table)
+cm_df_out <- as.data.frame(cm_table)
+kable(cm_df_out, caption = "Confusion Matrix for Logistic Regression (Out-of-Sample)")
+
+
+#also 67% accuracy with the test data set
+
+```
+
+
+```{r}
+#Wyoming
+vf_wy <- read_csv("~/Downloads/state_1pc_samples_aug24/WY_sample.csv")
+
+vf_wy_new <- vf_wy |> 
+  filter(
+    sii_deceased == 0,
+    sii_gender != "U",
+    sii_race != "U",
+    sii_education_level != "U") |>
+    mutate(gender = case_when(
+      sii_gender == "F" ~ "Female",
+      sii_gender == "M" ~ "Male",
+      sii_gender == "X" ~ "Other"),
+    age_subset = case_when(
+      sii_age > 18 & sii_age <= 29 ~ "18-29",
+      sii_age > 30 & sii_age <= 44 ~ "30-44",
+      sii_age > 45 & sii_age <= 59 ~ "45-59",
+      sii_age > 60 ~ "60+"),
+    race = case_when(
+      sii_race == "B" ~ "Black",
+      sii_race == "A" ~ "Asian",
+      sii_race == "W" ~ "White",
+      sii_race == "H" ~ "Hispanic",
+      sii_race == "N" ~ "Native",
+      sii_race == "O" ~ "Other"),
+    educ = case_when(
+      sii_education_level == "A" ~ "High School",
+      sii_education_level == "E" ~ "Some College",
+      sii_education_level == "B" ~ "College",         
+      sii_education_level == "C" ~ "Grad School",
+      sii_education_level == "D" ~ "Vocational"),
+    urb_rural = case_when(
+      sii_urbanicity %in% c("R1", "R2") ~ "Rural",
+      sii_urbanicity %in% c("S3", "S4") ~ "Suburban",
+      sii_urbanicity %in% c("U5", "U6") ~ "Urban"),
+    density = case_when(
+      sii_urbanicity %in% c("R1", "S3", "U5") ~ "Less Dense",
+      sii_urbanicity %in% c("R2", "S4", "U6") ~ "More Dense"),
+    voted_2020 = if_else(svi_vh_2020g != "", 1, 0)) |>
+  select(sii_state, gender, age_subset, race, educ, urb_rural, density, voted_2020)
+
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+#Arizona
+vf_az <- read_csv("~/Downloads/state_1pc_samples_aug24/AZ_sample.csv")
+
+vf_az_new <- vf_az |> 
+  filter(
+    sii_deceased == 0,
+    sii_gender != "U",
+    sii_race != "U",
+    sii_education_level != "U") |>
+    mutate(gender = case_when(
+      sii_gender == "F" ~ "Female",
+      sii_gender == "M" ~ "Male",
+      sii_gender == "X" ~ "Other"),
+    age_subset = case_when(
+      sii_age > 18 & sii_age <= 29 ~ "18-29",
+      sii_age > 30 & sii_age <= 44 ~ "30-44",
+      sii_age > 45 & sii_age <= 59 ~ "45-59",
+      sii_age > 60 ~ "60+"),
+    race = case_when(
+      sii_race == "B" ~ "Black",
+      sii_race == "A" ~ "Asian",
+      sii_race == "W" ~ "White",
+      sii_race == "H" ~ "Hispanic",
+      sii_race == "N" ~ "Native",
+      sii_race == "O" ~ "Other"),
+    educ = case_when(
+      sii_education_level == "A" ~ "High School",
+      sii_education_level == "E" ~ "Some College",
+      sii_education_level == "B" ~ "College",         
+      sii_education_level == "C" ~ "Grad School",
+      sii_education_level == "D" ~ "Vocational"),
+    urb_rural = case_when(
+      sii_urbanicity %in% c("R1", "R2") ~ "Rural",
+      sii_urbanicity %in% c("S3", "S4") ~ "Suburban",
+      sii_urbanicity %in% c("U5", "U6") ~ "Urban"),
+    density = case_when(
+      sii_urbanicity %in% c("R1", "S3", "U5") ~ "Less Dense",
+      sii_urbanicity %in% c("R2", "S4", "U6") ~ "More Dense"),
+    voted_2020 = if_else(svi_vh_2020g != "", 1, 0)) |>
+  select(sii_state, gender, age_subset, race, educ, urb_rural, density, voted_2020)
+
+```
+
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+#Vermont
+vf_vt <- read_csv("~/Downloads/state_1pc_samples_aug24/VT_sample.csv")
+
+vf_vt_new <- vf_vt |> 
+  filter(
+    sii_deceased == 0,
+    sii_gender != "U",
+    sii_race != "U",
+    sii_education_level != "U") |>
+    mutate(gender = case_when(
+      sii_gender == "F" ~ "Female",
+      sii_gender == "M" ~ "Male",
+      sii_gender == "X" ~ "Other"),
+    age_subset = case_when(
+      sii_age > 18 & sii_age <= 29 ~ "18-29",
+      sii_age > 30 & sii_age <= 44 ~ "30-44",
+      sii_age > 45 & sii_age <= 59 ~ "45-59",
+      sii_age > 60 ~ "60+"),
+    race = case_when(
+      sii_race == "B" ~ "Black",
+      sii_race == "A" ~ "Asian",
+      sii_race == "W" ~ "White",
+      sii_race == "H" ~ "Hispanic",
+      sii_race == "N" ~ "Native",
+      sii_race == "O" ~ "Other"),
+    educ = case_when(
+      sii_education_level == "A" ~ "High School",
+      sii_education_level == "E" ~ "Some College",
+      sii_education_level == "B" ~ "College",         
+      sii_education_level == "C" ~ "Grad School",
+      sii_education_level == "D" ~ "Vocational"),
+    urb_rural = case_when(
+      sii_urbanicity %in% c("R1", "R2") ~ "Rural",
+      sii_urbanicity %in% c("S3", "S4") ~ "Suburban",
+      sii_urbanicity %in% c("U5", "U6") ~ "Urban"),
+    density = case_when(
+      sii_urbanicity %in% c("R1", "S3", "U5") ~ "Less Dense",
+      sii_urbanicity %in% c("R2", "S4", "U6") ~ "More Dense"),
+    voted_2020 = if_else(svi_vh_2020g != "", 1, 0)) |>
+  select(sii_state, gender, age_subset, race, educ, urb_rural, density, voted_2020)
+
+```
+
+**Demographics and Voter Turnout**
+
+Since we do not have demographic data or vote choice available for the 2024 election, we cannot build a regression model for 2024. However, we can observe if there is a difference in how demographics play a role in blue states, red states, and swing states. To do this, I've created distribution models for different demographic indicators. I singled out three states' voterfile data, in order to specifically visualize party alignment and voter turnout based on demographic. I choose Wyoming as a representation of a red state, Vermont as a representation of a blue state, and Arizona as a representation of swing state, due to its particular importance in the 2024 election.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+combined_three <- rbind(vf_vt_new, vf_az_new, vf_wy_new)
+
+#Gender Distribution
+
+turnout_by_gender <- combined_three |>
+  group_by(sii_state, gender) |>
+  summarize(
+    total = n(),
+    voted = sum(voted_2020, na.rm = TRUE),
+    turnout_pct = (voted / total) * 100)
+
+gender <- ggplot(turnout_by_gender, aes(x = gender, y = turnout_pct, fill = gender)) +
+  geom_bar(stat = "identity") +
+  labs(title = "2020 General Election Turnout by Gender",
+    x = "Gender",
+    y = "Turnout Percentage (%)") +
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) +
+  scale_fill_manual(values = c("sienna2", "skyblue3"),
+                    name = "Gender") +
+  my_blog_theme() +
+  facet_wrap(~sii_state)
+
+gender
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+#Age Distribution
+
+turnout_by_age <- combined_three |>
+  group_by(sii_state, age_subset) |>
+  summarize(
+    total = n(),
+    voted = sum(voted_2020, na.rm = TRUE),
+    turnout_pct = (voted / total) * 100)
+
+age <- ggplot(turnout_by_age, aes(x = age_subset, y = turnout_pct, fill = age_subset)) +
+  geom_bar(stat = "identity") +
+  labs(title = "2020 General Election Turnout by Age",
+    x = "Age Subset",
+    y = "Turnout Percentage (%)") +
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) +
+  my_blog_theme() +
+  scale_fill_brewer(name = "Age") +
+  facet_wrap(~sii_state)
+
+age
+
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#Race Distribution
+
+turnout_by_race <- combined_three |>
+  group_by(sii_state, race) |>
+  summarize(
+    total = n(),
+    voted = sum(voted_2020, na.rm = TRUE),
+    turnout_pct = (voted / total) * 100)
+
+race <- ggplot(turnout_by_race, aes(x = race, y = turnout_pct, fill = race)) +
+  geom_bar(stat = "identity") +
+  labs(title = "2020 General Election Turnout by Race",
+    x = "Race",
+    y = "Turnout Percentage (%)") +
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) +
+  scale_fill_brewer(name = "Race") +
+  my_blog_theme() +
+  facet_wrap(~sii_state)
+
+race
+
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+#Education
+
+turnout_by_educ <- combined_three |>
+  group_by(sii_state, educ) |>
+  summarize(
+    total = n(),
+    voted = sum(voted_2020, na.rm = TRUE),
+    turnout_pct = (voted / total) * 100)
+
+education <- ggplot(turnout_by_educ, aes(x = educ, y = turnout_pct, fill = educ)) +
+  geom_bar(stat = "identity") +
+  labs(title = "2020 General Election Turnout by Education",
+    x = "Education",
+    y = "Turnout Percentage (%)") +
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) +
+  scale_fill_brewer(name = "Education Level") +
+  my_blog_theme() +
+  facet_wrap(~sii_state)
+
+education
+
+```
+
+The following trends are noticeable from this distribution charts:
+
+*Women have a higher voter turnout rate.
+*The age group with the highest voter turnout is 60+ year olds.
+*Race as an indicator has the greatest voter turnout variation between the three states analyzed.
+*Voters that went to grad school have a higher turnout rate; vocatational workers in VT are the only subgroup that closely compare.
+
+A more formal regression was run to verify that **most demographic variables and turnout are not significant for Democrats, but they are for Republicans.**
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+
+####----------------------------------------------------------#
+#### Simulation examples. 
+####----------------------------------------------------------#
+
+# Merge data.
+d <- d_pollav_state |> 
+  left_join(d_state_popvote, by = c("year", "state")) |>  
+  left_join(d_popvote |> filter(party == "democrat"), by = "year") |> 
+  left_join(d_demos, by = c("year", "state")) |> 
+  left_join(d_state_turnout, by = c("year", "state")) |> 
+  filter(year >= 1980) |> 
+  ungroup()
+
+# Sequester states for which we have polling data for 2024. 
+states.2024 <- unique(d$state[d$year == 2024])
+
+# Subset and split data.
+d <- d |> 
+  filter(state %in% states.2024)
+
+d_train <- d |> 
+  filter(year < 2024)
+d_test <- d |> 
+  filter(year == 2024)
+
+# Example pooled model with turnout and demographics. 
+mod_lm_dem <- lm(D_pv2p ~ D_pv2p_lag1 + D_pv2p_lag2 + latest_pollav_DEM + mean_pollav_DEM + vep_turnout + total_pop + white + black + american_indian + 
+                 asian_pacific_islander + other_race + two_or_more_races + hispanic_white +
+                 less_than_college + bachelors + graduate + incumbent + incumbent_party, 
+                 data = d_train)
+summary(mod_lm_dem)
+mod_lm_rep <- lm(R_pv2p ~ R_pv2p_lag1 + R_pv2p_lag2 + latest_pollav_REP + mean_pollav_REP + vep_turnout + total_pop + white + black + american_indian + 
+                 asian_pacific_islander + other_race + two_or_more_races + hispanic_white +
+                   less_than_college + bachelors + graduate,
+                 data = d_train)
+summary(mod_lm_rep)
+
+```
+
+
+
+```{r}
+
+# Most demographic variables and turnout are not significant for Democrats, but they are for Republicans.
+# Problem: we do not have demographic data for 2024. 
+# What can we do? 
+# A few options: 
+# (1.) Estimate state-level demographics from voterfile and plug in for 2024. 
+# (2.) Interpolate Census demographics using a spline or some type of model. 
+# (3.) Simulate plausible values for variables based on historical averages or more advanced model. 
+
+# Simple simulation example: 
+simp.vars <- c("D_pv2p_lag1", "D_pv2p_lag2", "latest_pollav_DEM", "mean_pollav_DEM",
+               "R_pv2p_lag1", "R_pv2p_lag2", "latest_pollav_REP", "mean_pollav_REP",
+               "vep_turnout")
+mod_lm_dem_simp <- lm(D_pv2p ~ D_pv2p_lag1 + D_pv2p_lag2 + latest_pollav_DEM + mean_pollav_DEM + vep_turnout,
+                      data = d_train)
+mod_lm_rep_simp <- lm(R_pv2p ~ R_pv2p_lag1 + R_pv2p_lag2 + latest_pollav_REP + mean_pollav_REP + vep_turnout,
+                      data = d_train)
+
+# What data do we have for 2024? 
+d_test |> select(all_of(simp.vars)) |> view()
+
+# Add back in lagged vote share for 2024. 
+t <- d |> 
+  filter(year >= 2016) |> 
+  arrange(year) |> 
+  group_by(state) |> 
+  mutate(
+    D_pv2p_lag1 = lag(D_pv2p, 1),
+    R_pv2p_lag1 = lag(R_pv2p, 1), 
+    D_pv2p_lag2 = lag(D_pv2p, 2),
+    R_pv2p_lag2 = lag(R_pv2p, 2)) |> 
+  filter(year == 2024) |> 
+  select(state, year, D_pv2p, R_pv2p, D_pv2p_lag1, R_pv2p_lag1, D_pv2p_lag2, R_pv2p_lag2) 
+
+# Subset testing data to only relevant variables for our simple model. 
+d_test_simp <- d_test |> 
+  select(-c(R_pv2p, R_pv2p_lag1, R_pv2p_lag2, 
+            D_pv2p, D_pv2p_lag1, D_pv2p_lag2)) |> 
+  left_join(t, by = c("state", "year")) |> 
+  select(state, year, all_of(simp.vars))
+
+# Get average state-level turnout accross 2020, 2016, 2012.  
+d_turnout_avg <- d_train |> 
+  filter(year %in% c(2020, 2016, 2012)) |> 
+  filter(state %in% unique(d_test_simp$state)) |> 
+  group_by(state) |> 
+  summarize(vep_turnout = mean(vep_turnout, na.rm = TRUE))
+
+# Make predictions with simple average turnout. 
+d_test_simp <- d_test_simp |> 
+  left_join(d_turnout_avg, by = "state") |> 
+  select(-vep_turnout.x) |> 
+  rename(vep_turnout = vep_turnout.y)
+
+simp_pred_dem <- predict(mod_lm_dem_simp, d_test_simp)
+simp_pred_rep <- predict(mod_lm_rep_simp, d_test_simp)
+
+# Create dataset to summarize winners and EC vote distributions. 
+win_pred <- data.frame(state = d_test_simp$state,
+                       year = rep(2024, length(d_test_simp$state)),
+                       simp_pred_dem = simp_pred_dem,
+                       simp_pred_rep = simp_pred_rep,
+                       winner = ifelse(simp_pred_dem > simp_pred_rep, "Democrat", "Republican")) |>
+  left_join(d_ec, by = c("state", "year"))
+
+win_pred |> 
+  filter(winner == "Democrat") |> 
+  select(state)
+
+win_pred |> 
+  filter(winner == "Republican") |> 
+  select(state)
+
+win_pred |> 
+  group_by(winner) |> 
+  summarize(n = n(), ec = sum(electors))
+
+# Now let's simulate this with varying levels of turnout and get both confidence intervals on our predictions
+# and approximate win percentages for each state. 
+m <- 1e4 # Number of simulations.
+pred.mat <- data.frame(state = rep(d_test_simp$state, m),
+                       year = rep(2024, m*length(d_test_simp$state)),
+                       vep_turnout = rep(d_turnout_avg$vep_turnout, m),
+                       simp_pred_dem = rep(simp_pred_dem, m),
+                       simp_pred_rep = rep(simp_pred_rep, m))
+
+j <- 1
+for (i in 1:m) {
+  print(i)
+  vep_turnout <- sapply(d_turnout_avg$vep_turnout, function(mu) {
+    rnorm(1, mean = mu, sd = 0.05) # Simulate turnout from Gaussian centered on state average with 5% SD.
+  })
+
+  d_test_samp <- d_test_simp
+  d_test_samp$vep_turnout <- vep_turnout
+
+  simp_pred_dem <- predict(mod_lm_dem_simp, d_test_samp)
+  simp_pred_rep <- predict(mod_lm_rep_simp, d_test_samp)
+
+  pred.mat$simp_pred_dem[j:(i*19)] <- simp_pred_dem
+  pred.mat$simp_pred_rep[j:(i*19)] <- simp_pred_rep
+  j <- j + 19 # Hack for filling out matrix.
+}
+
+pred.mat <- pred.mat |>
+  mutate(winner = ifelse(simp_pred_dem > simp_pred_rep, "Democrat", "Republican"))
+
+pred.mat |>
+  group_by(state, winner) |>
+  summarize(win_rate = n()/m) |>
+  view()
+
+# Now we can calculate confidence intervals for each state.
+pred.mat |>
+  group_by(state) |>
+  summarize(mean_dem = mean(simp_pred_dem),
+            mean_rep = mean(simp_pred_rep),
+            sd_dem = sd(simp_pred_dem),
+            sd_rep = sd(simp_pred_rep),
+            lower_dem = mean_dem - 1.96*sd_dem,
+            upper_dem = mean_dem + 1.96*sd_dem,
+            lower_rep = mean_rep - 1.96*sd_rep,
+            upper_rep = mean_rep + 1.96*sd_rep) |>
+  view()
+
+
+```
+
