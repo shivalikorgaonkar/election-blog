@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=4321&amp;path=livereload" data-no-instant defer></script>
+  <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Election Blog #1: Preliminary Prediction | A minimal Hugo website</title>
@@ -50,7 +50,7 @@ ggplot(data = d_popvote, aes(x = year, y = pv2p, color = party)) +
        subtitle = &quot;1948-2020&quot;) +
   my_blog_theme()
 </code></pre>
-<img src="/note/2024/09/09/election-blog-1-preliminary-prediction/index_files/figure-html/unnamed-chunk-1-1.png" width="672" />
+<img src="https://example.org/note/2024/09/09/election-blog-1-preliminary-prediction/index_files/figure-html/unnamed-chunk-1-1.png" width="672" />
 <p>Some notable trends exist over the past century, many of which can be credited to significant historical events. It&rsquo;s clear that the difference between the two party&rsquo;s vote share was much more drastic decades ago. Today, elections are likely to be within a ten point margin, whereas in the late 20th century, they would exceed 20 point differences. In recent decades, elections have become tighter, reflecting increased polarization and more closely divided public opinions on key issues. This tightening is often attributed to growing ideological divisions between the parties and heightened partisan engagement among voters.</p>
 <pre><code class="language-r">####----------------------------------------------------------#
 #### State-by-state map of presidential popular votes.
@@ -94,7 +94,7 @@ pv_win_map |&gt;
                     name = &quot;Party Winner&quot;) +
   my_blog_theme()
 </code></pre>
-<img src="/note/2024/09/09/election-blog-1-preliminary-prediction/index_files/figure-html/unnamed-chunk-2-1.png" width="672" />
+<img src="https://example.org/note/2024/09/09/election-blog-1-preliminary-prediction/index_files/figure-html/unnamed-chunk-2-1.png" width="672" />
 <pre><code class="language-r">d_pvstate_wide |&gt;
   filter(year &gt;= 1980) |&gt;
   left_join(states_map, by = &quot;region&quot;) |&gt;
@@ -117,7 +117,7 @@ pv_win_map |&gt;
 ## ℹ If a many-to-many relationship is expected, set `relationship =
 ##   &quot;many-to-many&quot;` to silence this warning.
 </code></pre>
-<img src="/note/2024/09/09/election-blog-1-preliminary-prediction/index_files/figure-html/unnamed-chunk-2-2.png" width="672" />
+<img src="https://example.org/note/2024/09/09/election-blog-1-preliminary-prediction/index_files/figure-html/unnamed-chunk-2-2.png" width="672" />
 <p>Using the simplified electoral cycle model (vote_2024 = 3/4<em>vote_2020 + 1/4</em>vote_2016), we can predict the two party popular vote share for the 2024 election. The map below details the vote share by state, coloring states blue that voted Democratic and states red that swing Republican.
 However, it is important to note that our elections do not rely on the popular vote outcome. Oftentimes, states vote a consistent way that make elections somewhat predictable. This causes elections to generally rely on the votes of a handful of swing states who bounce between blue and red. Usually, the popular votes can match the outcome of the election, but since we have an electoral college, this is not always the case. Namely, the 2016 election caused uproar when Hillary Clinton defeated Donald Trump in the popular vote, but lost the electoral college. In history, this has happened five times. That&rsquo;s why it&rsquo;s crucial that election predictions go one step further and look at the electoral college votes.</p>
 <pre><code class="language-r">####----------------------------------------------------------#
@@ -140,7 +140,7 @@ pv2p_2024_states |&gt;
        y = &quot;Latitude&quot;, x = &quot;Longitude&quot;) +
   my_blog_theme()
 </code></pre>
-<img src="/note/2024/09/09/election-blog-1-preliminary-prediction/index_files/figure-html/unnamed-chunk-3-1.png" width="672" />
+<img src="https://example.org/note/2024/09/09/election-blog-1-preliminary-prediction/index_files/figure-html/unnamed-chunk-3-1.png" width="672" />
 <pre><code class="language-r">####----------------------------------------------------------#
 #### Prediction Based on Popular Vote
 ####----------------------------------------------------------#
@@ -225,7 +225,7 @@ d_pvstate_wide_more |&gt;
 ## ℹ If a many-to-many relationship is expected, set `relationship =
 ##   &quot;many-to-many&quot;` to silence this warning.
 </code></pre>
-<img src="/note/2024/09/09/election-blog-1-preliminary-prediction/index_files/figure-html/unnamed-chunk-6-1.png" width="672" />
+<img src="https://example.org/note/2024/09/09/election-blog-1-preliminary-prediction/index_files/figure-html/unnamed-chunk-6-1.png" width="672" />
   Oftentimes, presidential candidates will focus their campaigning on a handful of states, including Arizona, Georgia, Michigan, Pennsylvania, and more. The map grid displayed showcases why this is the case. States shaded a darker color had greater shift in how individuals voted. This is important because candidates will focus their attention, knowing that voters are persuadable year to year. 
 
 </main>

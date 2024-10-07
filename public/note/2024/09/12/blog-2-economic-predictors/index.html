@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=4321&amp;path=livereload" data-no-instant defer></script>
+  <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Blog #2: Economic Predictors | A minimal Hugo website</title>
@@ -49,7 +49,7 @@ With this in mind, my second blog post will focus on different independent varia
        y = &quot;Incumbent Party's National Popular Vote Share&quot;) + 
   my_blog_theme()
 </code></pre>
-<img src="/note/2024/09/12/blog-2-economic-predictors/index_files/figure-html/unnamed-chunk-1-1.png" width="672" />
+<img src="https://example.org/note/2024/09/12/blog-2-economic-predictors/index_files/figure-html/unnamed-chunk-1-1.png" width="672" />
 <p>It&rsquo;s clear that 2020 is a significant outlier in this plot, having an extreme decrease in GDP growth, due to the pandemic. The dashed lines organize the information to showcase election years where there was growth versus loss, as well as popular vote victory versus losses for the incumbent party. A majority of election years where there was GDP growth also presented popular vote victories.
 The plot below better exemplifies this trend with a regression line drawn to show the positive correlation between GDP growth and vote share.</p>
 <pre><code class="language-r"># Can add bivariate regression lines to our scatterplots. 
@@ -72,7 +72,7 @@ d_inc_econ |&gt;
 ## ℹ Did you forget to specify a `group` aesthetic or to convert a numerical
 ##   variable into a factor?
 </code></pre>
-<img src="/note/2024/09/12/blog-2-economic-predictors/index_files/figure-html/unnamed-chunk-2-1.png" width="672" />
+<img src="https://example.org/note/2024/09/12/blog-2-economic-predictors/index_files/figure-html/unnamed-chunk-2-1.png" width="672" />
 <pre><code class="language-r">summary(reg_econ)$r.squared
 </code></pre>
 <pre><code>## [1] 0.1880919
@@ -94,7 +94,7 @@ d_inc_econ |&gt;
        y = &quot;Incumbent Party's National Popular Vote Share&quot;) + 
   my_blog_theme()
 </code></pre>
-<img src="/note/2024/09/12/blog-2-economic-predictors/index_files/figure-html/CPI cor-1.png" width="672" />
+<img src="https://example.org/note/2024/09/12/blog-2-economic-predictors/index_files/figure-html/CPI cor-1.png" width="672" />
 <pre><code class="language-r">d_inc_econ |&gt; 
   ggplot(aes(x = CPI, y = pv2p, label = year)) + 
   geom_text() + 
@@ -113,7 +113,7 @@ d_inc_econ |&gt;
 ## ℹ Did you forget to specify a `group` aesthetic or to convert a numerical
 ##   variable into a factor?
 </code></pre>
-<img src="/note/2024/09/12/blog-2-economic-predictors/index_files/figure-html/CPI cor-2.png" width="672" />
+<img src="https://example.org/note/2024/09/12/blog-2-economic-predictors/index_files/figure-html/CPI cor-2.png" width="672" />
 <pre><code class="language-r"># Compute correlations between CPI and incumbent vote 2-party vote share.
 cor(d_inc_econ$CPI, 
     d_inc_econ$pv2p)
@@ -189,7 +189,7 @@ d_inc_econ |&gt;
        y = &quot;Incumbent Party's National Popular Vote Share&quot;) + 
   my_blog_theme()
 </code></pre>
-<img src="/note/2024/09/12/blog-2-economic-predictors/index_files/figure-html/unnamed-chunk-4-1.png" width="672" />
+<img src="https://example.org/note/2024/09/12/blog-2-economic-predictors/index_files/figure-html/unnamed-chunk-4-1.png" width="672" />
 <pre><code class="language-r">d_inc_econ |&gt; 
   ggplot(aes(x = unemployment, y = pv2p, label = year)) + 
   geom_text() + 
@@ -208,7 +208,7 @@ d_inc_econ |&gt;
 ## ℹ Did you forget to specify a `group` aesthetic or to convert a numerical
 ##   variable into a factor?
 </code></pre>
-<img src="/note/2024/09/12/blog-2-economic-predictors/index_files/figure-html/unnamed-chunk-4-2.png" width="672" />
+<img src="https://example.org/note/2024/09/12/blog-2-economic-predictors/index_files/figure-html/unnamed-chunk-4-2.png" width="672" />
 <pre><code class="language-r"># Compute correlations between CPI and incumbent vote 2-party vote share.
 cor(d_inc_econ$unemployment, 
     d_inc_econ$pv2p)
