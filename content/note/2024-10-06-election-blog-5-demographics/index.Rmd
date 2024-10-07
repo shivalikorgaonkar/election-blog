@@ -176,7 +176,7 @@ summary(logit_fit)
 
 When measuring the accuracy of this machine learning model, we can use a Confusion Matrix to examine how the testing dataset performed. In both the in-sample and out-of-sample accuracy measures, there was a 67 percent accuracy. The number of trues positives and false negatives can be seen below. 
 
-```{r}
+```{r message=FALSE, warning=FALSE, include=FALSE}
 # In-sample accuracy.
 logit.is <- factor(ifelse(predict(logit_fit, type = "response") > 0.5, 2, 1), 
                    levels = c(1, 2), labels = c("Democrat", "Republican"))
@@ -205,7 +205,7 @@ kable(cm_df_out, caption = "Confusion Matrix for Logistic Regression (Out-of-Sam
 ```
 
 
-```{r}
+```{r message=FALSE, warning=FALSE, include=FALSE}
 #Wyoming
 vf_wy <- read_csv("~/Downloads/state_1pc_samples_aug24/WY_sample.csv")
 
@@ -396,6 +396,7 @@ age
 
 ```
 
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 #Race Distribution
 
@@ -562,12 +563,14 @@ Using the simple average of voter turnout and relevant demographic variables, th
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
-win_pred |> 
+win_table <- win_pred |> 
   group_by(winner) |> 
   summarize(n = n(), ec = sum(electors)) |>
   rename("States" = n,
          "Electoral Votes" = ec,
          "Winner" = winner)
+
+kable(win_table)
 
 ```
 

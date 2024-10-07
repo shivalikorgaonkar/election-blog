@@ -70,149 +70,6 @@
 ## Number of Fisher Scoring iterations: 4
 </code></pre>
 <p>When measuring the accuracy of this machine learning model, we can use a Confusion Matrix to examine how the testing dataset performed. In both the in-sample and out-of-sample accuracy measures, there was a 67 percent accuracy. The number of trues positives and false negatives can be seen below.</p>
-<pre><code class="language-r"># In-sample accuracy.
-logit.is &lt;- factor(ifelse(predict(logit_fit, type = &quot;response&quot;) &gt; 0.5, 2, 1), 
-                   levels = c(1, 2), labels = c(&quot;Democrat&quot;, &quot;Republican&quot;))
-cm_table &lt;- (cm.rf.logit.is &lt;- confusionMatrix(logit.is, anes_train$pres_vote))
-cm_table &lt;- as.table(cm.rf.logit.is$table)
-cm_df &lt;- as.data.frame(cm_table)
-kable(cm_df, caption = &quot;Confusion Matrix for Logistic Regression (In-Sample)&quot;)
-</code></pre>
-<p>Table: <span id="tab:unnamed-chunk-5"></span>Table 1: Confusion Matrix for Logistic Regression (In-Sample)</p>
-<table>
-  <thead>
-      <tr>
-          <th style="text-align: left">Prediction</th>
-          <th style="text-align: left">Reference</th>
-          <th style="text-align: right">Freq</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td style="text-align: left">Democrat</td>
-          <td style="text-align: left">Democrat</td>
-          <td style="text-align: right">746</td>
-      </tr>
-      <tr>
-          <td style="text-align: left">Republican</td>
-          <td style="text-align: left">Democrat</td>
-          <td style="text-align: right">346</td>
-      </tr>
-      <tr>
-          <td style="text-align: left">Democrat</td>
-          <td style="text-align: left">Republican</td>
-          <td style="text-align: right">336</td>
-      </tr>
-      <tr>
-          <td style="text-align: left">Republican</td>
-          <td style="text-align: left">Republican</td>
-          <td style="text-align: right">660</td>
-      </tr>
-  </tbody>
-</table>
-<pre><code class="language-r">## diagonals are false positives/negatives, and the truth positives/negatives
-##results shows that there is 67% accuracy in Kim &amp; Zilinsky's 2016 prediction 
-# 746 true democrats predicted and 660 true republicans
-# 346 dems incorrectly predicted as republican and 336 reps incorrectly predicted as dems
-
-# Out-of-sample accuracy. 
-logit_pred &lt;- factor(ifelse(predict(logit_fit, anes_test, type = &quot;response&quot;) &gt; 0.5, 2, 1), 
-                     levels = c(1, 2), labels = c(&quot;Democrat&quot;, &quot;Republican&quot;))
-cm_out&lt;- (cm.rf.logit.oos &lt;- confusionMatrix(logit_pred, anes_test$pres_vote))
-cm_out &lt;- as.table(cm.rf.logit.is$table)
-cm_df_out &lt;- as.data.frame(cm_table)
-kable(cm_df_out, caption = &quot;Confusion Matrix for Logistic Regression (Out-of-Sample)&quot;)
-</code></pre>
-<p>Table: <span id="tab:unnamed-chunk-5"></span>Table 1: Confusion Matrix for Logistic Regression (Out-of-Sample)</p>
-<table>
-  <thead>
-      <tr>
-          <th style="text-align: left">Prediction</th>
-          <th style="text-align: left">Reference</th>
-          <th style="text-align: right">Freq</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td style="text-align: left">Democrat</td>
-          <td style="text-align: left">Democrat</td>
-          <td style="text-align: right">746</td>
-      </tr>
-      <tr>
-          <td style="text-align: left">Republican</td>
-          <td style="text-align: left">Democrat</td>
-          <td style="text-align: right">346</td>
-      </tr>
-      <tr>
-          <td style="text-align: left">Democrat</td>
-          <td style="text-align: left">Republican</td>
-          <td style="text-align: right">336</td>
-      </tr>
-      <tr>
-          <td style="text-align: left">Republican</td>
-          <td style="text-align: left">Republican</td>
-          <td style="text-align: right">660</td>
-      </tr>
-  </tbody>
-</table>
-<pre><code class="language-r">#also 67% accuracy with the test data set
-</code></pre>
-<pre><code class="language-r">#Wyoming
-vf_wy &lt;- read_csv(&quot;~/Downloads/state_1pc_samples_aug24/WY_sample.csv&quot;)
-</code></pre>
-<pre><code>## Warning: One or more parsing issues, call `problems()` on your data frame for details,
-## e.g.:
-##   dat &lt;- vroom(...)
-##   problems(dat)
-</code></pre>
-<pre><code>## Rows: 4518 Columns: 43
-## ── Column specification ────────────────────────────────────────────────────────
-## Delimiter: &quot;,&quot;
-## chr (21): sii_state, sii_age_range, sii_gender, sii_race, svi_party_registra...
-## dbl (16): sii_deceased, sii_age, sii_married, svi_vote_all_general, svi_vote...
-## lgl  (6): svi_vh_2020pp_party, svi_vh_2021p_party, svi_vh_2023p, svi_vh_2023...
-## 
-## ℹ Use `spec()` to retrieve the full column specification for this data.
-## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-</code></pre>
-<pre><code class="language-r">vf_wy_new &lt;- vf_wy |&gt; 
-  filter(
-    sii_deceased == 0,
-    sii_gender != &quot;U&quot;,
-    sii_race != &quot;U&quot;,
-    sii_education_level != &quot;U&quot;) |&gt;
-    mutate(gender = case_when(
-      sii_gender == &quot;F&quot; ~ &quot;Female&quot;,
-      sii_gender == &quot;M&quot; ~ &quot;Male&quot;,
-      sii_gender == &quot;X&quot; ~ &quot;Other&quot;),
-    age_subset = case_when(
-      sii_age &gt; 18 &amp; sii_age &lt;= 29 ~ &quot;18-29&quot;,
-      sii_age &gt; 30 &amp; sii_age &lt;= 44 ~ &quot;30-44&quot;,
-      sii_age &gt; 45 &amp; sii_age &lt;= 59 ~ &quot;45-59&quot;,
-      sii_age &gt; 60 ~ &quot;60+&quot;),
-    race = case_when(
-      sii_race == &quot;B&quot; ~ &quot;Black&quot;,
-      sii_race == &quot;A&quot; ~ &quot;Asian&quot;,
-      sii_race == &quot;W&quot; ~ &quot;White&quot;,
-      sii_race == &quot;H&quot; ~ &quot;Hispanic&quot;,
-      sii_race == &quot;N&quot; ~ &quot;Native&quot;,
-      sii_race == &quot;O&quot; ~ &quot;Other&quot;),
-    educ = case_when(
-      sii_education_level == &quot;A&quot; ~ &quot;High School&quot;,
-      sii_education_level == &quot;E&quot; ~ &quot;Some College&quot;,
-      sii_education_level == &quot;B&quot; ~ &quot;College&quot;,         
-      sii_education_level == &quot;C&quot; ~ &quot;Grad School&quot;,
-      sii_education_level == &quot;D&quot; ~ &quot;Vocational&quot;),
-    urb_rural = case_when(
-      sii_urbanicity %in% c(&quot;R1&quot;, &quot;R2&quot;) ~ &quot;Rural&quot;,
-      sii_urbanicity %in% c(&quot;S3&quot;, &quot;S4&quot;) ~ &quot;Suburban&quot;,
-      sii_urbanicity %in% c(&quot;U5&quot;, &quot;U6&quot;) ~ &quot;Urban&quot;),
-    density = case_when(
-      sii_urbanicity %in% c(&quot;R1&quot;, &quot;S3&quot;, &quot;U5&quot;) ~ &quot;Less Dense&quot;,
-      sii_urbanicity %in% c(&quot;R2&quot;, &quot;S4&quot;, &quot;U6&quot;) ~ &quot;More Dense&quot;),
-    voted_2020 = if_else(svi_vh_2020g != &quot;&quot;, 1, 0)) |&gt;
-  select(sii_state, gender, age_subset, race, educ, urb_rural, density, voted_2020)
-</code></pre>
 <p><strong>Demographics and Voter Turnout</strong></p>
 <p>Since we do not have demographic data or vote choice available for the 2024 election, we cannot build a regression model for 2024. However, we can observe if there is a difference in how demographics play a role in blue states, red states, and swing states. To do this, I&rsquo;ve created distribution models for different demographic indicators. I singled out three states&rsquo; voterfile data, in order to specifically visualize party alignment and voter turnout based on demographic. I choose Wyoming as a representation of a red state, Vermont as a representation of a blue state, and Arizona as a representation of swing state, due to its particular importance in the 2024 election.</p>
 <img src="https://example.org/note/2024/10/06/election-blog-5-demographics/index_files/figure-html/unnamed-chunk-9-1.png" width="672" />
@@ -227,12 +84,27 @@ vf_wy &lt;- read_csv(&quot;~/Downloads/state_1pc_samples_aug24/WY_sample.csv&quo
 <p>A more formal regression was run to verify that <strong>most demographic variables and turnout are not significant for Democrats, but they are for Republicans.</strong> However, it is significant to look at polling at 2 party vote share in order to predict the 2024 outcome.</p>
 <p><strong>2024 Election Model</strong></p>
 <p>Using the simple average of voter turnout and relevant demographic variables, the data below summarizes how each party would perform among the 15 swing states. The table shows that the significant indicators give Kamala Harris an edge in winning the presidential election.</p>
-<pre><code>## # A tibble: 2 × 3
-##   Winner     States `Electoral Votes`
-##   &lt;chr&gt;       &lt;int&gt;             &lt;dbl&gt;
-## 1 Democrat       12               202
-## 2 Republican      3                87
-</code></pre>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Winner</th>
+          <th style="text-align: right">States</th>
+          <th style="text-align: right">Electoral Votes</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: right">12</td>
+          <td style="text-align: right">202</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: right">3</td>
+          <td style="text-align: right">87</td>
+      </tr>
+  </tbody>
+</table>
 <p><strong>Sources</strong></p>
 <p><a href="https://electionstudies.org/data-center/">https://electionstudies.org/data-center/</a></p>
 <p><a href="https://www.usnews.com/news/elections/articles/7-swing-states-that-could-decide-the-2024-presidential-election">https://www.usnews.com/news/elections/articles/7-swing-states-that-could-decide-the-2024-presidential-election</a></p>

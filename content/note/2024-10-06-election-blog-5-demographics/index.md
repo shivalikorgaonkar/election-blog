@@ -60,122 +60,9 @@ Using American National Voter File (ANES) data that was cleaned up by Matthew Da
 When measuring the accuracy of this machine learning model, we can use a Confusion Matrix to examine how the testing dataset performed. In both the in-sample and out-of-sample accuracy measures, there was a 67 percent accuracy. The number of trues positives and false negatives can be seen below. 
 
 
-```r
-# In-sample accuracy.
-logit.is <- factor(ifelse(predict(logit_fit, type = "response") > 0.5, 2, 1), 
-                   levels = c(1, 2), labels = c("Democrat", "Republican"))
-cm_table <- (cm.rf.logit.is <- confusionMatrix(logit.is, anes_train$pres_vote))
-cm_table <- as.table(cm.rf.logit.is$table)
-cm_df <- as.data.frame(cm_table)
-kable(cm_df, caption = "Confusion Matrix for Logistic Regression (In-Sample)")
-```
 
 
 
-Table: <span id="tab:unnamed-chunk-5"></span>Table 1: Confusion Matrix for Logistic Regression (In-Sample)
-
-|Prediction |Reference  | Freq|
-|:----------|:----------|----:|
-|Democrat   |Democrat   |  746|
-|Republican |Democrat   |  346|
-|Democrat   |Republican |  336|
-|Republican |Republican |  660|
-
-```r
-## diagonals are false positives/negatives, and the truth positives/negatives
-##results shows that there is 67% accuracy in Kim & Zilinsky's 2016 prediction 
-# 746 true democrats predicted and 660 true republicans
-# 346 dems incorrectly predicted as republican and 336 reps incorrectly predicted as dems
-
-# Out-of-sample accuracy. 
-logit_pred <- factor(ifelse(predict(logit_fit, anes_test, type = "response") > 0.5, 2, 1), 
-                     levels = c(1, 2), labels = c("Democrat", "Republican"))
-cm_out<- (cm.rf.logit.oos <- confusionMatrix(logit_pred, anes_test$pres_vote))
-cm_out <- as.table(cm.rf.logit.is$table)
-cm_df_out <- as.data.frame(cm_table)
-kable(cm_df_out, caption = "Confusion Matrix for Logistic Regression (Out-of-Sample)")
-```
-
-
-
-Table: <span id="tab:unnamed-chunk-5"></span>Table 1: Confusion Matrix for Logistic Regression (Out-of-Sample)
-
-|Prediction |Reference  | Freq|
-|:----------|:----------|----:|
-|Democrat   |Democrat   |  746|
-|Republican |Democrat   |  346|
-|Democrat   |Republican |  336|
-|Republican |Republican |  660|
-
-```r
-#also 67% accuracy with the test data set
-```
-
-
-
-```r
-#Wyoming
-vf_wy <- read_csv("~/Downloads/state_1pc_samples_aug24/WY_sample.csv")
-```
-
-```
-## Warning: One or more parsing issues, call `problems()` on your data frame for details,
-## e.g.:
-##   dat <- vroom(...)
-##   problems(dat)
-```
-
-```
-## Rows: 4518 Columns: 43
-## ── Column specification ────────────────────────────────────────────────────────
-## Delimiter: ","
-## chr (21): sii_state, sii_age_range, sii_gender, sii_race, svi_party_registra...
-## dbl (16): sii_deceased, sii_age, sii_married, svi_vote_all_general, svi_vote...
-## lgl  (6): svi_vh_2020pp_party, svi_vh_2021p_party, svi_vh_2023p, svi_vh_2023...
-## 
-## ℹ Use `spec()` to retrieve the full column specification for this data.
-## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-```
-
-```r
-vf_wy_new <- vf_wy |> 
-  filter(
-    sii_deceased == 0,
-    sii_gender != "U",
-    sii_race != "U",
-    sii_education_level != "U") |>
-    mutate(gender = case_when(
-      sii_gender == "F" ~ "Female",
-      sii_gender == "M" ~ "Male",
-      sii_gender == "X" ~ "Other"),
-    age_subset = case_when(
-      sii_age > 18 & sii_age <= 29 ~ "18-29",
-      sii_age > 30 & sii_age <= 44 ~ "30-44",
-      sii_age > 45 & sii_age <= 59 ~ "45-59",
-      sii_age > 60 ~ "60+"),
-    race = case_when(
-      sii_race == "B" ~ "Black",
-      sii_race == "A" ~ "Asian",
-      sii_race == "W" ~ "White",
-      sii_race == "H" ~ "Hispanic",
-      sii_race == "N" ~ "Native",
-      sii_race == "O" ~ "Other"),
-    educ = case_when(
-      sii_education_level == "A" ~ "High School",
-      sii_education_level == "E" ~ "Some College",
-      sii_education_level == "B" ~ "College",         
-      sii_education_level == "C" ~ "Grad School",
-      sii_education_level == "D" ~ "Vocational"),
-    urb_rural = case_when(
-      sii_urbanicity %in% c("R1", "R2") ~ "Rural",
-      sii_urbanicity %in% c("S3", "S4") ~ "Suburban",
-      sii_urbanicity %in% c("U5", "U6") ~ "Urban"),
-    density = case_when(
-      sii_urbanicity %in% c("R1", "S3", "U5") ~ "Less Dense",
-      sii_urbanicity %in% c("R2", "S4", "U6") ~ "More Dense"),
-    voted_2020 = if_else(svi_vh_2020g != "", 1, 0)) |>
-  select(sii_state, gender, age_subset, race, educ, urb_rural, density, voted_2020)
-```
 
 
 
@@ -189,6 +76,7 @@ Since we do not have demographic data or vote choice available for the 2024 elec
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-9-1.png" width="672" />
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-10-1.png" width="672" />
+
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-11-1.png" width="672" />
 
@@ -214,13 +102,10 @@ A more formal regression was run to verify that **most demographic variables and
 Using the simple average of voter turnout and relevant demographic variables, the data below summarizes how each party would perform among the 15 swing states. The table shows that the significant indicators give Kamala Harris an edge in winning the presidential election.
 
 
-```
-## # A tibble: 2 × 3
-##   Winner     States `Electoral Votes`
-##   <chr>       <int>             <dbl>
-## 1 Democrat       12               202
-## 2 Republican      3                87
-```
+|Winner     | States| Electoral Votes|
+|:----------|------:|---------------:|
+|Democrat   |     12|             202|
+|Republican |      3|              87|
 
 **Sources**
 
