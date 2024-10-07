@@ -173,6 +173,7 @@ summary(logit_fit)
 ##shows that gender, race, education, religion, southern are more significant indicators
 
 ```
+
 When measuring the accuracy of this machine learning model, we can use a Confusion Matrix to examine how the testing dataset performed. In both the in-sample and out-of-sample accuracy measures, there was a 67 percent accuracy. The number of trues positives and false negatives can be seen below. 
 
 ```{r}
@@ -452,7 +453,7 @@ The following trends are noticeable from this distribution charts:
 *Race as an indicator has the greatest voter turnout variation between the three states analyzed.
 *Voters that went to grad school have a higher turnout rate; vocatational workers in VT are the only subgroup that closely compare.
 
-A more formal regression was run to verify that **most demographic variables and turnout are not significant for Democrats, but they are for Republicans.**
+A more formal regression was run to verify that **most demographic variables and turnout are not significant for Democrats, but they are for Republicans.** However, it is significant to look at polling at 2 party vote share in order to predict the 2024 outcome.
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 
@@ -496,16 +497,7 @@ summary(mod_lm_rep)
 ```
 
 
-
-```{r}
-
-# Most demographic variables and turnout are not significant for Democrats, but they are for Republicans.
-# Problem: we do not have demographic data for 2024. 
-# What can we do? 
-# A few options: 
-# (1.) Estimate state-level demographics from voterfile and plug in for 2024. 
-# (2.) Interpolate Census demographics using a spline or some type of model. 
-# (3.) Simulate plausible values for variables based on historical averages or more advanced model. 
+```{r message=FALSE, warning=FALSE, include=FALSE}
 
 # Simple simulation example: 
 simp.vars <- c("D_pv2p_lag1", "D_pv2p_lag2", "latest_pollav_DEM", "mean_pollav_DEM",
@@ -562,67 +554,16 @@ win_pred <- data.frame(state = d_test_simp$state,
                        simp_pred_rep = simp_pred_rep,
                        winner = ifelse(simp_pred_dem > simp_pred_rep, "Democrat", "Republican")) |>
   left_join(d_ec, by = c("state", "year"))
+```
 
-win_pred |> 
-  filter(winner == "Democrat") |> 
-  select(state)
+**2024 Election Model**
 
-win_pred |> 
-  filter(winner == "Republican") |> 
-  select(state)
+Using the simple average of voter turnout and relevant demographic variables, the data below summarizes how each party would perform among the 15 swing states.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 win_pred |> 
   group_by(winner) |> 
   summarize(n = n(), ec = sum(electors))
 
-# Now let's simulate this with varying levels of turnout and get both confidence intervals on our predictions
-# and approximate win percentages for each state. 
-m <- 1e4 # Number of simulations.
-pred.mat <- data.frame(state = rep(d_test_simp$state, m),
-                       year = rep(2024, m*length(d_test_simp$state)),
-                       vep_turnout = rep(d_turnout_avg$vep_turnout, m),
-                       simp_pred_dem = rep(simp_pred_dem, m),
-                       simp_pred_rep = rep(simp_pred_rep, m))
-
-j <- 1
-for (i in 1:m) {
-  print(i)
-  vep_turnout <- sapply(d_turnout_avg$vep_turnout, function(mu) {
-    rnorm(1, mean = mu, sd = 0.05) # Simulate turnout from Gaussian centered on state average with 5% SD.
-  })
-
-  d_test_samp <- d_test_simp
-  d_test_samp$vep_turnout <- vep_turnout
-
-  simp_pred_dem <- predict(mod_lm_dem_simp, d_test_samp)
-  simp_pred_rep <- predict(mod_lm_rep_simp, d_test_samp)
-
-  pred.mat$simp_pred_dem[j:(i*19)] <- simp_pred_dem
-  pred.mat$simp_pred_rep[j:(i*19)] <- simp_pred_rep
-  j <- j + 19 # Hack for filling out matrix.
-}
-
-pred.mat <- pred.mat |>
-  mutate(winner = ifelse(simp_pred_dem > simp_pred_rep, "Democrat", "Republican"))
-
-pred.mat |>
-  group_by(state, winner) |>
-  summarize(win_rate = n()/m) |>
-  view()
-
-# Now we can calculate confidence intervals for each state.
-pred.mat |>
-  group_by(state) |>
-  summarize(mean_dem = mean(simp_pred_dem),
-            mean_rep = mean(simp_pred_rep),
-            sd_dem = sd(simp_pred_dem),
-            sd_rep = sd(simp_pred_rep),
-            lower_dem = mean_dem - 1.96*sd_dem,
-            upper_dem = mean_dem + 1.96*sd_dem,
-            lower_rep = mean_rep - 1.96*sd_rep,
-            upper_rep = mean_rep + 1.96*sd_rep) |>
-  view()
-
-
 ```
-
