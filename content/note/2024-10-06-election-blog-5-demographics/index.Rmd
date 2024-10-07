@@ -567,3 +567,9 @@ win_pred |>
   summarize(n = n(), ec = sum(electors))
 
 ```
+
+**Sources**
+
+https://electionstudies.org/data-center/
+
+https://www.usnews.com/news/elections/articles/7-swing-states-that-could-decide-the-2024-presidential-election
