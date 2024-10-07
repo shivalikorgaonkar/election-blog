@@ -450,8 +450,11 @@ education
 The following trends are noticeable from this distribution charts:
 
 *Women have a higher voter turnout rate.
+
 *The age group with the highest voter turnout is 60+ year olds.
+
 *Race as an indicator has the greatest voter turnout variation between the three states analyzed.
+
 *Voters that went to grad school have a higher turnout rate; vocatational workers in VT are the only subgroup that closely compare.
 
 A more formal regression was run to verify that **most demographic variables and turnout are not significant for Democrats, but they are for Republicans.** However, it is significant to look at polling at 2 party vote share in order to predict the 2024 outcome.

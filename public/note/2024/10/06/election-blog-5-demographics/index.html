@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <head>
+  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=4321&amp;path=livereload" data-no-instant defer></script>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Election Blog #5: Demographics | A minimal Hugo website</title>
@@ -72,15 +72,15 @@
 <p>When measuring the accuracy of this machine learning model, we can use a Confusion Matrix to examine how the testing dataset performed. In both the in-sample and out-of-sample accuracy measures, there was a 67 percent accuracy. The number of trues positives and false negatives can be seen below.</p>
 <p><strong>Demographics and Voter Turnout</strong></p>
 <p>Since we do not have demographic data or vote choice available for the 2024 election, we cannot build a regression model for 2024. However, we can observe if there is a difference in how demographics play a role in blue states, red states, and swing states. To do this, I&rsquo;ve created distribution models for different demographic indicators. I singled out three states&rsquo; voterfile data, in order to specifically visualize party alignment and voter turnout based on demographic. I choose Wyoming as a representation of a red state, Vermont as a representation of a blue state, and Arizona as a representation of swing state, due to its particular importance in the 2024 election.</p>
-<img src="https://example.org/note/2024/10/06/election-blog-5-demographics/index_files/figure-html/unnamed-chunk-9-1.png" width="672" />
-<img src="https://example.org/note/2024/10/06/election-blog-5-demographics/index_files/figure-html/unnamed-chunk-10-1.png" width="672" />
-<img src="https://example.org/note/2024/10/06/election-blog-5-demographics/index_files/figure-html/unnamed-chunk-11-1.png" width="672" />
-<img src="https://example.org/note/2024/10/06/election-blog-5-demographics/index_files/figure-html/unnamed-chunk-12-1.png" width="672" />
+<img src="/note/2024/10/06/election-blog-5-demographics/index_files/figure-html/unnamed-chunk-9-1.png" width="672" />
+<img src="/note/2024/10/06/election-blog-5-demographics/index_files/figure-html/unnamed-chunk-10-1.png" width="672" />
+<img src="/note/2024/10/06/election-blog-5-demographics/index_files/figure-html/unnamed-chunk-11-1.png" width="672" />
+<img src="/note/2024/10/06/election-blog-5-demographics/index_files/figure-html/unnamed-chunk-12-1.png" width="672" />
 <p>The following trends are noticeable from this distribution charts:</p>
-<p>*Women have a higher voter turnout rate.
-*The age group with the highest voter turnout is 60+ year olds.
-*Race as an indicator has the greatest voter turnout variation between the three states analyzed.
-*Voters that went to grad school have a higher turnout rate; vocatational workers in VT are the only subgroup that closely compare.</p>
+<p>*Women have a higher voter turnout rate.</p>
+<p>*The age group with the highest voter turnout is 60+ year olds.</p>
+<p>*Race as an indicator has the greatest voter turnout variation between the three states analyzed.</p>
+<p>*Voters that went to grad school have a higher turnout rate; vocatational workers in VT are the only subgroup that closely compare.</p>
 <p>A more formal regression was run to verify that <strong>most demographic variables and turnout are not significant for Democrats, but they are for Republicans.</strong> However, it is significant to look at polling at 2 party vote share in order to predict the 2024 outcome.</p>
 <p><strong>2024 Election Model</strong></p>
 <p>Using the simple average of voter turnout and relevant demographic variables, the data below summarizes how each party would perform among the 15 swing states. The table shows that the significant indicators give Kamala Harris an edge in winning the presidential election.</p>
