@@ -226,12 +226,12 @@ vf_wy &lt;- read_csv(&quot;~/Downloads/state_1pc_samples_aug24/WY_sample.csv&quo
 *Voters that went to grad school have a higher turnout rate; vocatational workers in VT are the only subgroup that closely compare.</p>
 <p>A more formal regression was run to verify that <strong>most demographic variables and turnout are not significant for Democrats, but they are for Republicans.</strong> However, it is significant to look at polling at 2 party vote share in order to predict the 2024 outcome.</p>
 <p><strong>2024 Election Model</strong></p>
-<p>Using the simple average of voter turnout and relevant demographic variables, the data below summarizes how each party would perform among the 15 swing states.</p>
+<p>Using the simple average of voter turnout and relevant demographic variables, the data below summarizes how each party would perform among the 15 swing states. The table shows that the significant indicators give Kamala Harris an edge in winning the presidential election.</p>
 <pre><code>## # A tibble: 2 × 3
-##   winner         n    ec
-##   &lt;chr&gt;      &lt;int&gt; &lt;dbl&gt;
-## 1 Democrat      12   202
-## 2 Republican     3    87
+##   Winner     States `Electoral Votes`
+##   &lt;chr&gt;       &lt;int&gt;             &lt;dbl&gt;
+## 1 Democrat       12               202
+## 2 Republican      3                87
 </code></pre>
 <p><strong>Sources</strong></p>
 <p><a href="https://electionstudies.org/data-center/">https://electionstudies.org/data-center/</a></p>

@@ -211,15 +211,15 @@ A more formal regression was run to verify that **most demographic variables and
 
 **2024 Election Model**
 
-Using the simple average of voter turnout and relevant demographic variables, the data below summarizes how each party would perform among the 15 swing states.
+Using the simple average of voter turnout and relevant demographic variables, the data below summarizes how each party would perform among the 15 swing states. The table shows that the significant indicators give Kamala Harris an edge in winning the presidential election.
 
 
 ```
 ## # A tibble: 2 × 3
-##   winner         n    ec
-##   <chr>      <int> <dbl>
-## 1 Democrat      12   202
-## 2 Republican     3    87
+##   Winner     States `Electoral Votes`
+##   <chr>       <int>             <dbl>
+## 1 Democrat       12               202
+## 2 Republican      3                87
 ```
 
 **Sources**
