@@ -6,8 +6,15 @@
     <description>Recent content in Notes on A minimal Hugo website</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 29 Sep 2024 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 06 Oct 2024 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://example.org/note/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Election Blog #5: Demographics</title>
+      <link>https://example.org/note/2024/10/06/election-blog-5-demographics/</link>
+      <pubDate>Sun, 06 Oct 2024 00:00:00 +0000</pubDate>
+      <guid>https://example.org/note/2024/10/06/election-blog-5-demographics/</guid>
+      <description>&lt;p&gt;&lt;strong&gt;Introduction&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;p&gt;There are many stereotypes surrounding voter demographics and how they can predict presidential candidate support. Whether it be sexuality, occupation, or immigration status, Americans often mentally associate different identities with different parties. In an attempt to break these stereotypes, we&amp;rsquo;ve seen groups like &amp;ldquo;Gays for Trump,&amp;rdquo; which attempt to break oxymoronic identity alignments. We&amp;rsquo;ve also seen backlash to such beliefs among communities who believe that their specific needs won&amp;rsquo;t get represented properly.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Election Blog #4: Incumbency</title>
       <link>https://example.org/note/2024/09/29/election-blog-4-incumbency/</link>

@@ -72,7 +72,7 @@ kable(cm_df, caption = "Confusion Matrix for Logistic Regression (In-Sample)")
 
 
 
-Table: (\#tab:unnamed-chunk-5)Confusion Matrix for Logistic Regression (In-Sample)
+Table: <span id="tab:unnamed-chunk-5"></span>Table 1: Confusion Matrix for Logistic Regression (In-Sample)
 
 |Prediction |Reference  | Freq|
 |:----------|:----------|----:|
@@ -98,7 +98,7 @@ kable(cm_df_out, caption = "Confusion Matrix for Logistic Regression (Out-of-Sam
 
 
 
-Table: (\#tab:unnamed-chunk-5)Confusion Matrix for Logistic Regression (Out-of-Sample)
+Table: <span id="tab:unnamed-chunk-5"></span>Table 1: Confusion Matrix for Logistic Regression (Out-of-Sample)
 
 |Prediction |Reference  | Freq|
 |:----------|:----------|----:|
@@ -186,14 +186,14 @@ vf_wy_new <- vf_wy |>
 
 Since we do not have demographic data or vote choice available for the 2024 election, we cannot build a regression model for 2024. However, we can observe if there is a difference in how demographics play a role in blue states, red states, and swing states. To do this, I've created distribution models for different demographic indicators. I singled out three states' voterfile data, in order to specifically visualize party alignment and voter turnout based on demographic. I choose Wyoming as a representation of a red state, Vermont as a representation of a blue state, and Arizona as a representation of swing state, due to its particular importance in the 2024 election.
 
-<img src="index_files/figure-html/unnamed-chunk-9-1.png" width="672" />
+<img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-9-1.png" width="672" />
 
-<img src="index_files/figure-html/unnamed-chunk-10-1.png" width="672" />
+<img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-10-1.png" width="672" />
 
-<img src="index_files/figure-html/unnamed-chunk-11-1.png" width="672" />
+<img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-11-1.png" width="672" />
 
 
-<img src="index_files/figure-html/unnamed-chunk-12-1.png" width="672" />
+<img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-12-1.png" width="672" />
 
 The following trends are noticeable from this distribution charts:
 
@@ -211,7 +211,19 @@ A more formal regression was run to verify that **most demographic variables and
 
 **2024 Election Model**
 
+Using the simple average of voter turnout and relevant demographic variables, the data below summarizes how each party would perform among the 15 swing states.
 
 
+```
+## # A tibble: 2 × 3
+##   winner         n    ec
+##   <chr>      <int> <dbl>
+## 1 Democrat      12   202
+## 2 Republican     3    87
+```
 
+**Sources**
 
+https://electionstudies.org/data-center/
+
+https://www.usnews.com/news/elections/articles/7-swing-states-that-could-decide-the-2024-presidential-election

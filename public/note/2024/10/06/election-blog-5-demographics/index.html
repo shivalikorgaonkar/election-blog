@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Election Blog #5: Demographics | A minimal Hugo website</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    
+  </head>
+
+  <body>
+    <nav>
+    <ul class="menu">
+      
+      <li><a href="/">Home</a></li>
+      
+      <li><a href="/about/">About</a></li>
+      
+      <li><a href="/categories/">Categories</a></li>
+      
+      <li><a href="/tags/">Tags</a></li>
+      
+      <li><a href="/index.xml">Subscribe</a></li>
+      
+    </ul>
+    <hr/>
+    </nav>
+
+<div class="article-meta">
+<h1><span class="title">Election Blog #5: Demographics</span></h1>
+<h2 class="author">Shivali Korgaonkar</h2>
+<h2 class="date">2024/10/06</h2>
+</div>
+
+<main>
+<p><strong>Introduction</strong></p>
+<p>There are many stereotypes surrounding voter demographics and how they can predict presidential candidate support. Whether it be sexuality, occupation, or immigration status, Americans often mentally associate different identities with different parties. In an attempt to break these stereotypes, we&rsquo;ve seen groups like &ldquo;Gays for Trump,&rdquo; which attempt to break oxymoronic identity alignments. We&rsquo;ve also seen backlash to such beliefs among communities who believe that their specific needs won&rsquo;t get represented properly.</p>
+<p>In this blog, I attempt to identify how demographic affects voter turnout, and I use this information to create an election prediction model.</p>
+<p><strong>Demographics and Vote Choice</strong></p>
+<p>Using American National Voter File (ANES) data that was cleaned up by Matthew Dardet, we can begin investigating the relationship between voter demographic and their vote choice, and replicate Kim &amp; Zilinsky&rsquo;s (2023) research. Using a logistic regression, a training dataset and testing data set were created. A training dataset teaches the model by allowing it to learn patterns and relationships from the given ANES data. A testing dataset is used to evaluate the model&rsquo;s performance on new, unseen data to ensure that it can generalize well beyond the training data. The summary displaying in-sample goodness of fit highlights an important conclusion that <strong>gender, race, education, religion, and geography are the most significant indicators.</strong></p>
+<pre><code>## 
+## Call:
+## glm(formula = pres_vote ~ ., family = &quot;binomial&quot;, data = anes_train)
+## 
+## Coefficients: (1 not defined because of singularities)
+##                 Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)    4.3583814  0.4366803   9.981  &lt; 2e-16 ***
+## age            0.0006984  0.0028117   0.248  0.80383    
+## gender        -0.4294732  0.0934585  -4.595 4.32e-06 ***
+## race          -0.5482380  0.0605982  -9.047  &lt; 2e-16 ***
+## educ          -0.3398141  0.0613322  -5.541 3.02e-08 ***
+## income         0.0494349  0.0468039   1.056  0.29087    
+## religion      -0.2148136  0.0421012  -5.102 3.36e-07 ***
+## attend_church -0.2109916  0.0331518  -6.364 1.96e-10 ***
+## southern      -0.4096051  0.1051603  -3.895 9.82e-05 ***
+## region                NA         NA      NA       NA    
+## work_status    0.0955178  0.0458378   2.084  0.03718 *  
+## homeowner     -0.1765531  0.0822755  -2.146  0.03188 *  
+## married       -0.0715981  0.0276917  -2.586  0.00972 ** 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 2890.2  on 2087  degrees of freedom
+## Residual deviance: 2564.3  on 2076  degrees of freedom
+## AIC: 2588.3
+## 
+## Number of Fisher Scoring iterations: 4
+</code></pre>
+<p>When measuring the accuracy of this machine learning model, we can use a Confusion Matrix to examine how the testing dataset performed. In both the in-sample and out-of-sample accuracy measures, there was a 67 percent accuracy. The number of trues positives and false negatives can be seen below.</p>
+<pre><code class="language-r"># In-sample accuracy.
+logit.is &lt;- factor(ifelse(predict(logit_fit, type = &quot;response&quot;) &gt; 0.5, 2, 1), 
+                   levels = c(1, 2), labels = c(&quot;Democrat&quot;, &quot;Republican&quot;))
+cm_table &lt;- (cm.rf.logit.is &lt;- confusionMatrix(logit.is, anes_train$pres_vote))
+cm_table &lt;- as.table(cm.rf.logit.is$table)
+cm_df &lt;- as.data.frame(cm_table)
+kable(cm_df, caption = &quot;Confusion Matrix for Logistic Regression (In-Sample)&quot;)
+</code></pre>
+<p>Table: <span id="tab:unnamed-chunk-5"></span>Table 1: Confusion Matrix for Logistic Regression (In-Sample)</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Prediction</th>
+          <th style="text-align: left">Reference</th>
+          <th style="text-align: right">Freq</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: right">746</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: right">346</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: right">336</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: right">660</td>
+      </tr>
+  </tbody>
+</table>
+<pre><code class="language-r">## diagonals are false positives/negatives, and the truth positives/negatives
+##results shows that there is 67% accuracy in Kim &amp; Zilinsky's 2016 prediction 
+# 746 true democrats predicted and 660 true republicans
+# 346 dems incorrectly predicted as republican and 336 reps incorrectly predicted as dems
+
+# Out-of-sample accuracy. 
+logit_pred &lt;- factor(ifelse(predict(logit_fit, anes_test, type = &quot;response&quot;) &gt; 0.5, 2, 1), 
+                     levels = c(1, 2), labels = c(&quot;Democrat&quot;, &quot;Republican&quot;))
+cm_out&lt;- (cm.rf.logit.oos &lt;- confusionMatrix(logit_pred, anes_test$pres_vote))
+cm_out &lt;- as.table(cm.rf.logit.is$table)
+cm_df_out &lt;- as.data.frame(cm_table)
+kable(cm_df_out, caption = &quot;Confusion Matrix for Logistic Regression (Out-of-Sample)&quot;)
+</code></pre>
+<p>Table: <span id="tab:unnamed-chunk-5"></span>Table 1: Confusion Matrix for Logistic Regression (Out-of-Sample)</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Prediction</th>
+          <th style="text-align: left">Reference</th>
+          <th style="text-align: right">Freq</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: right">746</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: right">346</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: right">336</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: right">660</td>
+      </tr>
+  </tbody>
+</table>
+<pre><code class="language-r">#also 67% accuracy with the test data set
+</code></pre>
+<pre><code class="language-r">#Wyoming
+vf_wy &lt;- read_csv(&quot;~/Downloads/state_1pc_samples_aug24/WY_sample.csv&quot;)
+</code></pre>
+<pre><code>## Warning: One or more parsing issues, call `problems()` on your data frame for details,
+## e.g.:
+##   dat &lt;- vroom(...)
+##   problems(dat)
+</code></pre>
+<pre><code>## Rows: 4518 Columns: 43
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr (21): sii_state, sii_age_range, sii_gender, sii_race, svi_party_registra...
+## dbl (16): sii_deceased, sii_age, sii_married, svi_vote_all_general, svi_vote...
+## lgl  (6): svi_vh_2020pp_party, svi_vh_2021p_party, svi_vh_2023p, svi_vh_2023...
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+</code></pre>
+<pre><code class="language-r">vf_wy_new &lt;- vf_wy |&gt; 
+  filter(
+    sii_deceased == 0,
+    sii_gender != &quot;U&quot;,
+    sii_race != &quot;U&quot;,
+    sii_education_level != &quot;U&quot;) |&gt;
+    mutate(gender = case_when(
+      sii_gender == &quot;F&quot; ~ &quot;Female&quot;,
+      sii_gender == &quot;M&quot; ~ &quot;Male&quot;,
+      sii_gender == &quot;X&quot; ~ &quot;Other&quot;),
+    age_subset = case_when(
+      sii_age &gt; 18 &amp; sii_age &lt;= 29 ~ &quot;18-29&quot;,
+      sii_age &gt; 30 &amp; sii_age &lt;= 44 ~ &quot;30-44&quot;,
+      sii_age &gt; 45 &amp; sii_age &lt;= 59 ~ &quot;45-59&quot;,
+      sii_age &gt; 60 ~ &quot;60+&quot;),
+    race = case_when(
+      sii_race == &quot;B&quot; ~ &quot;Black&quot;,
+      sii_race == &quot;A&quot; ~ &quot;Asian&quot;,
+      sii_race == &quot;W&quot; ~ &quot;White&quot;,
+      sii_race == &quot;H&quot; ~ &quot;Hispanic&quot;,
+      sii_race == &quot;N&quot; ~ &quot;Native&quot;,
+      sii_race == &quot;O&quot; ~ &quot;Other&quot;),
+    educ = case_when(
+      sii_education_level == &quot;A&quot; ~ &quot;High School&quot;,
+      sii_education_level == &quot;E&quot; ~ &quot;Some College&quot;,
+      sii_education_level == &quot;B&quot; ~ &quot;College&quot;,         
+      sii_education_level == &quot;C&quot; ~ &quot;Grad School&quot;,
+      sii_education_level == &quot;D&quot; ~ &quot;Vocational&quot;),
+    urb_rural = case_when(
+      sii_urbanicity %in% c(&quot;R1&quot;, &quot;R2&quot;) ~ &quot;Rural&quot;,
+      sii_urbanicity %in% c(&quot;S3&quot;, &quot;S4&quot;) ~ &quot;Suburban&quot;,
+      sii_urbanicity %in% c(&quot;U5&quot;, &quot;U6&quot;) ~ &quot;Urban&quot;),
+    density = case_when(
+      sii_urbanicity %in% c(&quot;R1&quot;, &quot;S3&quot;, &quot;U5&quot;) ~ &quot;Less Dense&quot;,
+      sii_urbanicity %in% c(&quot;R2&quot;, &quot;S4&quot;, &quot;U6&quot;) ~ &quot;More Dense&quot;),
+    voted_2020 = if_else(svi_vh_2020g != &quot;&quot;, 1, 0)) |&gt;
+  select(sii_state, gender, age_subset, race, educ, urb_rural, density, voted_2020)
+</code></pre>
+<p><strong>Demographics and Voter Turnout</strong></p>
+<p>Since we do not have demographic data or vote choice available for the 2024 election, we cannot build a regression model for 2024. However, we can observe if there is a difference in how demographics play a role in blue states, red states, and swing states. To do this, I&rsquo;ve created distribution models for different demographic indicators. I singled out three states&rsquo; voterfile data, in order to specifically visualize party alignment and voter turnout based on demographic. I choose Wyoming as a representation of a red state, Vermont as a representation of a blue state, and Arizona as a representation of swing state, due to its particular importance in the 2024 election.</p>
+<img src="https://example.org/note/2024/10/06/election-blog-5-demographics/index_files/figure-html/unnamed-chunk-9-1.png" width="672" />
+<img src="https://example.org/note/2024/10/06/election-blog-5-demographics/index_files/figure-html/unnamed-chunk-10-1.png" width="672" />
+<img src="https://example.org/note/2024/10/06/election-blog-5-demographics/index_files/figure-html/unnamed-chunk-11-1.png" width="672" />
+<img src="https://example.org/note/2024/10/06/election-blog-5-demographics/index_files/figure-html/unnamed-chunk-12-1.png" width="672" />
+<p>The following trends are noticeable from this distribution charts:</p>
+<p>*Women have a higher voter turnout rate.
+*The age group with the highest voter turnout is 60+ year olds.
+*Race as an indicator has the greatest voter turnout variation between the three states analyzed.
+*Voters that went to grad school have a higher turnout rate; vocatational workers in VT are the only subgroup that closely compare.</p>
+<p>A more formal regression was run to verify that <strong>most demographic variables and turnout are not significant for Democrats, but they are for Republicans.</strong> However, it is significant to look at polling at 2 party vote share in order to predict the 2024 outcome.</p>
+<p><strong>2024 Election Model</strong></p>
+<p>Using the simple average of voter turnout and relevant demographic variables, the data below summarizes how each party would perform among the 15 swing states.</p>
+<pre><code>## # A tibble: 2 × 3
+##   winner         n    ec
+##   &lt;chr&gt;      &lt;int&gt; &lt;dbl&gt;
+## 1 Democrat      12   202
+## 2 Republican     3    87
+</code></pre>
+<p><strong>Sources</strong></p>
+<p><a href="https://electionstudies.org/data-center/">https://electionstudies.org/data-center/</a></p>
+<p><a href="https://www.usnews.com/news/elections/articles/7-swing-states-that-could-decide-the-2024-presidential-election">https://www.usnews.com/news/elections/articles/7-swing-states-that-could-decide-the-2024-presidential-election</a></p>
+
+</main>
+
+  <footer>
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<script src="//cdn.jsdelivr.net/combine/npm/katex/dist/katex.min.js,npm/katex/dist/contrib/auto-render.min.js,npm/@xiee/utils/js/render-katex.js" defer></script>
+
+<script src="//cdn.jsdelivr.net/npm/@xiee/utils/js/center-img.min.js" defer></script>
+
+  
+  <hr/>
+  © <a href="https://yihui.org">Yihui Xie</a> 2017 &ndash; 2024 | <a href="https://github.com/yihui">Github</a> | <a href="https://twitter.com/xieyihui">Twitter</a>
+  
+  </footer>
+  </body>
+</html>
+
