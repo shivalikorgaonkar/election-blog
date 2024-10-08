@@ -562,7 +562,9 @@ win_pred <- data.frame(state = d_test_simp$state,
 
 **2024 Election Model**
 
-Using the simple average of voter turnout and relevant demographic variables, the data below summarizes how each party would perform among the 15 swing states. The table shows that the significant indicators give Kamala Harris an edge in winning the presidential election.
+Using the simple average of voter turnout and relevant demographic variables, the data below summarizes how each party would perform among the 15 swing states. The table shows that the significant indicators give Kamala Harris an edge in winning the presidential election. When using a 95% confidence interval, though, it becomes evident that the results are not as black and white as this makes it seem.
+
+For my final model, I now know the importance of voter turnout for either party. Looking back at Week 1, I could combine these effects with fundamental economic factors to have a more accurate model to predict the outcome of the 2024 election results.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
