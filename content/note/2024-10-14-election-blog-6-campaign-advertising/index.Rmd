@@ -1,0 +1,480 @@
+---
+title: 'Election Blog #6: Campaign Advertising'
+author: Shivali Korgaonkar
+date: '2024-10-14'
+slug: election-blog-6
+categories: []
+tags: []
+---
+
+**Introduction**
+
+With 3 weeks left until Election Day, American citizens are being bombarded by campaign advertisements on their TVs, social medias, and radio stations. In fact, recent reports showcase that a total half a billion dollars will be spent on advertisements by the two campaigns, with Vice President Kamala Harris dominating this spending amount with 63 percent of the total (The New York Times 2024). In the twentieth century, candidates have taken advantage of Americans' media usage to push their policy and personal agenda, which has coined the term "Air War," following the 2008 Election where John McCain ramped up attacks against Barack Obama leading up to election day. While ads sometimes focus on the differences in policy, other times they hit on personal discrepancies. In 1988, for example, George HW Bush called out Micheal Dukakis in the "Tank Ride" ad for being anti-war previously, yet pro-war for the sake of winning the election. This as is often credited as being the defining reason Dukakis' campaign failed (Schulte 2008). The ads are especially focused on the key battle states in an effort to convince them in these crucial next 21 days before Election Day, which can be viewed in the distribution below, detailing the 2012 spending by state. (Digiday 2024). 
+
+In this blog, I will look at election ad spending starting in 2000 to investigate the purpose of these ads, their effect on vote choice, and finally, apply these trends to the 2024 election. 
+  
+```{r message=FALSE, warning=FALSE, include=FALSE}
+####----------------------------------------------------------#
+#### Preamble
+####----------------------------------------------------------#
+
+# Load libraries.
+## install via `install.packages("name")`
+library(car)
+library(caret)
+library(cowplot)
+library(curl)
+library(CVXR)
+library(foreign)
+library(geofacet)
+library(glmnet)
+library(haven)
+library(janitor)
+library(kableExtra)
+library(maps)
+library(mlr3)
+library(randomForest)
+library(ranger)
+library(RColorBrewer)
+library(rstan)
+library(scales)
+library(sf)
+library(shinystan)
+library(tidyverse)
+library(viridis)
+
+my_blog_theme <- function() {
+  theme(
+    panel.border = element_blank(),
+    panel.background = element_rect(fill = "gray92"),
+    plot.title = element_text(size = 18, hjust = 0.8, color = "gray16", face = "bold", family = "Times New Roman"), 
+    plot.subtitle = element_text(size = 14, color = "black", hjust = 0.5, family = "Times New Roman"),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    axis.text = element_text(size = 10, family = "Times New Roman"),
+    axis.line = element_line(colour = "black"),
+    axis.title = element_text(size = 12, family = "Times New Roman"),
+    legend.position = "right",
+    legend.text = element_text(size = 12))
+  
+}
+
+## set working directory here
+# setwd("~")
+
+####----------------------------------------------------------#
+#### Read, merge, and process data.
+####----------------------------------------------------------#
+
+# Read popular vote datasets. 
+d_popvote <- read_csv("~/Downloads/popvote_1948_2020.csv")
+d_state_popvote <- read_csv("~/Downloads/state_popvote_1948_2020.csv")
+
+# Read elector distribution dataset. 
+d_ec <- read_csv("~/Downloads/corrected_ec_1948_2024.csv")
+
+# Read ads datasets. 
+ad_campaigns <- read_csv("~/Downloads/ad_campaigns_2000-2012.csv")
+ad_creative <- read_csv("~/Downloads/ad_creative_2000-2012.csv")
+ads_2020 <- read_csv("~/Downloads/ads_2020.csv")
+facebook_ads_2020 <- read_csv("~/Downloads/facebook_ads_2020.csv")
+facebook_ads_biden_2020 <- read_csv("~/Downloads/facebook_ads_biden_2020.csv")
+campaign_spending <- read_csv("~/Downloads/FEC_contributions_by_state_2008_2024.csv")
+
+# Read polling data. 
+d_polls <- read_csv("~/Downloads/national_polls_1968-2024.csv")
+d_state_polls <- read_csv("~/Downloads/state_polls_1968-2024.csv")
+
+# Read turnout data. 
+d_turnout <- read_csv("~/Downloads/state_turnout_1980_2022.csv")
+
+```
+
+
+```{r}
+ad_campaigns |>
+  mutate(year = as.numeric(substr(air_date, 1, 4))) |>
+  mutate(month = as.numeric(substr(air_date, 6, 7))) |>
+  mutate(state = state.name[match(state, state.abb)]) |>
+  filter(cycle == 2008) |>
+  left_join(d_state_popvote |> filter(year == 2008) |> select(-year), by="state") |>
+  mutate(winner=ifelse(D_pv2p > R_pv2p, "democrat", "republican")) |>
+  group_by(cycle, state, air_date, party, winner) |>
+  summarise(total_cost = sum(total_cost)) |>
+  filter(!is.na(state)) |>
+  # ggplot(aes(x=air_date, y=log(total_cost+1), color=party)) +
+  ggplot(aes(x=party, y=total_cost, fill=party)) +
+  ggtitle("The Air War in 2008 (Obama vs. McCain)") +
+  geom_bar(stat="identity") +
+  geom_rect(aes(fill=winner), xmin=-Inf, xmax=Inf, ymin=46.3*10^6, ymax=52*10^6) +
+  facet_geo(~ state, scales="free_x") +
+  scale_fill_manual(values = c("dodgerblue", "indianred3")) +
+  scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6)) +
+  xlab("") + ylab("ad spend") +
+  my_blog_theme() +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+```
+
+**Ads and Campaign Spending Over Time*
+
+Before applying ad effects to the 2024 election model, it's important to understand the basic descriptive statistics of spending and content between 2000 and 2012, which emulate contemporary conditions of technology best. To begin, the graph below details the tone (attack, promote, contrast) of campaign ads in the twentieth century. The Democratic and Republican candidates in these four elections generally mimicked the tone of each others ads, meaning the percentage of promotional ads, for example, made up similar percentages in both parties. An important exception to this is in 2004, as the Republican advertisements were attacking over 50 percent of the time, while the Democratic advertisements were attacking about 27 percent of the time. The 2004 election was between John Kerry and the incumbent Geroge W. Bush, and Swift Vets and POWs for Truth had accused Kerry of exaggerating his military service during the Vietnam War, so they ran an extremely effective smear campaign with advertisements against him. Bush ultimately won this election. Though a close race, Bush is the last Republican to have won the popular vote, showcasing the power of the campaigning, as Bush was coming off a term that faced 9/11 aftermath and war in the Middle East. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+####--------------------------------------------------------------#
+#### Descriptive statistics on ads and campaign spending over time. 
+####--------------------------------------------------------------#
+
+# Tone and Political Ads. 
+ad_campaigns |>
+  left_join(ad_creative) |>
+  group_by(cycle, party) |> mutate(tot_n=n()) |> ungroup() |>
+  group_by(cycle, party, ad_tone) |> summarise(pct=n()*100/first(tot_n)) |>
+  filter(!is.na(ad_tone)) |>
+  ggplot(aes(x = cycle, y = pct, fill = ad_tone, group = party)) +
+  geom_bar(stat = "identity") +
+  scale_x_continuous(breaks = seq(2000, 2012, 4)) +
+  ggtitle("Campaign Ads Aired By Tone") +
+  scale_fill_manual(values = c("indianred4","sandybrown","slategray4","palegreen4","white"), name = "tone") +
+  xlab("") + ylab("%") +
+  facet_wrap(~ party) + theme_minimal() +
+  theme(axis.title = element_text(size=20),
+        axis.text = element_text(size=15),
+        strip.text.x = element_text(size = 20)) +
+  my_blog_theme()
+
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+## The Purpose of Political Ads
+ad_campaigns |>
+  left_join(ad_creative) |>
+  group_by(cycle, party) |> mutate(tot_n=n()) |> ungroup() |>
+  group_by(cycle, party, ad_purpose) |> summarise(pct=n()*100/first(tot_n)) |>
+  filter(!is.na(ad_purpose)) |>
+  bind_rows( ##2016 raw data not public yet! This was entered manually
+    data.frame(cycle = 2016, ad_purpose = "personal", party = "democrat", pct = 67),
+    data.frame(cycle = 2016, ad_purpose = "policy", party = "democrat", pct = 12),
+    data.frame(cycle = 2016, ad_purpose = "both", party = "democrat", pct = 21),
+    data.frame(cycle = 2016, ad_purpose = "personal", party = "republican", pct = 11),
+    data.frame(cycle = 2016, ad_purpose = "policy", party = "republican", pct = 71),
+    data.frame(cycle = 2016, ad_purpose = "both", party = "republican", pct = 18)
+  ) |>
+  ggplot(aes(x = cycle, y = pct, fill = ad_purpose, group = party)) +
+  geom_bar(stat = "identity") +
+  scale_x_continuous(breaks = seq(2000, 2016, 4)) +
+  ggtitle("Campaign Ads Aired By Purpose") +
+  scale_fill_manual(values = c("indianred4","sandybrown", "palegreen4","slategray4"), name = "purpose") +
+  xlab("") + ylab("%") +
+  facet_wrap(~ party) + theme_minimal() +
+  theme(axis.title = element_text(size=20),
+        axis.text = element_text(size=15),
+        strip.text.x = element_text(size = 20)) +
+  my_blog_theme()
+```
+
+
+```{r eval=FALSE, include=FALSE}
+## The Elections and Their Issues
+top_issues <- ad_campaigns |> 
+  left_join(ad_creative) |>
+  filter(!grepl("None|Other", ad_issue)) |>
+  group_by(cycle, ad_issue) |> summarise(n=n()) |> top_n(5, n)
+
+### making each plot in a grid to have its own x-axis (issue name)
+### is tricky with `facet_wrap`, so we use this package `cowplot`
+### which allows us to take a list of separate plots and grid them together
+plist <- lapply(c(2000,2004,2008,2012), function(c) {
+  top_issues |> filter(cycle == c) |> 
+    ggplot(aes(x = reorder(ad_issue, n), y = n)) +
+    geom_bar(stat = "identity") + coord_flip() + 
+    xlab("") + ylab("number ads aired") + ggtitle(paste("Top 5 Ad\nIssues in",c))
+  
+})
+cowplot::plot_grid(plotlist = plist, nrow = 2, ncol = 2, align = "hv") +
+  my_blog_theme()
+
+```
+
+Further, the content of campaign ads is also important to understanding political context, party priorities, and issues that matter to voters. I decided to look at data from 2004 and 2012 because they were both election years where Bush and Obama were incumbents running for reelection, respectively. As observed in Week 4, the incumbency effect is a good predictor variable, so observing the 2004 and 2012 descriptive statistics are especially important as Donald Trump is an incumbent, and Kamala Harris comes from the incumbent administration. One clear difference between ad content in 2012 is that the two parties touched on a greater variety of topics at least once, whereas in 2004, the Republican party focused on a much smaller variety than the Democrats. In 2004, the Democrats were generally focused on social issues (civil rights, welfare, child care, etc.), but they had an overwhelmingly emphasis on war and the Middle East, due to the War on Terror begun in Bush's previous administration. Interestingly, the Republicans framed their ads in 2004 as "defense" and 9/11, though this was not the focus of their ads. They focused on gambling, business, family, as well as civil liberty, which persisted as a trend into 2012. There was also many reactionary ads in response to the legalization of gay marriage under Obama's Supreme Court.In 2012, the Democrats continued to focus on war and terrorism, as well as civil rights. Campaign ads seem to focus heavily on current events, as well as issues that a political candidate has specific policy hoping to implement. 
+
+```{r}
+## Campaign Ads Aired By Issue and Party: 2004
+party_issues2004 <- ad_campaigns |>
+  filter(cycle == 2004) |>
+  left_join(ad_creative) |>
+  filter(ad_issue != "None") |>
+  group_by(ad_issue) |> mutate(tot_n=n()) |> ungroup() |>
+  group_by(ad_issue, party) |> summarise(p_n=n()*100/first(tot_n)) |> ungroup() |>
+  group_by(ad_issue) |> mutate(Dp_n = ifelse(first(party) == "democrat", first(p_n), 0))
+
+ggplot(party_issues2004, aes(x = reorder(ad_issue, Dp_n), y = p_n, fill = party)) + 
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = c("dodgerblue", "indianred3")) +
+  ylab("% of ads on topic from each party") + xlab("issue") + 
+  ggtitle("Campaign Ads Aired by Topic in 2004") +
+  coord_flip() + 
+  my_blog_theme()
+
+
+## Campaign Ads Aired By Issue and Party: 2012
+party_issues2012 <- ad_campaigns |>
+  filter(cycle == 2012) |>
+  left_join(ad_creative) |>
+  filter(ad_issue != "None") |>
+  group_by(cycle, ad_issue) |> mutate(tot_n=n()) |> ungroup() |>
+  group_by(cycle, ad_issue, party) |> summarise(p_n=n()*100/first(tot_n)) |> ungroup() |>
+  group_by(cycle, ad_issue) |> mutate(Dp_n = ifelse(first(party) == "democrat", first(p_n), 0))
+
+ggplot(party_issues2012, aes(x = reorder(ad_issue, Dp_n), y = p_n, fill = party)) + 
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = c("dodgerblue", "indianred3")) +
+  ylab("% of ads on topic from each party") + xlab("issue") +
+  ggtitle("Campaign Ads Aired by Topic in 2012") +
+  coord_flip() + 
+  my_blog_theme()
+
+```
+
+```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+## When to Buy Ads? 
+ad_campaigns |>
+  mutate(year = as.numeric(substr(air_date, 1, 4))) |>
+  mutate(month = as.numeric(substr(air_date, 6, 7))) |>
+  filter(year %in% c(2000, 2004, 2008, 2012), month > 7) |>
+  group_by(cycle, air_date, party) |>
+  summarise(total_cost = sum(total_cost)) |>
+  ggplot(aes(x=air_date, y=total_cost, color=party)) +
+  scale_x_date(date_labels = "%b, %Y") +
+  scale_y_continuous(labels = dollar_format()) +
+  scale_color_manual(values = c("blue","red"), name = "") +
+  geom_line() + geom_point(size=0.5) +
+  facet_wrap(cycle ~ ., scales="free") +
+  xlab("") + ylab("ad spend") +
+  theme_bw() +
+  theme(axis.title = element_text(size=20),
+        axis.text = element_text(size=11),
+        strip.text.x = element_text(size = 20))
+
+## Tone in Political Ads
+ad_campaigns |>
+  left_join(ad_creative) |>
+  filter(ad_tone %in% c("attack", "promote")) |>
+  mutate(year = as.numeric(substr(air_date, 1, 4))) |>
+  mutate(month = as.numeric(substr(air_date, 6, 7))) |>
+  filter(year %in% c(2000, 2004, 2008, 2012), month > 7) |>
+  group_by(cycle, air_date, ad_tone) |>
+  summarise(total_cost = sum(n_stations)) |>
+  group_by(cycle, air_date) |>
+  mutate(total_cost = total_cost/sum(total_cost)) |>
+  ungroup() |>
+  ggplot(aes(x=air_date, y=total_cost, fill=ad_tone, color=ad_tone)) +
+  scale_x_date(date_labels = "%b") +
+  scale_fill_manual(values = c("purple","green"), name = "ad tone") +
+  scale_color_manual(values = c("purple","green"), name = "ad tone") +
+  geom_bar(stat = "identity") +
+  facet_wrap(cycle ~ ., scales="free") +
+  xlab("") + ylab("% of ads bought on day") +
+  theme_bw() +
+  theme(axis.title = element_text(size=20),
+        axis.text = element_text(size=10),
+        strip.text.x = element_text(size = 20))
+```
+
+
+```{r eval=FALSE, include=FALSE}
+# Visualizing Facebook ads and Biden Facebook ads in 2020. 
+d_facebook <- facebook_ads_2020 |> 
+  rename(date = from_date, new_ads = num_of_new_ads) |> 
+  group_by(date) |> 
+  summarize(new_spend = sum(new_spend, na.rm = T),
+            new_ads = sum(new_ads, na.rm = T))
+
+d_facebook |> 
+  ggplot(aes(x = date, y = new_ads)) + 
+  geom_line() +
+  geom_smooth(method = "lm", se = TRUE) +
+  labs(x = "Date", 
+       y = "New Facebook Ads") +
+  theme_minimal()
+
+d_facebook |> 
+  ggplot(aes(x = date, y = new_spend)) +
+  geom_line() +
+  scale_y_continuous(labels = dollar_format()) +
+  geom_smooth(method = "lm", se = TRUE) + 
+  labs(x = "Date", 
+       y = "New Facebook Ad Spending") +
+  theme_minimal()
+  
+d_facebook_biden <- facebook_ads_biden_2020 |> 
+  rename(date = from_date, new_ads = num_of_new_ads) |> 
+  group_by(date) |> 
+  summarize(new_spend = sum(new_spend, na.rm = T),
+            new_ads = sum(new_ads, na.rm = T))
+
+d_facebook_biden |>
+  ggplot(aes(x = date, y = new_ads)) + 
+  geom_line() +
+  geom_smooth(method = "lm", se = TRUE) +
+  labs(x = "Date", 
+       y = "New Facebook Ads (Biden Only)") +
+  theme_minimal()
+
+d_facebook_biden |>
+  ggplot(aes(x = date, y = new_spend)) +
+  geom_line() +
+  scale_y_continuous(labels = dollar_format()) +
+  geom_smooth(method = "lm", se = TRUE) + 
+  labs(x = "Date", 
+       y = "New Facebook Ad Spending (Biden Only)")
+  theme_minimal()
+```
+**Campaign Spending and Vote Share**
+
+In order to estimate how vote share changes as campaign spending changes, I have run a regression that tracks how much more/less spending the Democratic party put into campaigning by state, as well as how this impacts a one point increase in the two party vote share of the 2008 and 2012 elections. The table below showcases the results of this regression. A few takeaways can be made from this table. To start, when Democrat campaign spending increases, their vote share generally does too. The exception to this is in historically red states, like Arkansas, North Dakota, Idaho, etc., where spending is not statistically significant, and the relationship is also inverse from the general trend.
+
+Most importantly, campaign spending has has a statistically significant effect on vote share in this upcoming election's battleground states in the past two election. With this knowledge, it's crucial that I update my election prediction to include the effects of campaign spending. Unfortunately, I do not have a dataset detailing Harris' and Trump's campaign spending this year, but I can still use trends from 2008 and 2012 to predict this November's outcome. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+# Estimate state-level regression of vote share on campaign spending. 
+d_campaign_spending <- d_state_popvote |> 
+  mutate(state_abb = state.abb[match(d_state_popvote$state, state.name)]) |> 
+  left_join(campaign_spending |> filter(party == "Democrat"), by = c("year" = "election_year", "state_abb" = "contribution_state")) |>
+  filter(year >= 2008)
+
+ad_lm <- lm(D_pv2p ~ contribution_receipt_amount + factor(state), 
+   data = d_campaign_spending) |> summary()
+ad_lm_dataframe <- as.data.frame(ad_lm$coefficients)
+
+kable(ad_lm_dataframe,
+      caption = "Effect of Campaign Spending on Democratic Two Party Vote Share")
+
+```
+
+**Updating 2024 Prediction Model**
+
+Using data on advertisement contributions, I have updated my election model. In this model, I use the economy, incumbency, and polls to create the most accurate prediction. I do not use demographics because, as shown in Week 5, they do not accurately predict election results. My new model shows that Harris wins 14 of the 15 states observed (she does not win Ohio). In order for Trump to win the presidency under this model, he would have to defeat Kamala Harris the the remaining states, which I was unable to analyze as the data was not available. Given that this is nearly impossible, my updated model, once again, predicts that Kamala will win.
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+
+# Process state-level polling data.
+d_pollav_state <- d_state_polls |>
+  group_by(year, state, party) |>
+  mutate(mean_pollav = mean(poll_support, na.rm = TRUE)) |>
+  top_n(1, poll_date) |>
+  rename(latest_pollav = poll_support) |>
+  select(-c(weeks_left, days_left, poll_date, candidate, before_convention)) |>
+  pivot_wider(names_from = party, values_from = c(latest_pollav, mean_pollav))
+
+d_econ <- read_csv("~/Downloads/fred_econ.csv")
+
+d_econ <- d_econ |>
+  filter(quarter == 2) |>
+  select(year, GDP_growth_quarterly) |>
+  filter(year >= 1980)
+
+# Merge data.
+d <- d_pollav_state |>
+  left_join(d_state_popvote, by = c("year", "state")) |>
+  left_join(d_popvote |> filter(party == "democrat"), by = "year") |>
+  left_join(d_econ, by = "year") |>
+  left_join(d_campaign_spending, by = c("year", "state")) |>
+  filter(year >= 1980) |>
+  ungroup()
+
+# Sequester states for which we have polling data for 2024.
+states.2024 <- unique(d$state[d$year == 2024])
+d <- d |>
+  filter(state %in% states.2024)
+
+# Separate into training and testing for simple poll prediction model. 
+d_train <- d |> 
+  filter(year < 2024)
+d_test <- d |> 
+  filter(year == 2024)
+
+# Add back in lagged vote share for 2024. 
+t <- d |> 
+  filter(year >= 2016) |> 
+  arrange(year) |> 
+  group_by(state) |> 
+  mutate(
+    D_pv2p_lag1.x = lag(D_pv2p.x, 1),
+    R_pv2p_lag1.x = lag(R_pv2p.x, 1), 
+    D_pv2p_lag2.x = lag(D_pv2p.x, 2),
+    R_pv2p_lag2.x = lag(R_pv2p.x, 2)) |> 
+  filter(year == 2024) |> 
+  select(state, year, D_pv2p.x, R_pv2p.x, D_pv2p_lag1.x, R_pv2p_lag1.x, D_pv2p_lag2.x, R_pv2p_lag2.x) 
+
+simp.vars <- c("D_pv2p_lag1.x", "D_pv2p_lag2.x", "latest_pollav_DEM", "GDP_growth_quarterly",
+                        "contribution_receipt_amount", "incumbent")
+
+# Subset testing data to only relevant variables for our simple model. 
+d_test_simp <- d_test |> 
+  select(-c(R_pv2p.x, R_pv2p_lag1.x, R_pv2p_lag2.x, 
+            D_pv2p.x, D_pv2p_lag1.x, D_pv2p_lag2.x)) |> 
+  left_join(t, by = c("state", "year")) |> 
+  select(state, year, all_of(simp.vars))
+
+# Get average contributions accross 2020, 2016, 2012.  
+d_contribution_avg <- d_train |> 
+  filter(year %in% c(2020, 2016, 2012)) |> 
+  filter(state %in% unique(d_test_simp$state)) |> 
+  group_by(state) |> 
+  summarize(contribution_receipt_amount = mean(contribution_receipt_amount, na.rm = TRUE))
+
+# Make predictions with simple average turnout. 
+d_test_simp<- d_test_simp |> 
+  left_join(d_contribution_avg, by = "state") |>
+  mutate(contribution_receipt_amount = contribution_receipt_amount.y)
+```
+
+```{r}
+#Pooled model
+mod_lm_dem <- lm(D_pv2p.x ~ D_pv2p_lag1.x + D_pv2p_lag2.x + latest_pollav_DEM + GDP_growth_quarterly +
+                        contribution_receipt_amount + incumbent,
+                      data = d_train)  
+simp_pred_dem <- predict(mod_lm_dem, newdata = d_test_simp, interval = "prediction", level = 0.95)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+win_pred <- data.frame(state = d_test_simp$state,
+                       year = rep(2024, length(d_test_simp$state)),
+                       simp_pred_dem = simp_pred_dem,
+                       simp_pred_rep = 100 - simp_pred_dem,
+                       winner = ifelse(simp_pred_dem > 50, "Democrat", "Republican")) |>
+  left_join(d_ec, by = c("state", "year"))
+
+kable(win_pred, caption = "Updated Popular Vote State Predictions")
+```
+
+```{r}
+
+final_table_pred <- win_pred |> 
+  group_by(winner.fit) |> 
+  summarize(States = n(), Electorates = sum(electors))
+
+kable(final_table_pred, caption = "Electoral College Distribution")
+
+```
+
+**Sources
+
+https://www.nytimes.com/2024/09/17/us/elections/presidential-campaign-advertising-spending.html
+
+https://digiday.com/media-buying/political-ad-spending-piles-up-in-key-states-less-than-a-month-until-election-day/
+
+https://www.usnews.com/news/articles/2008/01/17/the-photo-op-that-tanked 
+
+
+
+
+
+
+
+
+

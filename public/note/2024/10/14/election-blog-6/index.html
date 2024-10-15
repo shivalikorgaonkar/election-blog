@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Election Blog #6: Campaign Advertising | A minimal Hugo website</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    
+  </head>
+
+  <body>
+    <nav>
+    <ul class="menu">
+      
+      <li><a href="/">Home</a></li>
+      
+      <li><a href="/about/">About</a></li>
+      
+      <li><a href="/categories/">Categories</a></li>
+      
+      <li><a href="/tags/">Tags</a></li>
+      
+      <li><a href="/index.xml">Subscribe</a></li>
+      
+    </ul>
+    <hr/>
+    </nav>
+
+<div class="article-meta">
+<h1><span class="title">Election Blog #6: Campaign Advertising</span></h1>
+<h2 class="author">Shivali Korgaonkar</h2>
+<h2 class="date">2024/10/14</h2>
+</div>
+
+<main>
+<p><strong>Introduction</strong></p>
+<p>With 3 weeks left until Election Day, American citizens are being bombarded by campaign advertisements on their TVs, social medias, and radio stations. In fact, recent reports showcase that a total half a billion dollars will be spent on advertisements by the two campaigns, with Vice President Kamala Harris dominating this spending amount with 63 percent of the total (The New York Times 2024). In the twentieth century, candidates have taken advantage of Americans&rsquo; media usage to push their policy and personal agenda, which has coined the term &ldquo;Air War,&rdquo; following the 2008 Election where John McCain ramped up attacks against Barack Obama leading up to election day. While ads sometimes focus on the differences in policy, other times they hit on personal discrepancies. In 1988, for example, George HW Bush called out Micheal Dukakis in the &ldquo;Tank Ride&rdquo; ad for being anti-war previously, yet pro-war for the sake of winning the election. This as is often credited as being the defining reason Dukakis&rsquo; campaign failed (Schulte 2008). The ads are especially focused on the key battle states in an effort to convince them in these crucial next 21 days before Election Day, which can be viewed in the distribution below, detailing the 2012 spending by state. (Digiday 2024).</p>
+<p>In this blog, I will look at election ad spending starting in 2000 to investigate the purpose of these ads, their effect on vote choice, and finally, apply these trends to the 2024 election.</p>
+<pre><code class="language-r">ad_campaigns |&gt;
+  mutate(year = as.numeric(substr(air_date, 1, 4))) |&gt;
+  mutate(month = as.numeric(substr(air_date, 6, 7))) |&gt;
+  mutate(state = state.name[match(state, state.abb)]) |&gt;
+  filter(cycle == 2008) |&gt;
+  left_join(d_state_popvote |&gt; filter(year == 2008) |&gt; select(-year), by=&quot;state&quot;) |&gt;
+  mutate(winner=ifelse(D_pv2p &gt; R_pv2p, &quot;democrat&quot;, &quot;republican&quot;)) |&gt;
+  group_by(cycle, state, air_date, party, winner) |&gt;
+  summarise(total_cost = sum(total_cost)) |&gt;
+  filter(!is.na(state)) |&gt;
+  # ggplot(aes(x=air_date, y=log(total_cost+1), color=party)) +
+  ggplot(aes(x=party, y=total_cost, fill=party)) +
+  ggtitle(&quot;The Air War in 2008 (Obama vs. McCain)&quot;) +
+  geom_bar(stat=&quot;identity&quot;) +
+  geom_rect(aes(fill=winner), xmin=-Inf, xmax=Inf, ymin=46.3*10^6, ymax=52*10^6) +
+  facet_geo(~ state, scales=&quot;free_x&quot;) +
+  scale_fill_manual(values = c(&quot;dodgerblue&quot;, &quot;indianred3&quot;)) +
+  scale_y_continuous(labels = unit_format(unit = &quot;M&quot;, scale = 1e-6)) +
+  xlab(&quot;&quot;) + ylab(&quot;ad spend&quot;) +
+  my_blog_theme() +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+</code></pre>
+<pre><code>## `summarise()` has grouped output by 'cycle', 'state', 'air_date', 'party'. You
+## can override using the `.groups` argument.
+</code></pre>
+<img src="https://example.org/note/2024/10/14/election-blog-6/index_files/figure-html/unnamed-chunk-2-1.png" width="672" />
+<p>*<em>Ads and Campaign Spending Over Time</em></p>
+<p>Before applying ad effects to the 2024 election model, it&rsquo;s important to understand the basic descriptive statistics of spending and content between 2000 and 2012, which emulate contemporary conditions of technology best. To begin, the graph below details the tone (attack, promote, contrast) of campaign ads in the twentieth century. The Democratic and Republican candidates in these four elections generally mimicked the tone of each others ads, meaning the percentage of promotional ads, for example, made up similar percentages in both parties. An important exception to this is in 2004, as the Republican advertisements were attacking over 50 percent of the time, while the Democratic advertisements were attacking about 27 percent of the time. The 2004 election was between John Kerry and the incumbent Geroge W. Bush, and Swift Vets and POWs for Truth had accused Kerry of exaggerating his military service during the Vietnam War, so they ran an extremely effective smear campaign with advertisements against him. Bush ultimately won this election. Though a close race, Bush is the last Republican to have won the popular vote, showcasing the power of the campaigning, as Bush was coming off a term that faced 9/11 aftermath and war in the Middle East.</p>
+<img src="https://example.org/note/2024/10/14/election-blog-6/index_files/figure-html/unnamed-chunk-3-1.png" width="672" />
+<p>Further, the content of campaign ads is also important to understanding political context, party priorities, and issues that matter to voters. I decided to look at data from 2004 and 2012 because they were both election years where Bush and Obama were incumbents running for reelection, respectively. As observed in Week 4, the incumbency effect is a good predictor variable, so observing the 2004 and 2012 descriptive statistics are especially important as Donald Trump is an incumbent, and Kamala Harris comes from the incumbent administration. One clear difference between ad content in 2012 is that the two parties touched on a greater variety of topics at least once, whereas in 2004, the Republican party focused on a much smaller variety than the Democrats. In 2004, the Democrats were generally focused on social issues (civil rights, welfare, child care, etc.), but they had an overwhelmingly emphasis on war and the Middle East, due to the War on Terror begun in Bush&rsquo;s previous administration. Interestingly, the Republicans framed their ads in 2004 as &ldquo;defense&rdquo; and 9/11, though this was not the focus of their ads. They focused on gambling, business, family, as well as civil liberty, which persisted as a trend into 2012. There was also many reactionary ads in response to the legalization of gay marriage under Obama&rsquo;s Supreme Court.In 2012, the Democrats continued to focus on war and terrorism, as well as civil rights. Campaign ads seem to focus heavily on current events, as well as issues that a political candidate has specific policy hoping to implement.</p>
+<pre><code class="language-r">## Campaign Ads Aired By Issue and Party: 2004
+party_issues2004 &lt;- ad_campaigns |&gt;
+  filter(cycle == 2004) |&gt;
+  left_join(ad_creative) |&gt;
+  filter(ad_issue != &quot;None&quot;) |&gt;
+  group_by(ad_issue) |&gt; mutate(tot_n=n()) |&gt; ungroup() |&gt;
+  group_by(ad_issue, party) |&gt; summarise(p_n=n()*100/first(tot_n)) |&gt; ungroup() |&gt;
+  group_by(ad_issue) |&gt; mutate(Dp_n = ifelse(first(party) == &quot;democrat&quot;, first(p_n), 0))
+</code></pre>
+<pre><code>## Joining with `by = join_by(party, creative, cycle)`
+</code></pre>
+<pre><code>## Warning in left_join(filter(ad_campaigns, cycle == 2004), ad_creative): Detected an unexpected many-to-many relationship between `x` and `y`.
+## ℹ Row 1 of `x` matches multiple rows in `y`.
+## ℹ Row 1015 of `y` matches multiple rows in `x`.
+## ℹ If a many-to-many relationship is expected, set `relationship =
+##   &quot;many-to-many&quot;` to silence this warning.
+</code></pre>
+<pre><code>## `summarise()` has grouped output by 'ad_issue'. You can override using the
+## `.groups` argument.
+</code></pre>
+<pre><code class="language-r">ggplot(party_issues2004, aes(x = reorder(ad_issue, Dp_n), y = p_n, fill = party)) + 
+  geom_bar(stat = &quot;identity&quot;) +
+  scale_fill_manual(values = c(&quot;dodgerblue&quot;, &quot;indianred3&quot;)) +
+  ylab(&quot;% of ads on topic from each party&quot;) + xlab(&quot;issue&quot;) + 
+  ggtitle(&quot;Campaign Ads Aired by Topic in 2004&quot;) +
+  coord_flip() + 
+  my_blog_theme()
+</code></pre>
+<img src="https://example.org/note/2024/10/14/election-blog-6/index_files/figure-html/unnamed-chunk-6-1.png" width="672" />
+<pre><code class="language-r">## Campaign Ads Aired By Issue and Party: 2012
+party_issues2012 &lt;- ad_campaigns |&gt;
+  filter(cycle == 2012) |&gt;
+  left_join(ad_creative) |&gt;
+  filter(ad_issue != &quot;None&quot;) |&gt;
+  group_by(cycle, ad_issue) |&gt; mutate(tot_n=n()) |&gt; ungroup() |&gt;
+  group_by(cycle, ad_issue, party) |&gt; summarise(p_n=n()*100/first(tot_n)) |&gt; ungroup() |&gt;
+  group_by(cycle, ad_issue) |&gt; mutate(Dp_n = ifelse(first(party) == &quot;democrat&quot;, first(p_n), 0))
+</code></pre>
+<pre><code>## Joining with `by = join_by(party, creative, cycle)`
+</code></pre>
+<pre><code>## Warning in left_join(filter(ad_campaigns, cycle == 2012), ad_creative): Detected an unexpected many-to-many relationship between `x` and `y`.
+## ℹ Row 7 of `x` matches multiple rows in `y`.
+## ℹ Row 8259 of `y` matches multiple rows in `x`.
+## ℹ If a many-to-many relationship is expected, set `relationship =
+##   &quot;many-to-many&quot;` to silence this warning.
+</code></pre>
+<pre><code>## `summarise()` has grouped output by 'cycle', 'ad_issue'. You can override using
+## the `.groups` argument.
+</code></pre>
+<pre><code class="language-r">ggplot(party_issues2012, aes(x = reorder(ad_issue, Dp_n), y = p_n, fill = party)) + 
+  geom_bar(stat = &quot;identity&quot;) +
+  scale_fill_manual(values = c(&quot;dodgerblue&quot;, &quot;indianred3&quot;)) +
+  ylab(&quot;% of ads on topic from each party&quot;) + xlab(&quot;issue&quot;) +
+  ggtitle(&quot;Campaign Ads Aired by Topic in 2012&quot;) +
+  coord_flip() + 
+  my_blog_theme()
+</code></pre>
+<img src="https://example.org/note/2024/10/14/election-blog-6/index_files/figure-html/unnamed-chunk-6-2.png" width="672" />
+<p><strong>Campaign Spending and Vote Share</strong></p>
+<p>In order to estimate how vote share changes as campaign spending changes, I have run a regression that tracks how much more/less spending the Democratic party put into campaigning by state, as well as how this impacts a one point increase in the two party vote share of the 2008 and 2012 elections. The table below showcases the results of this regression. A few takeaways can be made from this table. To start, when Democrat campaign spending increases, their vote share generally does too. The exception to this is in historically red states, like Arkansas, North Dakota, Idaho, etc., where spending is not statistically significant, and the relationship is also inverse from the general trend.</p>
+<p>Most importantly, campaign spending has has a statistically significant effect on vote share in this upcoming election&rsquo;s battleground states in the past two election. With this knowledge, it&rsquo;s crucial that I update my election prediction to include the effects of campaign spending. Unfortunately, I do not have a dataset detailing Harris&rsquo; and Trump&rsquo;s campaign spending this year, but I can still use trends from 2008 and 2012 to predict this November&rsquo;s outcome.</p>
+<p>Table: <span id="tab:unnamed-chunk-9"></span>Table 1: Effect of Campaign Spending on Democratic Two Party Vote Share</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left"></th>
+          <th style="text-align: right">Estimate</th>
+          <th style="text-align: right">Std. Error</th>
+          <th style="text-align: right">t value</th>
+          <th style="text-align: right">Pr(&gt;|t|)</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">(Intercept)</td>
+          <td style="text-align: right">37.5829796</td>
+          <td style="text-align: right">1.516939</td>
+          <td style="text-align: right">24.7755387</td>
+          <td style="text-align: right">0.0000000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">contribution_receipt_amount</td>
+          <td style="text-align: right">0.0000000</td>
+          <td style="text-align: right">0.000000</td>
+          <td style="text-align: right">1.0003549</td>
+          <td style="text-align: right">0.3187606</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Alaska</td>
+          <td style="text-align: right">4.3767716</td>
+          <td style="text-align: right">2.143360</td>
+          <td style="text-align: right">2.0420144</td>
+          <td style="text-align: right">0.0429137</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Arizona</td>
+          <td style="text-align: right">9.5482330</td>
+          <td style="text-align: right">2.147299</td>
+          <td style="text-align: right">4.4466250</td>
+          <td style="text-align: right">0.0000169</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Arkansas</td>
+          <td style="text-align: right">-0.3482745</td>
+          <td style="text-align: right">2.143087</td>
+          <td style="text-align: right">-0.1625107</td>
+          <td style="text-align: right">0.8711239</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)California</td>
+          <td style="text-align: right">22.7715965</td>
+          <td style="text-align: right">3.995781</td>
+          <td style="text-align: right">5.6989098</td>
+          <td style="text-align: right">0.0000001</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Colorado</td>
+          <td style="text-align: right">16.2696071</td>
+          <td style="text-align: right">2.165159</td>
+          <td style="text-align: right">7.5142787</td>
+          <td style="text-align: right">0.0000000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Connecticut</td>
+          <td style="text-align: right">21.4508523</td>
+          <td style="text-align: right">2.158077</td>
+          <td style="text-align: right">9.9397984</td>
+          <td style="text-align: right">0.0000000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Delaware</td>
+          <td style="text-align: right">21.7840859</td>
+          <td style="text-align: right">2.143082</td>
+          <td style="text-align: right">10.1648401</td>
+          <td style="text-align: right">0.0000000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Florida</td>
+          <td style="text-align: right">11.5210381</td>
+          <td style="text-align: right">2.258862</td>
+          <td style="text-align: right">5.1003723</td>
+          <td style="text-align: right">0.0000010</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Georgia</td>
+          <td style="text-align: right">9.8517025</td>
+          <td style="text-align: right">2.153792</td>
+          <td style="text-align: right">4.5741209</td>
+          <td style="text-align: right">0.0000100</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Hawaii</td>
+          <td style="text-align: right">31.6393364</td>
+          <td style="text-align: right">2.143067</td>
+          <td style="text-align: right">14.7635806</td>
+          <td style="text-align: right">0.0000000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Idaho</td>
+          <td style="text-align: right">-3.5270264</td>
+          <td style="text-align: right">2.143322</td>
+          <td style="text-align: right">-1.6455888</td>
+          <td style="text-align: right">0.1019563</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Illinois</td>
+          <td style="text-align: right">21.3866123</td>
+          <td style="text-align: right">2.257308</td>
+          <td style="text-align: right">9.4743880</td>
+          <td style="text-align: right">0.0000000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Indiana</td>
+          <td style="text-align: right">6.5424890</td>
+          <td style="text-align: right">2.143849</td>
+          <td style="text-align: right">3.0517483</td>
+          <td style="text-align: right">0.0026945</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Iowa</td>
+          <td style="text-align: right">11.9791964</td>
+          <td style="text-align: right">2.143086</td>
+          <td style="text-align: right">5.5896945</td>
+          <td style="text-align: right">0.0000001</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Kansas</td>
+          <td style="text-align: right">3.0277382</td>
+          <td style="text-align: right">2.143101</td>
+          <td style="text-align: right">1.4127840</td>
+          <td style="text-align: right">0.1598047</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Kentucky</td>
+          <td style="text-align: right">0.1782500</td>
+          <td style="text-align: right">2.143082</td>
+          <td style="text-align: right">0.0831746</td>
+          <td style="text-align: right">0.9338243</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Louisiana</td>
+          <td style="text-align: right">2.8849573</td>
+          <td style="text-align: right">2.143068</td>
+          <td style="text-align: right">1.3461808</td>
+          <td style="text-align: right">0.1802887</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Maine</td>
+          <td style="text-align: right">18.0809919</td>
+          <td style="text-align: right">2.143075</td>
+          <td style="text-align: right">8.4369375</td>
+          <td style="text-align: right">0.0000000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Maryland</td>
+          <td style="text-align: right">26.1298886</td>
+          <td style="text-align: right">2.210126</td>
+          <td style="text-align: right">11.8228039</td>
+          <td style="text-align: right">0.0000000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Massachusetts</td>
+          <td style="text-align: right">25.7790679</td>
+          <td style="text-align: right">2.272577</td>
+          <td style="text-align: right">11.3435417</td>
+          <td style="text-align: right">0.0000000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Michigan</td>
+          <td style="text-align: right">15.7586287</td>
+          <td style="text-align: right">2.152981</td>
+          <td style="text-align: right">7.3194448</td>
+          <td style="text-align: right">0.0000000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Minnesota</td>
+          <td style="text-align: right">15.5884158</td>
+          <td style="text-align: right">2.149809</td>
+          <td style="text-align: right">7.2510703</td>
+          <td style="text-align: right">0.0000000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Mississippi</td>
+          <td style="text-align: right">4.9120604</td>
+          <td style="text-align: right">2.143508</td>
+          <td style="text-align: right">2.2915985</td>
+          <td style="text-align: right">0.0233301</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Missouri</td>
+          <td style="text-align: right">6.6361866</td>
+          <td style="text-align: right">2.144823</td>
+          <td style="text-align: right">3.0940493</td>
+          <td style="text-align: right">0.0023585</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Montana</td>
+          <td style="text-align: right">5.4540793</td>
+          <td style="text-align: right">2.143328</td>
+          <td style="text-align: right">2.5446777</td>
+          <td style="text-align: right">0.0119554</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Nebraska</td>
+          <td style="text-align: right">1.8653760</td>
+          <td style="text-align: right">2.143348</td>
+          <td style="text-align: right">0.8703096</td>
+          <td style="text-align: right">0.3855312</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Nevada</td>
+          <td style="text-align: right">15.3991829</td>
+          <td style="text-align: right">2.143233</td>
+          <td style="text-align: right">7.1850257</td>
+          <td style="text-align: right">0.0000000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)New Hampshire</td>
+          <td style="text-align: right">15.2419739</td>
+          <td style="text-align: right">2.143142</td>
+          <td style="text-align: right">7.1119746</td>
+          <td style="text-align: right">0.0000000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)New Jersey</td>
+          <td style="text-align: right">19.9708689</td>
+          <td style="text-align: right">2.183865</td>
+          <td style="text-align: right">9.1447351</td>
+          <td style="text-align: right">0.0000000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)New Mexico</td>
+          <td style="text-align: right">18.0482298</td>
+          <td style="text-align: right">2.144644</td>
+          <td style="text-align: right">8.4154909</td>
+          <td style="text-align: right">0.0000000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)New York</td>
+          <td style="text-align: right">24.5980509</td>
+          <td style="text-align: right">2.919853</td>
+          <td style="text-align: right">8.4244145</td>
+          <td style="text-align: right">0.0000000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)North Carolina</td>
+          <td style="text-align: right">11.2436402</td>
+          <td style="text-align: right">2.156511</td>
+          <td style="text-align: right">5.2138098</td>
+          <td style="text-align: right">0.0000006</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)North Dakota</td>
+          <td style="text-align: right">-0.4782581</td>
+          <td style="text-align: right">2.143911</td>
+          <td style="text-align: right">-0.2230774</td>
+          <td style="text-align: right">0.8237808</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Ohio</td>
+          <td style="text-align: right">11.0201897</td>
+          <td style="text-align: right">2.152733</td>
+          <td style="text-align: right">5.1191634</td>
+          <td style="text-align: right">0.0000009</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Oklahoma</td>
+          <td style="text-align: right">-4.8185083</td>
+          <td style="text-align: right">2.143066</td>
+          <td style="text-align: right">-2.2484179</td>
+          <td style="text-align: right">0.0260168</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Oregon</td>
+          <td style="text-align: right">19.4445657</td>
+          <td style="text-align: right">2.151516</td>
+          <td style="text-align: right">9.0376108</td>
+          <td style="text-align: right">0.0000000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Pennsylvania</td>
+          <td style="text-align: right">13.9281854</td>
+          <td style="text-align: right">2.192645</td>
+          <td style="text-align: right">6.3522295</td>
+          <td style="text-align: right">0.0000000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Rhode Island</td>
+          <td style="text-align: right">24.1375827</td>
+          <td style="text-align: right">2.143082</td>
+          <td style="text-align: right">11.2630259</td>
+          <td style="text-align: right">0.0000000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)South Carolina</td>
+          <td style="text-align: right">6.5136983</td>
+          <td style="text-align: right">2.143207</td>
+          <td style="text-align: right">3.0392301</td>
+          <td style="text-align: right">0.0028021</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)South Dakota</td>
+          <td style="text-align: right">1.6725368</td>
+          <td style="text-align: right">2.143760</td>
+          <td style="text-align: right">0.7801883</td>
+          <td style="text-align: right">0.4365177</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Tennessee</td>
+          <td style="text-align: right">1.4123537</td>
+          <td style="text-align: right">2.144453</td>
+          <td style="text-align: right">0.6586079</td>
+          <td style="text-align: right">0.5111640</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Texas</td>
+          <td style="text-align: right">6.2265549</td>
+          <td style="text-align: right">2.270314</td>
+          <td style="text-align: right">2.7425961</td>
+          <td style="text-align: right">0.0068433</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Utah</td>
+          <td style="text-align: right">-3.2056010</td>
+          <td style="text-align: right">2.143069</td>
+          <td style="text-align: right">-1.4957994</td>
+          <td style="text-align: right">0.1368210</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Vermont</td>
+          <td style="text-align: right">30.0007175</td>
+          <td style="text-align: right">2.143073</td>
+          <td style="text-align: right">13.9989257</td>
+          <td style="text-align: right">0.0000000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Virginia</td>
+          <td style="text-align: right">15.1297907</td>
+          <td style="text-align: right">2.200837</td>
+          <td style="text-align: right">6.8745629</td>
+          <td style="text-align: right">0.0000000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Washington</td>
+          <td style="text-align: right">20.5637469</td>
+          <td style="text-align: right">2.214370</td>
+          <td style="text-align: right">9.2864998</td>
+          <td style="text-align: right">0.0000000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)West Virginia</td>
+          <td style="text-align: right">-3.1870160</td>
+          <td style="text-align: right">2.143472</td>
+          <td style="text-align: right">-1.4868476</td>
+          <td style="text-align: right">0.1391681</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Wisconsin</td>
+          <td style="text-align: right">14.8728339</td>
+          <td style="text-align: right">2.144667</td>
+          <td style="text-align: right">6.9348001</td>
+          <td style="text-align: right">0.0000000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">factor(state)Wyoming</td>
+          <td style="text-align: right">-9.0819329</td>
+          <td style="text-align: right">2.143581</td>
+          <td style="text-align: right">-4.2368041</td>
+          <td style="text-align: right">0.0000396</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Updating 2024 Prediction Model</strong></p>
+<p>Using data on advertisement contributions, I have updated my election model. In this model, I use the economy, incumbency, and polls to create the most accurate prediction. I do not use demographics because, as shown in Week 5, they do not accurately predict election results. My new model shows that Harris wins 14 of the 15 states observed (she does not win Ohio). In order for Trump to win the presidency under this model, he would have to defeat Kamala Harris the the remaining states, which I was unable to analyze as the data was not available. Given that this is nearly impossible, my updated model, once again, predicts that Kamala will win.</p>
+<pre><code class="language-r">#Pooled model
+mod_lm_dem &lt;- lm(D_pv2p.x ~ D_pv2p_lag1.x + D_pv2p_lag2.x + latest_pollav_DEM + GDP_growth_quarterly +
+                        contribution_receipt_amount + incumbent,
+                      data = d_train)  
+simp_pred_dem &lt;- predict(mod_lm_dem, newdata = d_test_simp, interval = &quot;prediction&quot;, level = 0.95)
+</code></pre>
+<p>Table: <span id="tab:unnamed-chunk-12"></span>Table 2: Updated Popular Vote State Predictions</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">state</th>
+          <th style="text-align: right">year</th>
+          <th style="text-align: right">simp_pred_dem.fit</th>
+          <th style="text-align: right">simp_pred_dem.lwr</th>
+          <th style="text-align: right">simp_pred_dem.upr</th>
+          <th style="text-align: right">simp_pred_rep.fit</th>
+          <th style="text-align: right">simp_pred_rep.lwr</th>
+          <th style="text-align: right">simp_pred_rep.upr</th>
+          <th style="text-align: left">winner.fit</th>
+          <th style="text-align: left">winner.lwr</th>
+          <th style="text-align: left">winner.upr</th>
+          <th style="text-align: left">stateab</th>
+          <th style="text-align: right">electors</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">Arizona</td>
+          <td style="text-align: right">2024</td>
+          <td style="text-align: right">49.16147</td>
+          <td style="text-align: right">46.15511</td>
+          <td style="text-align: right">52.16782</td>
+          <td style="text-align: right">50.83853</td>
+          <td style="text-align: right">53.84489</td>
+          <td style="text-align: right">47.83218</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">AZ</td>
+          <td style="text-align: right">11</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">California</td>
+          <td style="text-align: right">2024</td>
+          <td style="text-align: right">64.08198</td>
+          <td style="text-align: right">60.51960</td>
+          <td style="text-align: right">67.64436</td>
+          <td style="text-align: right">35.91802</td>
+          <td style="text-align: right">39.48040</td>
+          <td style="text-align: right">32.35564</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">CA</td>
+          <td style="text-align: right">54</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Florida</td>
+          <td style="text-align: right">2024</td>
+          <td style="text-align: right">47.06571</td>
+          <td style="text-align: right">43.81323</td>
+          <td style="text-align: right">50.31819</td>
+          <td style="text-align: right">52.93429</td>
+          <td style="text-align: right">56.18677</td>
+          <td style="text-align: right">49.68181</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">FL</td>
+          <td style="text-align: right">30</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Georgia</td>
+          <td style="text-align: right">2024</td>
+          <td style="text-align: right">49.55999</td>
+          <td style="text-align: right">46.57547</td>
+          <td style="text-align: right">52.54450</td>
+          <td style="text-align: right">50.44001</td>
+          <td style="text-align: right">53.42453</td>
+          <td style="text-align: right">47.45550</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">GA</td>
+          <td style="text-align: right">16</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Michigan</td>
+          <td style="text-align: right">2024</td>
+          <td style="text-align: right">50.12646</td>
+          <td style="text-align: right">47.10218</td>
+          <td style="text-align: right">53.15074</td>
+          <td style="text-align: right">49.87354</td>
+          <td style="text-align: right">52.89782</td>
+          <td style="text-align: right">46.84926</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">MI</td>
+          <td style="text-align: right">15</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Minnesota</td>
+          <td style="text-align: right">2024</td>
+          <td style="text-align: right">52.66064</td>
+          <td style="text-align: right">49.68421</td>
+          <td style="text-align: right">55.63706</td>
+          <td style="text-align: right">47.33936</td>
+          <td style="text-align: right">50.31579</td>
+          <td style="text-align: right">44.36294</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">MN</td>
+          <td style="text-align: right">10</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Nevada</td>
+          <td style="text-align: right">2024</td>
+          <td style="text-align: right">49.16991</td>
+          <td style="text-align: right">46.06581</td>
+          <td style="text-align: right">52.27400</td>
+          <td style="text-align: right">50.83009</td>
+          <td style="text-align: right">53.93419</td>
+          <td style="text-align: right">47.72600</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">NV</td>
+          <td style="text-align: right">6</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">New Hampshire</td>
+          <td style="text-align: right">2024</td>
+          <td style="text-align: right">53.62191</td>
+          <td style="text-align: right">50.64862</td>
+          <td style="text-align: right">56.59521</td>
+          <td style="text-align: right">46.37809</td>
+          <td style="text-align: right">49.35138</td>
+          <td style="text-align: right">43.40479</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">NH</td>
+          <td style="text-align: right">4</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">North Carolina</td>
+          <td style="text-align: right">2024</td>
+          <td style="text-align: right">49.09009</td>
+          <td style="text-align: right">46.03230</td>
+          <td style="text-align: right">52.14788</td>
+          <td style="text-align: right">50.90991</td>
+          <td style="text-align: right">53.96770</td>
+          <td style="text-align: right">47.85212</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">NC</td>
+          <td style="text-align: right">16</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Ohio</td>
+          <td style="text-align: right">2024</td>
+          <td style="text-align: right">44.34590</td>
+          <td style="text-align: right">41.19002</td>
+          <td style="text-align: right">47.50179</td>
+          <td style="text-align: right">55.65410</td>
+          <td style="text-align: right">58.80998</td>
+          <td style="text-align: right">52.49821</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">OH</td>
+          <td style="text-align: right">17</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Pennsylvania</td>
+          <td style="text-align: right">2024</td>
+          <td style="text-align: right">49.74610</td>
+          <td style="text-align: right">46.67562</td>
+          <td style="text-align: right">52.81658</td>
+          <td style="text-align: right">50.25390</td>
+          <td style="text-align: right">53.32438</td>
+          <td style="text-align: right">47.18342</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">PA</td>
+          <td style="text-align: right">19</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Texas</td>
+          <td style="text-align: right">2024</td>
+          <td style="text-align: right">46.32535</td>
+          <td style="text-align: right">43.22658</td>
+          <td style="text-align: right">49.42412</td>
+          <td style="text-align: right">53.67465</td>
+          <td style="text-align: right">56.77342</td>
+          <td style="text-align: right">50.57588</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">TX</td>
+          <td style="text-align: right">40</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Virginia</td>
+          <td style="text-align: right">2024</td>
+          <td style="text-align: right">53.07380</td>
+          <td style="text-align: right">50.08165</td>
+          <td style="text-align: right">56.06595</td>
+          <td style="text-align: right">46.92620</td>
+          <td style="text-align: right">49.91835</td>
+          <td style="text-align: right">43.93405</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">VA</td>
+          <td style="text-align: right">13</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Wisconsin</td>
+          <td style="text-align: right">2024</td>
+          <td style="text-align: right">50.49243</td>
+          <td style="text-align: right">47.41185</td>
+          <td style="text-align: right">53.57301</td>
+          <td style="text-align: right">49.50757</td>
+          <td style="text-align: right">52.58815</td>
+          <td style="text-align: right">46.42699</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">WI</td>
+          <td style="text-align: right">10</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">New York</td>
+          <td style="text-align: right">2024</td>
+          <td style="text-align: right">52.40015</td>
+          <td style="text-align: right">48.91375</td>
+          <td style="text-align: right">55.88654</td>
+          <td style="text-align: right">47.59985</td>
+          <td style="text-align: right">51.08625</td>
+          <td style="text-align: right">44.11346</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">NY</td>
+          <td style="text-align: right">28</td>
+      </tr>
+  </tbody>
+</table>
+<pre><code class="language-r">final_table_pred &lt;- win_pred |&gt; 
+  group_by(winner.fit) |&gt; 
+  summarize(States = n(), Electorates = sum(electors))
+
+kable(final_table_pred, caption = &quot;Electoral College Distribution&quot;)
+</code></pre>
+<p>Table: <span id="tab:unnamed-chunk-13"></span>Table 3: Electoral College Distribution</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">winner.fit</th>
+          <th style="text-align: right">States</th>
+          <th style="text-align: right">Electorates</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: right">7</td>
+          <td style="text-align: right">134</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: right">8</td>
+          <td style="text-align: right">155</td>
+      </tr>
+  </tbody>
+</table>
+<p>**Sources</p>
+<p><a href="https://www.nytimes.com/2024/09/17/us/elections/presidential-campaign-advertising-spending.html">https://www.nytimes.com/2024/09/17/us/elections/presidential-campaign-advertising-spending.html</a></p>
+<p><a href="https://digiday.com/media-buying/political-ad-spending-piles-up-in-key-states-less-than-a-month-until-election-day/">https://digiday.com/media-buying/political-ad-spending-piles-up-in-key-states-less-than-a-month-until-election-day/</a></p>
+<p><a href="https://www.usnews.com/news/articles/2008/01/17/the-photo-op-that-tanked">https://www.usnews.com/news/articles/2008/01/17/the-photo-op-that-tanked</a></p>
+
+</main>
+
+  <footer>
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<script src="//cdn.jsdelivr.net/combine/npm/katex/dist/katex.min.js,npm/katex/dist/contrib/auto-render.min.js,npm/@xiee/utils/js/render-katex.js" defer></script>
+
+<script src="//cdn.jsdelivr.net/npm/@xiee/utils/js/center-img.min.js" defer></script>
+
+  
+  <hr/>
+  © <a href="https://yihui.org">Yihui Xie</a> 2017 &ndash; 2024 | <a href="https://github.com/yihui">Github</a> | <a href="https://twitter.com/xieyihui">Twitter</a>
+  
+  </footer>
+  </body>
+</html>
+
