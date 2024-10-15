@@ -502,7 +502,7 @@ party_issues2012 &lt;- ad_campaigns |&gt;
   </tbody>
 </table>
 <p><strong>Updating 2024 Prediction Model</strong></p>
-<p>Using data on advertisement contributions, I have updated my election model. In this model, I use the economy, incumbency, and polls to create the most accurate prediction. I do not use demographics because, as shown in Week 5, they do not accurately predict election results. My new model shows that Harris wins 14 of the 15 states observed (she does not win Ohio). In order for Trump to win the presidency under this model, he would have to defeat Kamala Harris the the remaining states, which I was unable to analyze as the data was not available. Given that this is nearly impossible, my updated model, once again, predicts that Kamala will win.</p>
+<p>Using data on advertisement contributions, I have updated my election model. In this model, I use the economy, incumbency, and polls to create the most accurate prediction. I do not use demographics because, as shown in Week 5, they do not accurately predict election results. My new model shows that Trump will win 8 out of the 15 states, which is the first model of this blog to give the Republicans an edge.I was unable to analyze the remaining states as the data was not available, but it would be a surreal achievement for Harris to which all remaining 35 states given my model. Given that this is nearly impossible, my updated model, for once, predicts that Trump will win.</p>
 <pre><code class="language-r">#Pooled model
 mod_lm_dem &lt;- lm(D_pv2p.x ~ D_pv2p_lag1.x + D_pv2p_lag2.x + latest_pollav_DEM + GDP_growth_quarterly +
                         contribution_receipt_amount + incumbent,
