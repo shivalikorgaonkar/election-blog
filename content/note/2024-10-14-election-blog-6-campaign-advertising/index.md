@@ -265,7 +265,7 @@ Table: <span id="tab:unnamed-chunk-13"></span>Table 3: Electoral College Distrib
 |Democrat   |      7|         134|
 |Republican |      8|         155|
 
-**Sources
+**Sources**
 
 https://www.nytimes.com/2024/09/17/us/elections/presidential-campaign-advertising-spending.html
 

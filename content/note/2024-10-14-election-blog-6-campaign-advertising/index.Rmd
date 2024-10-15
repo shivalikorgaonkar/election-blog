@@ -453,16 +453,14 @@ kable(win_pred, caption = "Updated Popular Vote State Predictions")
 ```
 
 ```{r}
-
 final_table_pred <- win_pred |> 
   group_by(winner.fit) |> 
   summarize(States = n(), Electorates = sum(electors))
 
 kable(final_table_pred, caption = "Electoral College Distribution")
-
 ```
 
-**Sources
+**Sources**
 
 https://www.nytimes.com/2024/09/17/us/elections/presidential-campaign-advertising-spending.html
 
