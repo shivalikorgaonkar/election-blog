@@ -90,7 +90,7 @@ d_turnout <- read_csv("~/Downloads/state_turnout_1980_2022.csv")
 ```
 
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 ad_campaigns |>
   mutate(year = as.numeric(substr(air_date, 1, 4))) |>
   mutate(month = as.numeric(substr(air_date, 6, 7))) |>
@@ -199,7 +199,7 @@ cowplot::plot_grid(plotlist = plist, nrow = 2, ncol = 2, align = "hv") +
 
 Further, the content of campaign ads is also important to understanding political context, party priorities, and issues that matter to voters. I decided to look at data from 2004 and 2012 because they were both election years where Bush and Obama were incumbents running for reelection, respectively. As observed in Week 4, the incumbency effect is a good predictor variable, so observing the 2004 and 2012 descriptive statistics are especially important as Donald Trump is an incumbent, and Kamala Harris comes from the incumbent administration. One clear difference between ad content in 2012 is that the two parties touched on a greater variety of topics at least once, whereas in 2004, the Republican party focused on a much smaller variety than the Democrats. In 2004, the Democrats were generally focused on social issues (civil rights, welfare, child care, etc.), but they had an overwhelmingly emphasis on war and the Middle East, due to the War on Terror begun in Bush's previous administration. Interestingly, the Republicans framed their ads in 2004 as "defense" and 9/11, though this was not the focus of their ads. They focused on gambling, business, family, as well as civil liberty, which persisted as a trend into 2012. There was also many reactionary ads in response to the legalization of gay marriage under Obama's Supreme Court.In 2012, the Democrats continued to focus on war and terrorism, as well as civil rights. Campaign ads seem to focus heavily on current events, as well as issues that a political candidate has specific policy hoping to implement. 
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 ## Campaign Ads Aired By Issue and Party: 2004
 party_issues2004 <- ad_campaigns |>
   filter(cycle == 2004) |>
@@ -432,7 +432,7 @@ d_test_simp<- d_test_simp |>
   mutate(contribution_receipt_amount = contribution_receipt_amount.y)
 ```
 
-```{r}
+```{r include=FALSE}
 #Pooled model
 mod_lm_dem <- lm(D_pv2p.x ~ D_pv2p_lag1.x + D_pv2p_lag2.x + latest_pollav_DEM + GDP_growth_quarterly +
                         contribution_receipt_amount + incumbent,
@@ -452,7 +452,7 @@ win_pred <- data.frame(state = d_test_simp$state,
 kable(win_pred, caption = "Updated Popular Vote State Predictions")
 ```
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 final_table_pred <- win_pred |> 
   group_by(winner.fit) |> 
   summarize(States = n(), Electorates = sum(electors))

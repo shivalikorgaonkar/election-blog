@@ -16,38 +16,6 @@ In this blog, I will look at election ad spending starting in 2000 to investigat
 
 
 
-
-```r
-ad_campaigns |>
-  mutate(year = as.numeric(substr(air_date, 1, 4))) |>
-  mutate(month = as.numeric(substr(air_date, 6, 7))) |>
-  mutate(state = state.name[match(state, state.abb)]) |>
-  filter(cycle == 2008) |>
-  left_join(d_state_popvote |> filter(year == 2008) |> select(-year), by="state") |>
-  mutate(winner=ifelse(D_pv2p > R_pv2p, "democrat", "republican")) |>
-  group_by(cycle, state, air_date, party, winner) |>
-  summarise(total_cost = sum(total_cost)) |>
-  filter(!is.na(state)) |>
-  # ggplot(aes(x=air_date, y=log(total_cost+1), color=party)) +
-  ggplot(aes(x=party, y=total_cost, fill=party)) +
-  ggtitle("The Air War in 2008 (Obama vs. McCain)") +
-  geom_bar(stat="identity") +
-  geom_rect(aes(fill=winner), xmin=-Inf, xmax=Inf, ymin=46.3*10^6, ymax=52*10^6) +
-  facet_geo(~ state, scales="free_x") +
-  scale_fill_manual(values = c("dodgerblue", "indianred3")) +
-  scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6)) +
-  xlab("") + ylab("ad spend") +
-  my_blog_theme() +
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank())
-```
-
-```
-## `summarise()` has grouped output by 'cycle', 'state', 'air_date', 'party'. You
-## can override using the `.groups` argument.
-```
-
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-2-1.png" width="672" />
 
 **Ads and Campaign Spending Over Time*
@@ -63,86 +31,7 @@ Before applying ad effects to the 2024 election model, it's important to underst
 
 Further, the content of campaign ads is also important to understanding political context, party priorities, and issues that matter to voters. I decided to look at data from 2004 and 2012 because they were both election years where Bush and Obama were incumbents running for reelection, respectively. As observed in Week 4, the incumbency effect is a good predictor variable, so observing the 2004 and 2012 descriptive statistics are especially important as Donald Trump is an incumbent, and Kamala Harris comes from the incumbent administration. One clear difference between ad content in 2012 is that the two parties touched on a greater variety of topics at least once, whereas in 2004, the Republican party focused on a much smaller variety than the Democrats. In 2004, the Democrats were generally focused on social issues (civil rights, welfare, child care, etc.), but they had an overwhelmingly emphasis on war and the Middle East, due to the War on Terror begun in Bush's previous administration. Interestingly, the Republicans framed their ads in 2004 as "defense" and 9/11, though this was not the focus of their ads. They focused on gambling, business, family, as well as civil liberty, which persisted as a trend into 2012. There was also many reactionary ads in response to the legalization of gay marriage under Obama's Supreme Court.In 2012, the Democrats continued to focus on war and terrorism, as well as civil rights. Campaign ads seem to focus heavily on current events, as well as issues that a political candidate has specific policy hoping to implement. 
 
-
-```r
-## Campaign Ads Aired By Issue and Party: 2004
-party_issues2004 <- ad_campaigns |>
-  filter(cycle == 2004) |>
-  left_join(ad_creative) |>
-  filter(ad_issue != "None") |>
-  group_by(ad_issue) |> mutate(tot_n=n()) |> ungroup() |>
-  group_by(ad_issue, party) |> summarise(p_n=n()*100/first(tot_n)) |> ungroup() |>
-  group_by(ad_issue) |> mutate(Dp_n = ifelse(first(party) == "democrat", first(p_n), 0))
-```
-
-```
-## Joining with `by = join_by(party, creative, cycle)`
-```
-
-```
-## Warning in left_join(filter(ad_campaigns, cycle == 2004), ad_creative): Detected an unexpected many-to-many relationship between `x` and `y`.
-## ℹ Row 1 of `x` matches multiple rows in `y`.
-## ℹ Row 1015 of `y` matches multiple rows in `x`.
-## ℹ If a many-to-many relationship is expected, set `relationship =
-##   "many-to-many"` to silence this warning.
-```
-
-```
-## `summarise()` has grouped output by 'ad_issue'. You can override using the
-## `.groups` argument.
-```
-
-```r
-ggplot(party_issues2004, aes(x = reorder(ad_issue, Dp_n), y = p_n, fill = party)) + 
-  geom_bar(stat = "identity") +
-  scale_fill_manual(values = c("dodgerblue", "indianred3")) +
-  ylab("% of ads on topic from each party") + xlab("issue") + 
-  ggtitle("Campaign Ads Aired by Topic in 2004") +
-  coord_flip() + 
-  my_blog_theme()
-```
-
-<img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-6-1.png" width="672" />
-
-```r
-## Campaign Ads Aired By Issue and Party: 2012
-party_issues2012 <- ad_campaigns |>
-  filter(cycle == 2012) |>
-  left_join(ad_creative) |>
-  filter(ad_issue != "None") |>
-  group_by(cycle, ad_issue) |> mutate(tot_n=n()) |> ungroup() |>
-  group_by(cycle, ad_issue, party) |> summarise(p_n=n()*100/first(tot_n)) |> ungroup() |>
-  group_by(cycle, ad_issue) |> mutate(Dp_n = ifelse(first(party) == "democrat", first(p_n), 0))
-```
-
-```
-## Joining with `by = join_by(party, creative, cycle)`
-```
-
-```
-## Warning in left_join(filter(ad_campaigns, cycle == 2012), ad_creative): Detected an unexpected many-to-many relationship between `x` and `y`.
-## ℹ Row 7 of `x` matches multiple rows in `y`.
-## ℹ Row 8259 of `y` matches multiple rows in `x`.
-## ℹ If a many-to-many relationship is expected, set `relationship =
-##   "many-to-many"` to silence this warning.
-```
-
-```
-## `summarise()` has grouped output by 'cycle', 'ad_issue'. You can override using
-## the `.groups` argument.
-```
-
-```r
-ggplot(party_issues2012, aes(x = reorder(ad_issue, Dp_n), y = p_n, fill = party)) + 
-  geom_bar(stat = "identity") +
-  scale_fill_manual(values = c("dodgerblue", "indianred3")) +
-  ylab("% of ads on topic from each party") + xlab("issue") +
-  ggtitle("Campaign Ads Aired by Topic in 2012") +
-  coord_flip() + 
-  my_blog_theme()
-```
-
-<img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-6-2.png" width="672" />
+<img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-6-1.png" width="672" /><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-6-2.png" width="672" />
 
 
 
@@ -218,13 +107,6 @@ Using data on advertisement contributions, I have updated my election model. In 
 
 
 
-```r
-#Pooled model
-mod_lm_dem <- lm(D_pv2p.x ~ D_pv2p_lag1.x + D_pv2p_lag2.x + latest_pollav_DEM + GDP_growth_quarterly +
-                        contribution_receipt_amount + incumbent,
-                      data = d_train)  
-simp_pred_dem <- predict(mod_lm_dem, newdata = d_test_simp, interval = "prediction", level = 0.95)
-```
 
 
 Table: <span id="tab:unnamed-chunk-12"></span>Table 2: Updated Popular Vote State Predictions
@@ -246,16 +128,6 @@ Table: <span id="tab:unnamed-chunk-12"></span>Table 2: Updated Popular Vote Stat
 |Virginia       | 2024|          53.07380|          50.08165|          56.06595|          46.92620|          49.91835|          43.93405|Democrat   |Democrat   |Democrat   |VA      |       13|
 |Wisconsin      | 2024|          50.49243|          47.41185|          53.57301|          49.50757|          52.58815|          46.42699|Democrat   |Republican |Democrat   |WI      |       10|
 |New York       | 2024|          52.40015|          48.91375|          55.88654|          47.59985|          51.08625|          44.11346|Democrat   |Republican |Democrat   |NY      |       28|
-
-
-```r
-final_table_pred <- win_pred |> 
-  group_by(winner.fit) |> 
-  summarize(States = n(), Electorates = sum(electors))
-
-kable(final_table_pred, caption = "Electoral College Distribution")
-```
-
 
 
 Table: <span id="tab:unnamed-chunk-13"></span>Table 3: Electoral College Distribution

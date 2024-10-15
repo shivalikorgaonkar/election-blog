@@ -37,96 +37,12 @@
 <p><strong>Introduction</strong></p>
 <p>With 3 weeks left until Election Day, American citizens are being bombarded by campaign advertisements on their TVs, social medias, and radio stations. In fact, recent reports showcase that a total half a billion dollars will be spent on advertisements by the two campaigns, with Vice President Kamala Harris dominating this spending amount with 63 percent of the total (The New York Times 2024). In the twentieth century, candidates have taken advantage of Americans&rsquo; media usage to push their policy and personal agenda, which has coined the term &ldquo;Air War,&rdquo; following the 2008 Election where John McCain ramped up attacks against Barack Obama leading up to election day. While ads sometimes focus on the differences in policy, other times they hit on personal discrepancies. In 1988, for example, George HW Bush called out Micheal Dukakis in the &ldquo;Tank Ride&rdquo; ad for being anti-war previously, yet pro-war for the sake of winning the election. This as is often credited as being the defining reason Dukakis&rsquo; campaign failed (Schulte 2008). The ads are especially focused on the key battle states in an effort to convince them in these crucial next 21 days before Election Day, which can be viewed in the distribution below, detailing the 2012 spending by state. (Digiday 2024).</p>
 <p>In this blog, I will look at election ad spending starting in 2000 to investigate the purpose of these ads, their effect on vote choice, and finally, apply these trends to the 2024 election.</p>
-<pre><code class="language-r">ad_campaigns |&gt;
-  mutate(year = as.numeric(substr(air_date, 1, 4))) |&gt;
-  mutate(month = as.numeric(substr(air_date, 6, 7))) |&gt;
-  mutate(state = state.name[match(state, state.abb)]) |&gt;
-  filter(cycle == 2008) |&gt;
-  left_join(d_state_popvote |&gt; filter(year == 2008) |&gt; select(-year), by=&quot;state&quot;) |&gt;
-  mutate(winner=ifelse(D_pv2p &gt; R_pv2p, &quot;democrat&quot;, &quot;republican&quot;)) |&gt;
-  group_by(cycle, state, air_date, party, winner) |&gt;
-  summarise(total_cost = sum(total_cost)) |&gt;
-  filter(!is.na(state)) |&gt;
-  # ggplot(aes(x=air_date, y=log(total_cost+1), color=party)) +
-  ggplot(aes(x=party, y=total_cost, fill=party)) +
-  ggtitle(&quot;The Air War in 2008 (Obama vs. McCain)&quot;) +
-  geom_bar(stat=&quot;identity&quot;) +
-  geom_rect(aes(fill=winner), xmin=-Inf, xmax=Inf, ymin=46.3*10^6, ymax=52*10^6) +
-  facet_geo(~ state, scales=&quot;free_x&quot;) +
-  scale_fill_manual(values = c(&quot;dodgerblue&quot;, &quot;indianred3&quot;)) +
-  scale_y_continuous(labels = unit_format(unit = &quot;M&quot;, scale = 1e-6)) +
-  xlab(&quot;&quot;) + ylab(&quot;ad spend&quot;) +
-  my_blog_theme() +
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank())
-</code></pre>
-<pre><code>## `summarise()` has grouped output by 'cycle', 'state', 'air_date', 'party'. You
-## can override using the `.groups` argument.
-</code></pre>
 <img src="https://example.org/note/2024/10/14/election-blog-6/index_files/figure-html/unnamed-chunk-2-1.png" width="672" />
 <p>*<em>Ads and Campaign Spending Over Time</em></p>
 <p>Before applying ad effects to the 2024 election model, it&rsquo;s important to understand the basic descriptive statistics of spending and content between 2000 and 2012, which emulate contemporary conditions of technology best. To begin, the graph below details the tone (attack, promote, contrast) of campaign ads in the twentieth century. The Democratic and Republican candidates in these four elections generally mimicked the tone of each others ads, meaning the percentage of promotional ads, for example, made up similar percentages in both parties. An important exception to this is in 2004, as the Republican advertisements were attacking over 50 percent of the time, while the Democratic advertisements were attacking about 27 percent of the time. The 2004 election was between John Kerry and the incumbent Geroge W. Bush, and Swift Vets and POWs for Truth had accused Kerry of exaggerating his military service during the Vietnam War, so they ran an extremely effective smear campaign with advertisements against him. Bush ultimately won this election. Though a close race, Bush is the last Republican to have won the popular vote, showcasing the power of the campaigning, as Bush was coming off a term that faced 9/11 aftermath and war in the Middle East.</p>
 <img src="https://example.org/note/2024/10/14/election-blog-6/index_files/figure-html/unnamed-chunk-3-1.png" width="672" />
 <p>Further, the content of campaign ads is also important to understanding political context, party priorities, and issues that matter to voters. I decided to look at data from 2004 and 2012 because they were both election years where Bush and Obama were incumbents running for reelection, respectively. As observed in Week 4, the incumbency effect is a good predictor variable, so observing the 2004 and 2012 descriptive statistics are especially important as Donald Trump is an incumbent, and Kamala Harris comes from the incumbent administration. One clear difference between ad content in 2012 is that the two parties touched on a greater variety of topics at least once, whereas in 2004, the Republican party focused on a much smaller variety than the Democrats. In 2004, the Democrats were generally focused on social issues (civil rights, welfare, child care, etc.), but they had an overwhelmingly emphasis on war and the Middle East, due to the War on Terror begun in Bush&rsquo;s previous administration. Interestingly, the Republicans framed their ads in 2004 as &ldquo;defense&rdquo; and 9/11, though this was not the focus of their ads. They focused on gambling, business, family, as well as civil liberty, which persisted as a trend into 2012. There was also many reactionary ads in response to the legalization of gay marriage under Obama&rsquo;s Supreme Court.In 2012, the Democrats continued to focus on war and terrorism, as well as civil rights. Campaign ads seem to focus heavily on current events, as well as issues that a political candidate has specific policy hoping to implement.</p>
-<pre><code class="language-r">## Campaign Ads Aired By Issue and Party: 2004
-party_issues2004 &lt;- ad_campaigns |&gt;
-  filter(cycle == 2004) |&gt;
-  left_join(ad_creative) |&gt;
-  filter(ad_issue != &quot;None&quot;) |&gt;
-  group_by(ad_issue) |&gt; mutate(tot_n=n()) |&gt; ungroup() |&gt;
-  group_by(ad_issue, party) |&gt; summarise(p_n=n()*100/first(tot_n)) |&gt; ungroup() |&gt;
-  group_by(ad_issue) |&gt; mutate(Dp_n = ifelse(first(party) == &quot;democrat&quot;, first(p_n), 0))
-</code></pre>
-<pre><code>## Joining with `by = join_by(party, creative, cycle)`
-</code></pre>
-<pre><code>## Warning in left_join(filter(ad_campaigns, cycle == 2004), ad_creative): Detected an unexpected many-to-many relationship between `x` and `y`.
-## ℹ Row 1 of `x` matches multiple rows in `y`.
-## ℹ Row 1015 of `y` matches multiple rows in `x`.
-## ℹ If a many-to-many relationship is expected, set `relationship =
-##   &quot;many-to-many&quot;` to silence this warning.
-</code></pre>
-<pre><code>## `summarise()` has grouped output by 'ad_issue'. You can override using the
-## `.groups` argument.
-</code></pre>
-<pre><code class="language-r">ggplot(party_issues2004, aes(x = reorder(ad_issue, Dp_n), y = p_n, fill = party)) + 
-  geom_bar(stat = &quot;identity&quot;) +
-  scale_fill_manual(values = c(&quot;dodgerblue&quot;, &quot;indianred3&quot;)) +
-  ylab(&quot;% of ads on topic from each party&quot;) + xlab(&quot;issue&quot;) + 
-  ggtitle(&quot;Campaign Ads Aired by Topic in 2004&quot;) +
-  coord_flip() + 
-  my_blog_theme()
-</code></pre>
-<img src="https://example.org/note/2024/10/14/election-blog-6/index_files/figure-html/unnamed-chunk-6-1.png" width="672" />
-<pre><code class="language-r">## Campaign Ads Aired By Issue and Party: 2012
-party_issues2012 &lt;- ad_campaigns |&gt;
-  filter(cycle == 2012) |&gt;
-  left_join(ad_creative) |&gt;
-  filter(ad_issue != &quot;None&quot;) |&gt;
-  group_by(cycle, ad_issue) |&gt; mutate(tot_n=n()) |&gt; ungroup() |&gt;
-  group_by(cycle, ad_issue, party) |&gt; summarise(p_n=n()*100/first(tot_n)) |&gt; ungroup() |&gt;
-  group_by(cycle, ad_issue) |&gt; mutate(Dp_n = ifelse(first(party) == &quot;democrat&quot;, first(p_n), 0))
-</code></pre>
-<pre><code>## Joining with `by = join_by(party, creative, cycle)`
-</code></pre>
-<pre><code>## Warning in left_join(filter(ad_campaigns, cycle == 2012), ad_creative): Detected an unexpected many-to-many relationship between `x` and `y`.
-## ℹ Row 7 of `x` matches multiple rows in `y`.
-## ℹ Row 8259 of `y` matches multiple rows in `x`.
-## ℹ If a many-to-many relationship is expected, set `relationship =
-##   &quot;many-to-many&quot;` to silence this warning.
-</code></pre>
-<pre><code>## `summarise()` has grouped output by 'cycle', 'ad_issue'. You can override using
-## the `.groups` argument.
-</code></pre>
-<pre><code class="language-r">ggplot(party_issues2012, aes(x = reorder(ad_issue, Dp_n), y = p_n, fill = party)) + 
-  geom_bar(stat = &quot;identity&quot;) +
-  scale_fill_manual(values = c(&quot;dodgerblue&quot;, &quot;indianred3&quot;)) +
-  ylab(&quot;% of ads on topic from each party&quot;) + xlab(&quot;issue&quot;) +
-  ggtitle(&quot;Campaign Ads Aired by Topic in 2012&quot;) +
-  coord_flip() + 
-  my_blog_theme()
-</code></pre>
-<img src="https://example.org/note/2024/10/14/election-blog-6/index_files/figure-html/unnamed-chunk-6-2.png" width="672" />
+<p><img src="https://example.org/note/2024/10/14/election-blog-6/index_files/figure-html/unnamed-chunk-6-1.png" width="672" /><img src="https://example.org/note/2024/10/14/election-blog-6/index_files/figure-html/unnamed-chunk-6-2.png" width="672" /></p>
 <p><strong>Campaign Spending and Vote Share</strong></p>
 <p>In order to estimate how vote share changes as campaign spending changes, I have run a regression that tracks how much more/less spending the Democratic party put into campaigning by state, as well as how this impacts a one point increase in the two party vote share of the 2008 and 2012 elections. The table below showcases the results of this regression. A few takeaways can be made from this table. To start, when Democrat campaign spending increases, their vote share generally does too. The exception to this is in historically red states, like Arkansas, North Dakota, Idaho, etc., where spending is not statistically significant, and the relationship is also inverse from the general trend.</p>
 <p>Most importantly, campaign spending has has a statistically significant effect on vote share in this upcoming election&rsquo;s battleground states in the past two election. With this knowledge, it&rsquo;s crucial that I update my election prediction to include the effects of campaign spending. Unfortunately, I do not have a dataset detailing Harris&rsquo; and Trump&rsquo;s campaign spending this year, but I can still use trends from 2008 and 2012 to predict this November&rsquo;s outcome.</p>
@@ -503,12 +419,6 @@ party_issues2012 &lt;- ad_campaigns |&gt;
 </table>
 <p><strong>Updating 2024 Prediction Model</strong></p>
 <p>Using data on advertisement contributions, I have updated my election model. In this model, I use the economy, incumbency, and polls to create the best accurate prediction. I do not use demographics because, as shown in Week 5, they do not accurately predict election results. My new model shows that Trump will win 8 out of the 15 states, which is the first model of this blog to give the Republicans an edge.I was unable to analyze the remaining states as the data was not available, but it would be a surreal achievement for Harris to which all remaining 35 states given my model. Given that this is nearly impossible, my updated model, for once, predicts that Trump will win.</p>
-<pre><code class="language-r">#Pooled model
-mod_lm_dem &lt;- lm(D_pv2p.x ~ D_pv2p_lag1.x + D_pv2p_lag2.x + latest_pollav_DEM + GDP_growth_quarterly +
-                        contribution_receipt_amount + incumbent,
-                      data = d_train)  
-simp_pred_dem &lt;- predict(mod_lm_dem, newdata = d_test_simp, interval = &quot;prediction&quot;, level = 0.95)
-</code></pre>
 <p>Table: <span id="tab:unnamed-chunk-12"></span>Table 2: Updated Popular Vote State Predictions</p>
 <table>
   <thead>
@@ -756,12 +666,6 @@ simp_pred_dem &lt;- predict(mod_lm_dem, newdata = d_test_simp, interval = &quot;
       </tr>
   </tbody>
 </table>
-<pre><code class="language-r">final_table_pred &lt;- win_pred |&gt; 
-  group_by(winner.fit) |&gt; 
-  summarize(States = n(), Electorates = sum(electors))
-
-kable(final_table_pred, caption = &quot;Electoral College Distribution&quot;)
-</code></pre>
 <p>Table: <span id="tab:unnamed-chunk-13"></span>Table 3: Electoral College Distribution</p>
 <table>
   <thead>
