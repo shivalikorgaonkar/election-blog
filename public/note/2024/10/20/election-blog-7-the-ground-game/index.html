@@ -44,41 +44,6 @@
 There are a few issues that can be seen from a linear regression model in the context of polling and vote share. For one, these graphs visualize a vote share prediction that exceeds 0%-100%, which is an impossible reality. For example, if a candidate in Florida was able to reach 90% support in the polls, they would be expected to win over 100% of the vote. Additionally, both Nevada and Mississippi have counter-intuitive data displayed, as the former has extremely high variance, and the latter displays a negative slope.
 <p>In order to address some of these issues in the linear regression model, it could be useful to see how a logistic regression model interprets the same correlation. Immediately, it is clear that the y-axis fits a more realistic trend with bounds between 0% and 100%, matching an actual election.</p>
 <img src="https://example.org/note/2024/10/20/election-blog-7-the-ground-game/index_files/figure-html/unnamed-chunk-6-1.png" width="672" />
-<pre><code class="language-r">state_glm_forecast_outputs |&gt;
-  filter(state_abb == &quot;CA&quot; | state_abb == &quot;FL&quot;) |&gt;
-  ggplot(aes(x=x, y=y, ymin=ymin, ymax=ymax)) + 
-  facet_wrap(~ state_abb) +
-  geom_line(aes(color = party)) + 
-  geom_ribbon(aes(fill = party), alpha=0.5, color=NA) +
-  coord_cartesian(ylim=c(0, 100)) +
-  geom_text(data = d |&gt; filter(state_abb == &quot;CA&quot;, party==&quot;DEM&quot;), 
-            aes(x = poll_support, y = D_pv, ymin = D_pv, ymax = D_pv, color = party, label = year), size=1.5) +
-  geom_text(data = d |&gt; filter(state_abb == &quot;CA&quot;, party==&quot;REP&quot;), 
-            aes(x = poll_support, y = D_pv, ymin = D_pv, ymax = D_pv, color = party, label = year), size=1.5) +
-  geom_text(data = d |&gt; filter(state_abb == &quot;FL&quot;, party==&quot;DEM&quot;), 
-            aes(x = poll_support, y = D_pv, ymin = D_pv, ymax = D_pv, color = party, label = year), size=1.5) +
-  geom_text(data = d |&gt; filter(state_abb == &quot;FL&quot;, party==&quot;REP&quot;), 
-            aes(x = poll_support, y = D_pv, ymin = D_pv, ymax = D_pv, color = party, label = year), size=1.5) +
-  scale_color_manual(values = c(&quot;blue&quot;, &quot;red&quot;)) +
-  scale_fill_manual(values = c(&quot;blue&quot;, &quot;red&quot;)) +
-  xlab(&quot;Hypothetical Poll Support&quot;) +
-  ylab('Probability of\nState-Eligible Voter\nVoting for Party') +
-  ggtitle(&quot;Binomial Logit&quot;) + 
-  theme_bw() + 
-  theme(axis.title.y = element_text(size=6.5))
-</code></pre>
-<pre><code>## Warning in geom_text(data = filter(d, state_abb == &quot;CA&quot;, party == &quot;DEM&quot;), :
-## Ignoring unknown aesthetics: ymin and ymax
-</code></pre>
-<pre><code>## Warning in geom_text(data = filter(d, state_abb == &quot;CA&quot;, party == &quot;REP&quot;), :
-## Ignoring unknown aesthetics: ymin and ymax
-</code></pre>
-<pre><code>## Warning in geom_text(data = filter(d, state_abb == &quot;FL&quot;, party == &quot;DEM&quot;), :
-## Ignoring unknown aesthetics: ymin and ymax
-</code></pre>
-<pre><code>## Warning in geom_text(data = filter(d, state_abb == &quot;FL&quot;, party == &quot;REP&quot;), :
-## Ignoring unknown aesthetics: ymin and ymax
-</code></pre>
 <img src="https://example.org/note/2024/10/20/election-blog-7-the-ground-game/index_files/figure-html/unnamed-chunk-7-1.png" width="672" />
 The binomial logistic regression is a non-linear relationship, so we can see that many of the data points don't have a line drawn through them, as seen in th elinear regression. However, a ogistic regression is typically used when the outcome is binary. Since we want to see vote share, though, we can think of each percentage point as a probability of winning a certain share of votes, which works better with the binomial logistic regression framework better.
 <p><strong>Field Offices</strong></p>

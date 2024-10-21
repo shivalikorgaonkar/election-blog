@@ -33,52 +33,6 @@ In order to address some of these issues in the linear regression model, it coul
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-6-1.png" width="672" />
 
-
-```r
-state_glm_forecast_outputs |>
-  filter(state_abb == "CA" | state_abb == "FL") |>
-  ggplot(aes(x=x, y=y, ymin=ymin, ymax=ymax)) + 
-  facet_wrap(~ state_abb) +
-  geom_line(aes(color = party)) + 
-  geom_ribbon(aes(fill = party), alpha=0.5, color=NA) +
-  coord_cartesian(ylim=c(0, 100)) +
-  geom_text(data = d |> filter(state_abb == "CA", party=="DEM"), 
-            aes(x = poll_support, y = D_pv, ymin = D_pv, ymax = D_pv, color = party, label = year), size=1.5) +
-  geom_text(data = d |> filter(state_abb == "CA", party=="REP"), 
-            aes(x = poll_support, y = D_pv, ymin = D_pv, ymax = D_pv, color = party, label = year), size=1.5) +
-  geom_text(data = d |> filter(state_abb == "FL", party=="DEM"), 
-            aes(x = poll_support, y = D_pv, ymin = D_pv, ymax = D_pv, color = party, label = year), size=1.5) +
-  geom_text(data = d |> filter(state_abb == "FL", party=="REP"), 
-            aes(x = poll_support, y = D_pv, ymin = D_pv, ymax = D_pv, color = party, label = year), size=1.5) +
-  scale_color_manual(values = c("blue", "red")) +
-  scale_fill_manual(values = c("blue", "red")) +
-  xlab("Hypothetical Poll Support") +
-  ylab('Probability of\nState-Eligible Voter\nVoting for Party') +
-  ggtitle("Binomial Logit") + 
-  theme_bw() + 
-  theme(axis.title.y = element_text(size=6.5))
-```
-
-```
-## Warning in geom_text(data = filter(d, state_abb == "CA", party == "DEM"), :
-## Ignoring unknown aesthetics: ymin and ymax
-```
-
-```
-## Warning in geom_text(data = filter(d, state_abb == "CA", party == "REP"), :
-## Ignoring unknown aesthetics: ymin and ymax
-```
-
-```
-## Warning in geom_text(data = filter(d, state_abb == "FL", party == "DEM"), :
-## Ignoring unknown aesthetics: ymin and ymax
-```
-
-```
-## Warning in geom_text(data = filter(d, state_abb == "FL", party == "REP"), :
-## Ignoring unknown aesthetics: ymin and ymax
-```
-
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-7-1.png" width="672" />
 The binomial logistic regression is a non-linear relationship, so we can see that many of the data points don't have a line drawn through them, as seen in th elinear regression. However, a ogistic regression is typically used when the outcome is binary. Since we want to see vote share, though, we can think of each percentage point as a probability of winning a certain share of votes, which works better with the binomial logistic regression framework better.
 

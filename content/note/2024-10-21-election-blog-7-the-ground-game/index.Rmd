@@ -253,7 +253,7 @@ ggplot(state_glm_forecast_outputs, aes(x=x, y=y, ymin=ymin, ymax=ymax)) +
   theme_bw()
 ```
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 state_glm_forecast_outputs |>
   filter(state_abb == "CA" | state_abb == "FL") |>
   ggplot(aes(x=x, y=y, ymin=ymin, ymax=ymax)) + 
