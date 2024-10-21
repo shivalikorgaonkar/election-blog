@@ -182,3 +182,9 @@ With all the time and money put into campaign events, it's crucial to recognize 
 ```
 
 Looking back to last week's model, we can compare the effects of campaign events versus advertisements and decide which initiative is more effective and worth investing in. If I were a campaign manager for Harris, based on the past two weeks' findings, I would throw the most funding into in-person events in swing states. This would ensure that vote share increases in contentious places where the election will likely end up being reliant on in November.
+
+**Sources**
+
+https://www.foxnews.com/politics/trump-makes-fries-pennsylvania-mcdonalds-ive-now-worked-15-minutes-more-than-kamala
+
+https://ash.harvard.edu/articles/the-real-numbers-tracking-crowd-sizes-at-presidential-rallies/
