@@ -1,0 +1,397 @@
+---
+title: 'Election Blog #7: The Ground Game'
+author: Shivali Korgaonkar
+date: '2024-10-20'
+slug: election-blog-7-the-ground-game
+categories: []
+tags: []
+---
+
+**Introduction**
+
+Last week, we investigated the impact of campaign advertisements. This week, we will look at campaign events as a strategy for candidates. The 2024 election has been extraordinary in many ways, but one of the most jarring moments traces back to a campaign event from this summer, when Donald Trump survived an assassination attempt. In-person events have a powerful effect on voters, as they carry contagious energy and rally supporters who unite in their excitement over a candidate. They also allow voters to see the way candidates deal speak to an audience and dominate a space. Oftentimes, the bigger rallies lead to an opportunity for candidates to visit local restaurants or meet with different communities. Earlier today, in fact, Trump put in a shift at a McDonald's in Pennsylvania. Joe Biden was often seen at ice cream shops across the country. And, most importantly, a candidate's greatest test was witnessed in their interactions with babies passed to them in rallies.
+
+In this blog, we will investigate historical data on the Ground Game, as well as how it can be used to predict voter turnout this year.
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+####----------------------------------------------------------#
+#### Preamble
+####----------------------------------------------------------#
+
+# Load libraries.
+## install via `install.packages("name")`
+library(geofacet)
+library(ggpubr)
+library(ggthemes)
+library(haven)
+library(kableExtra)
+library(maps)
+library(mgcv)
+library(mgcViz)
+library(RColorBrewer)
+library(scales)
+library(sf)
+library(spData)
+library(stargazer)
+library(tidygeocoder)
+library(tidyverse)
+library(tigris)
+library(tmap)
+library(tmaptools)
+library(viridis)
+
+
+####----------------------------------------------------------#
+#### Read, merge, and process data.
+####----------------------------------------------------------#
+
+# Read popular vote datasets. 
+d_popvote <- read_csv("~/Downloads/popvote_1948_2020.csv")
+d_state_popvote <- read_csv("~/Downloads/state_popvote_1948_2020 (2).csv")
+d_state_popvote[d_state_popvote$state == "District of Columbia",]$state <- "District Of Columbia"
+
+# Read elector distribution dataset. 
+d_ec <- read_csv("~/Downloads/corrected_ec_1948_2024.csv")
+
+
+# Read polling data. 
+d_polls <- read_csv("~/Downloads/national_polls_1968-2024.csv")
+d_state_polls <- read_csv("~/Downloads/state_polls_1968-2024.csv")
+
+# Read turnout data. 
+d_turnout <- read_csv("~/Downloads/state_turnout_1980_2022.csv")
+
+# Read county turnout. 
+d_county_turnout <- read_csv("~/Downloads/county_turnout.csv")
+
+# Read state-level demographics.
+d_state_demog <- read_csv("~/Downloads/demographics.csv")
+
+# Read county demographics. 
+d_county_demog <- read_csv("~/Downloads/county_demographics.csv")
+
+# Read campaign events datasets. 
+d_campaign_events <- read_csv("~/Downloads/campaigns_2016_2024.csv")[,-1]
+
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+####----------------------------------------------------------#
+#### Binomial simulations for election prediction. 
+####----------------------------------------------------------#
+
+# How many days until the election? 
+election.day <- as.Date("2024-11-05")
+current.date <- Sys.Date()
+
+election.day-current.date
+
+# Merge popular vote and polling data. 
+d <- d_state_popvote |> 
+  inner_join(d_state_polls |> filter(weeks_left == 3)) |> 
+  mutate(state_abb = state.abb[match(state, state.name)])
+
+# Generate state-specific univariate poll-based forecasts with linear model.
+state_forecast <- list()
+state_forecast_outputs <- data.frame()
+for (s in unique(d$state_abb)) {
+  # Democrat model.
+  state_forecast[[s]]$dat_D <- d |> filter(state_abb == s, party == "DEM")
+  state_forecast[[s]]$mod_D <- lm(D_pv ~ poll_support, 
+                                  state_forecast[[s]]$dat_D)
+  
+  # Republican model.
+  state_forecast[[s]]$dat_R <- d |> filter(state_abb == s, party == "REP")
+  state_forecast[[s]]$mod_R <- lm(R_pv ~ poll_support, 
+                                  state_forecast[[s]]$dat_R)
+  
+  if (nrow(state_forecast[[s]]$dat_R) > 2) {
+    # Save state-level model estimates. 
+    state_forecast_outputs <- rbind(state_forecast_outputs, 
+                                    rbind(cbind.data.frame(
+                                      intercept = summary(state_forecast[[s]]$mod_D)$coefficients[1,1], 
+                                      intercept_se = summary(state_forecast[[s]]$mod_D)$coefficients[1,2],
+                                      slope = summary(state_forecast[[s]]$mod_D)$coefficients[2,1], 
+                                      state_abb = s, 
+                                      party = "DEM"), 
+                                    rbind(cbind.data.frame(
+                                     intercept = summary(state_forecast[[s]]$mod_R)$coefficients[1,1],
+                                     intercept_se = summary(state_forecast[[s]]$mod_R)$coefficients[1,2],
+                                     slope = summary(state_forecast[[s]]$mod_R)$coefficients[2,1],
+                                     state_abb = s,
+                                     party = "REP"
+                                    ))))
+  }
+}
+```
+
+**Binomial Simulations and Probabilistic Models**
+
+The first two visualizations this week track the relationship between poll support and hypothetical vote share in state-level polls between 1948 and 2020. The second visual looks specifically and California and Florida, for an easier viewing at the trends that can be found in linear regression models.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Make graphs of polls in different states/parties at different levels of strength/significance of outcome. 
+state_forecast_trends <- state_forecast_outputs |> 
+  mutate(`0` = intercept, 
+         `25` = intercept + slope*25, 
+         `50` = intercept + slope*50, 
+         `75` = intercept + slope*75, 
+         `100` = intercept + slope*100) |>
+  select(-intercept, -slope) |> 
+  gather(x, y, -party, -state_abb, -intercept_se) |> 
+  mutate(x = as.numeric(x))
+
+ggplot(state_forecast_trends, aes(x=x, y=y, ymin=y-intercept_se, ymax=y+intercept_se)) + 
+  facet_geo(~ state_abb) +
+  geom_line(aes(color = party)) + 
+  geom_ribbon(aes(fill = party), alpha=0.5, color=NA) +
+  coord_cartesian(ylim=c(0, 100)) +
+  scale_color_manual(values = c("blue", "red")) +
+  scale_fill_manual(values = c("blue", "red")) +
+  xlab("Hypothetical Poll Support") +
+  ylab("Predicted Voteshare\n(pv = A + B * poll)") +
+  ggtitle("") +
+  theme_bw()
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+state_forecast_trends |>
+  filter(state_abb == "CA" | state_abb == "FL")|>
+  ggplot(aes(x=x, y=y, ymin=y-intercept_se, ymax=y+intercept_se)) + 
+  facet_wrap(~ state_abb) +
+  geom_line(aes(color = party)) + 
+  geom_hline(yintercept = 100, lty = 3) +
+  geom_hline(yintercept = 0, lty = 3) + 
+  geom_ribbon(aes(fill = party), alpha=0.5, color=NA) +
+  ## N.B. You can, in fact, combine *different* data and aesthetics
+  ##       in one ggplot; but this usually needs to come at the end 
+  ##       and you must explicitly override all previous aesthetics
+  geom_text(data = d |> filter(state_abb == "CA", party=="DEM"), 
+            aes(x = poll_support, y = D_pv, ymin = D_pv, ymax = D_pv, color = party, label = year), size=1.5) +
+  geom_text(data = d |> filter(state_abb == "CA", party=="REP"), 
+            aes(x = poll_support, y = D_pv, ymin = D_pv, ymax = D_pv, color = party, label = year), size=1.5) +
+  geom_text(data = d |> filter(state_abb == "FL", party=="DEM"), 
+            aes(x = poll_support, y = D_pv, ymin = D_pv, ymax = D_pv, color = party, label = year), size=1.5) +
+  geom_text(data = d |> filter(state_abb == "FL", party=="REP"), 
+            aes(x = poll_support, y = D_pv, ymin = D_pv, ymax = D_pv, color = party, label = year), size=1.5) +
+  scale_color_manual(values = c("blue", "red")) +
+  scale_fill_manual(values = c("blue", "red")) +
+  xlab("Hypothetical Poll Support") +
+  ylab("Predicted Voteshare\n(pv = A + B * poll)") +
+  theme_bw()
+
+```
+There are a few issues that can be seen from a linear regression model in the context of polling and vote share. For one, these graphs visualize a vote share prediction that exceeds 0%-100%, which is an impossible reality. For example, if a candidate in Florida was able to reach 90% support in the polls, they would be expected to win over 100% of the vote. Additionally, both Nevada and Mississippi have counter-intuitive data displayed, as the former has extremely high variance, and the latter displays a negative slope.
+
+In order to address some of these issues in the linear regression model, it could be useful to see how a logistic regression model interprets the same correlation. Immediately, it is clear that the y-axis fits a more realistic trend with bounds between 0% and 100%, matching an actual election.
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+# Merge turnout data into main dataset. 
+d <- d |> 
+  left_join(d_turnout, by = c("state", "year")) |> 
+  filter(year >= 1980) # Filter to when turnout dataset begins. 
+
+# Generate probabilistic univariate poll-based state forecasts. 
+state_glm_forecast <- list()
+state_glm_forecast_outputs <- data.frame()
+for (s in unique(d$state_abb)) {
+  # Democrat model. 
+  state_glm_forecast[[s]]$dat_D <- d |> filter(state_abb == s, party == "DEM")
+  state_glm_forecast[[s]]$mod_D <- glm(cbind(votes_D, vep - votes_D) ~ poll_support, # Cbind(N Success, N Total) for Binomial Model 
+                                      state_glm_forecast[[s]]$dat_D, 
+                                      family = binomial(link = "logit"))
+  
+  # Republican model. 
+  state_glm_forecast[[s]]$dat_R <- d |> filter(state_abb == s, party == "REP")
+  state_glm_forecast[[s]]$mod_R <- glm(cbind(votes_R, vep - votes_R) ~ poll_support, 
+                                      state_glm_forecast[[s]]$dat_R, 
+                                      family = binomial(link = "logit"))
+  
+  if (nrow(state_glm_forecast[[s]]$dat_R) > 2) {
+    for (hypo_avg_poll in seq(from = 0, to = 100, by = 10)) { 
+      # Democrat prediction. 
+      D_pred_vote_prob <- predict(state_glm_forecast[[s]]$mod_D, 
+                                  newdata = data.frame(poll_support = hypo_avg_poll), se = TRUE, type = "response")
+      D_pred_qt <- qt(0.975, df = df.residual(state_glm_forecast[[s]]$mod_D)) # Used in the prediction interval formula. 
+      
+      # Republican prediction. 
+      R_pred_vote_prob <- predict(state_glm_forecast[[s]]$mod_R, 
+                                  newdata = data.frame(poll_support = hypo_avg_poll), se = TRUE, type = "response")
+      R_pred_qt <- qt(0.975, df = df.residual(state_glm_forecast[[s]]$mod_R)) # Used in the prediction interval formula.
+      
+      # Save predictions. 
+      state_glm_forecast_outputs <- rbind(state_glm_forecast_outputs, 
+                                          cbind.data.frame(x = hypo_avg_poll,
+                                                           y = D_pred_vote_prob$fit*100,
+                                                           ymin = (D_pred_vote_prob$fit - D_pred_qt*D_pred_vote_prob$se.fit)*100,
+                                                           ymax = (D_pred_vote_prob$fit + D_pred_qt*D_pred_vote_prob$se.fit)*100,
+                                                           state_abb = s, 
+                                                           party = "DEM"),
+                                          cbind.data.frame(x = hypo_avg_poll,
+                                                           y = R_pred_vote_prob$fit*100,
+                                                           ymin = (R_pred_vote_prob$fit - R_pred_qt*R_pred_vote_prob$se.fit)*100,
+                                                           ymax = (R_pred_vote_prob$fit + R_pred_qt*R_pred_vote_prob$se.fit)*100,
+                                                           state_abb = s, 
+                                                           party = "REP"))
+    }
+  }
+}
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Make graphs of polls in different states/parties at different levels of strength/significance of outcome. 
+ggplot(state_glm_forecast_outputs, aes(x=x, y=y, ymin=ymin, ymax=ymax)) + 
+  facet_geo(~ state_abb) +
+  geom_line(aes(color = party)) + 
+  geom_ribbon(aes(fill = party), alpha=0.5, color=NA) +
+  coord_cartesian(ylim=c(0, 100)) +
+  scale_color_manual(values = c("blue", "red")) +
+  scale_fill_manual(values = c("blue", "red")) +
+  xlab("Hypothetical Poll Support") +
+  ylab('Probability of State-Eligible Voter Voting for Party') +
+  theme_bw()
+```
+
+```{r}
+state_glm_forecast_outputs |>
+  filter(state_abb == "CA" | state_abb == "FL") |>
+  ggplot(aes(x=x, y=y, ymin=ymin, ymax=ymax)) + 
+  facet_wrap(~ state_abb) +
+  geom_line(aes(color = party)) + 
+  geom_ribbon(aes(fill = party), alpha=0.5, color=NA) +
+  coord_cartesian(ylim=c(0, 100)) +
+  geom_text(data = d |> filter(state_abb == "CA", party=="DEM"), 
+            aes(x = poll_support, y = D_pv, ymin = D_pv, ymax = D_pv, color = party, label = year), size=1.5) +
+  geom_text(data = d |> filter(state_abb == "CA", party=="REP"), 
+            aes(x = poll_support, y = D_pv, ymin = D_pv, ymax = D_pv, color = party, label = year), size=1.5) +
+  geom_text(data = d |> filter(state_abb == "FL", party=="DEM"), 
+            aes(x = poll_support, y = D_pv, ymin = D_pv, ymax = D_pv, color = party, label = year), size=1.5) +
+  geom_text(data = d |> filter(state_abb == "FL", party=="REP"), 
+            aes(x = poll_support, y = D_pv, ymin = D_pv, ymax = D_pv, color = party, label = year), size=1.5) +
+  scale_color_manual(values = c("blue", "red")) +
+  scale_fill_manual(values = c("blue", "red")) +
+  xlab("Hypothetical Poll Support") +
+  ylab('Probability of\nState-Eligible Voter\nVoting for Party') +
+  ggtitle("Binomial Logit") + 
+  theme_bw() + 
+  theme(axis.title.y = element_text(size=6.5))
+```
+The binomial logistic regression is a non-linear relationship, so we can see that many of the data points don't have a line drawn through them, as seen in th elinear regression. However, a ogistic regression is typically used when the outcome is binary. Since we want to see vote share, though, we can think of each percentage point as a probability of winning a certain share of votes, which works better with the binomial logistic regression framework better.
+
+**Field Offices**
+
+Every campaign has field offices scattered throughout the country to ensure that specific states are receiving enough attention. Campaigns obviously have a strategy as to where they want these field offices to be placed, so it's helpful to look at past data and detect trends. 
+
+The table below displays information from the 2012 election between Barack Obama and Mitt Romney. This regression highlights a few variables as statistically significant in influencing the placement of field offices. For one, there are more field offices from one candidate in counties where the other candidate is situated, too. Also, if the county was a core republican state, for example, Obama was less likely to place a field office there, and vice versa for democrats. Interestingly, Obama placed more field offices in battle states, but Romney did not.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+####----------------------------------------------------------#
+#### Ground Game: Field offices and campaign events. 
+####----------------------------------------------------------#
+
+# Where should campaigns build field offices? 
+fo_2012 <- read_csv("~/Downloads/fieldoffice_2012_bycounty.csv")
+
+lm_obama <- lm(obama12fo ~ romney12fo + 
+                 swing + 
+                 core_rep + 
+                 swing:romney12fo + 
+                 core_rep:romney12fo + 
+                 battle + 
+                 medage08 + 
+                 pop2008 + 
+                 pop2008^2 + 
+                 medinc08 + 
+                 black + 
+                 hispanic + 
+                 pc_less_hs00 + 
+                 pc_degree00 + 
+                 as.factor(state), 
+               fo_2012)
+
+lm_romney <- lm(romney12fo ~ 
+                  obama12fo + 
+                  swing + 
+                  core_dem + 
+                  swing:obama12fo + 
+                  core_dem:obama12fo + 
+                  battle + 
+                  medage08 + 
+                  pop2008 + 
+                  pop2008^2 + 
+                  medinc08 + 
+                  black + 
+                  hispanic + 
+                  pc_less_hs00 + 
+                  pc_degree00 + 
+                  as.factor(state),
+                  fo_2012)
+
+stargazer(lm_obama, lm_romney, header=FALSE, type='text', no.space = TRUE,
+          column.sep.width = "3pt", font.size = "scriptsize", single.row = TRUE,
+          keep = c(1:7, 62:66), omit.table.layout = "sn",
+          title = "Placement of Field Offices (2012)")
+          
+```
+Further, it's important to look at the impact these field offices have on voter turnout and vote choice. The chart below explains that democrats had a statistically significant increase in both turnout and vote share in battle states with field offices. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Effects of field offices on turnout and vote share. 
+fo_dem <- read_csv("~/Downloads/fieldoffice_2004-2012_dems.csv")
+
+ef_t <- lm(turnout_change ~ dummy_fo_change + battle + dummy_fo_change:battle + as.factor(state) + as.factor(year), fo_dem)
+
+ef_d <- lm(dempct_change ~ dummy_fo_change + battle + dummy_fo_change:battle + as.factor(state) + as.factor(year), fo_dem)
+
+stargazer(ef_t, ef_d, header=FALSE, type='text', no.space = TRUE,
+          column.sep.width = "3pt", font.size = "scriptsize", single.row = TRUE,
+          keep = c(1:3, 53:54), keep.stat = c("n", "adj.rsq", "res.dev"),
+          title = "Effect of DEM Field Offices on Turnout and DEM Vote Share (2004-2012)")
+```
+**Campaign Events**
+
+The timeline of candidates hosting events has varied between the 2016, 2020, and 2024 elections. More generally, events shoot up in frequency as Election Day approaches, which can be seen in the 2016 and 2020 elections. This is useful in predicting that this year, a similar spike will occur in the next two weeks. Republicans have a more consistent exponential trajectory from August to November. Democrats have sharp upward/downward curves around September, which is hard to explain. Perhaps they spend October focusing on other aspects of campaigning besides events. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Visualizing campaign events. 
+d_campaign_events$party[d_campaign_events$candidate %in% c("Trump / Pence", "Trump", "Pence", "Trump/Pence", "Vance")] <- "REP"
+d_campaign_events$party[d_campaign_events$candidate %in% c("Biden / Harris", "Biden", "Harris", "Biden/Harris", "Walz", "Kaine", "Clinton", "Clinton / Kaine")] <- "DEM"
+p.ev.1 <- d_campaign_events |> group_by(date, party) |> summarize(n_events = n(), year) |> filter(year == 2016) |> ggplot(aes(x = date, y = n_events, color = party)) + geom_point() + geom_smooth() + ggtitle("2016") + theme_bw()
+p.ev.2 <- d_campaign_events |> group_by(date, party) |> summarize(n_events = n(), year) |> filter(year == 2020) |> ggplot(aes(x = date, y = n_events, color = party)) + geom_point() + geom_smooth() + ggtitle("2020") +  theme_bw()
+p.ev.3 <- d_campaign_events |> group_by(date, party) |> summarize(n_events = n(), year) |> filter(year == 2024) |> ggplot(aes(x = date, y = n_events, color = party)) + geom_point() + geom_smooth() + ggtitle("2024") + theme_bw()
+
+ggarrange(p.ev.1, p.ev.2, p.ev.3)
+
+```
+
+**Campaign Events vs Campaign Ads**
+
+With all the time and money put into campaign events, it's crucial to recognize the impact they have on a candidate's state level vote share. The table below shows that events have a statistically significant impact on vote share. For democrats, events boost their vote share, while for republicans, they reduce their vote share. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Can the number of campaign events predict state-level vote share? 
+d_ev_state <- d_campaign_events |> 
+  group_by(year, state, party) |> 
+  summarize(n_events = n()) |> 
+  pivot_wider(names_from = party, values_from = n_events) |> 
+  rename(n_ev_D = DEM, n_ev_R = REP)
+d_ev_state$n_ev_D[which(is.na(d_ev_state$n_ev_D))] <- 0
+d_ev_state$n_ev_R[which(is.na(d_ev_state$n_ev_R))] <- 0
+d_ev_state$ev_diff_D_R <- d_ev_state$n_ev_D - d_ev_state$n_ev_R
+d_ev_state$ev_diff_R_D <- d_ev_state$n_ev_R - d_ev_state$n_ev_D
+
+d <- d |> 
+  left_join(d_ev_state, by = c("year", "state_abb" = "state"))
+
+lm_ev_D <- lm(D_pv2p ~ n_ev_D + ev_diff_D_R, data = d)
+lm_ev_R <- lm(R_pv2p ~ n_ev_R + ev_diff_R_D, data = d)
+
+stargazer(lm_ev_D, lm_ev_R,
+          type = "text",   
+          title = "Association Between Campaign Events and Voting Outcomes of Interest",
+          covariate.labels = c("Dem Events", "D - R Event Diff", "Rep Events", "R - D Event Diff"),
+          dep.var.labels = c("Dem Vote Share", "Rep Vote Share"))
+```
+
+Looking back to last week's model, we can compare the effects of campaign events versus advertisements and decide which initiative is more effective and worth investing in. If I were a campaign manager for Harris, based on the past two weeks' findings, I would throw the most funding into in-person events in swing states. This would ensure that vote share increases in contentious places where the election will likely end up being reliant on in November.
