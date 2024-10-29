@@ -1,0 +1,376 @@
+---
+title: Election Blog 8: Updated Prediction
+author: Shivali Korgaonkar
+date: '2024-10-27'
+slug: final-election-predictions
+categories: []
+tags: []
+---
+
+**Introduction**
+
+As ballots begin to roll in, tension and excitement around the election are building. Donald Trump hosted a rally at Madison Square Garden with numerous speakers, building the MAGA spirit in a classic, controversial fashion. Kamala Harris has begun her final week campaigning with Barack Obama at her right hand. Polls continue to conflict, but one key factor remains: this election will be very tight.
+
+In this final prediction blog, I will be editing my prediction model to be cohesive and thorough, based on the lessons I have learned over the past 8 weeks in this course. As a class, we have looked at different election indicators, including the economy, demographics, shocks, campaigning, and more. My final model will include some of these indicators that I deemed to be predictive of this election, and excluded others that I have previously calculated to be statistically insignificant. By doing this, I hope to curate the best prediction possible, especially in the swing states of this election, which are Arizona, Georgia, Michigan, Nevada, North Carolina, Pennsylvania, and Wisconsin.
+  
+```{r message=FALSE, warning=FALSE, include=FALSE}
+####----------------------------------------------------------#
+#### Preamble
+####----------------------------------------------------------#
+
+# Load libraries.
+## install via `install.packages("name")`
+library(car)
+library(caret)
+library(cowplot)
+library(curl)
+library(CVXR)
+library(foreign)
+library(geofacet)
+library(glmnet)
+library(haven)
+library(janitor)
+library(kableExtra)
+library(maps)
+library(mlr3)
+library(randomForest)
+library(ranger)
+library(RColorBrewer)
+library(rstan)
+library(scales)
+library(sf)
+library(shinystan)
+library(tidyverse)
+library(viridis)
+
+my_blog_theme <- function() {
+  theme(
+    panel.border = element_blank(),
+    panel.background = element_rect(fill = "gray92"),
+    plot.title = element_text(size = 18, hjust = 0.8, color = "gray16", face = "bold", family = "Times New Roman"), 
+    plot.subtitle = element_text(size = 14, color = "black", hjust = 0.5, family = "Times New Roman"),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    axis.text = element_text(size = 10, family = "Times New Roman"),
+    axis.line = element_line(colour = "black"),
+    axis.title = element_text(size = 12, family = "Times New Roman"),
+    legend.position = "right",
+    legend.text = element_text(size = 12))
+  
+}
+
+####----------------------------------------------------------#
+#### Read, merge, and process data.
+####----------------------------------------------------------#
+
+# Read popular vote datasets. 
+d_popvote <- read_csv("~/Downloads/popvote_1948_2020.csv")
+d_state_popvote <- read_csv("~/Downloads/state_popvote_1948_2020.csv")
+
+# Read elector distribution dataset. 
+d_ec <- read_csv("~/Downloads/corrected_ec_1948_2024.csv")
+
+# Read ads datasets. 
+ad_campaigns <- read_csv("~/Downloads/ad_campaigns_2000-2012.csv")
+ad_creative <- read_csv("~/Downloads/ad_creative_2000-2012.csv")
+ads_2020 <- read_csv("~/Downloads/ads_2020.csv")
+facebook_ads_2020 <- read_csv("~/Downloads/facebook_ads_2020.csv")
+facebook_ads_biden_2020 <- read_csv("~/Downloads/facebook_ads_biden_2020.csv")
+campaign_spending <- read_csv("~/Downloads/FEC_contributions_by_state_2008_2024.csv")
+
+# Read polling data. 
+d_polls <- read_csv("~/Downloads/national_polls_1968-2024.csv")
+d_state_polls <- read_csv("~/Downloads/state_polls_1968-2024.csv")
+
+# Read turnout data. 
+d_turnout <- read_csv("~/Downloads/state_turnout_1980_2022.csv")
+
+# Read county turnout. 
+d_county_turnout <- read_csv("~/Downloads/county_turnout.csv")
+
+# Read state-level demographics.
+d_state_demog <- read_csv("~/Downloads/demographics.csv")
+
+# Read county demographics. 
+d_county_demog <- read_csv("~/Downloads/county_demographics.csv")
+
+# Read campaign events datasets. 
+d_campaign_events <- read_csv("~/Downloads/campaigns_2016_2024.csv")[,-1]
+
+fo_2012 <- read_csv("~/Downloads/fieldoffice_2012_bycounty.csv")
+fo_dem <- read_csv("~/Downloads/fieldoffice_2004-2012_dems.csv")
+
+d_econ <- read_csv("~/Downloads/fred_econ.csv")
+
+```
+
+**Analyzing State Party Preferences**
+
+The map below lays out the party alignment of the states, based on how they voted in 2020. The identified Swing States are established through multiple sources, cited at the bottom of this blog. Assuming these state preferences continue, the current electoral college votes establish **226 votes for Kamala Harris and 219 votes for Donald Trump.** This leaves **93 votes up in the air from the swing states**.
+
+```{r include=FALSE}
+
+d_ec <- d_ec |> 
+      filter(year == 2024) |> 
+      mutate(state = tolower(state))
+  
+# Create Electoral College Map dataset
+us_map <- map_data("state") |> 
+  left_join(d_ec, by = c("region" = "state"))
+
+voting_results <- data.frame(
+  state = tolower(c(
+    "Alabama", "Alaska", "Arizona", "Arkansas", "California", 
+    "Colorado", "Connecticut", "Delaware", "District of Columbia", "Florida", 
+    "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", 
+    "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", 
+    "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", 
+    "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", 
+    "New Jersey", "New Mexico", "New York", "North Carolina", 
+    "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", 
+    "Rhode Island", "South Carolina", "South Dakota", "Tennessee", 
+    "Texas", "Utah", "Vermont", "Virginia", "Washington", 
+    "West Virginia", "Wisconsin", "Wyoming"
+  )),
+  party = c(
+    "Republican", "Republican", "Swing State", "Republican", "Democrat", 
+    "Democrat", "Democrat", "Democrat", "Democrat", "Republican", 
+    "Swing State", "Democrat", "Republican", "Democrat", "Republican", 
+    "Republican", "Republican", "Republican", "Republican", "Democrat", 
+    "Democrat", "Democrat", "Swing State", "Democrat", "Republican", 
+    "Republican", "Republican", "Republican", "Swing State", "Democrat", 
+    "Democrat", "Democrat", "Democrat", "Swing State", 
+    "Republican", "Republican", "Republican", "Democrat", "Swing State", 
+    "Democrat", "Republican", "Republican", "Republican", 
+    "Republican", "Republican", "Democrat", "Democrat", "Democrat", 
+    "Republican", "Swing State", "Republican"
+  )) |> 
+  left_join(d_ec |> 
+              filter(year == 2024) |> 
+              select(state, electors), by = c("state" = "state"))
+
+us_map <- us_map |> 
+  left_join(voting_results, by = c("region" = "state")) |> 
+  mutate(party = ifelse(region == "district of columbia", "Democrat", party))
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, results=}
+
+#Creating the Map
+ggplot(data = us_map, aes(x = long, y = lat, group = group, fill = factor(party))) +
+  geom_polygon(color = "white", size = 0.2) +  
+  scale_fill_manual(values = c("Democrat" = "dodgerblue3", "Republican" = "indianred3", "Swing State" = "oldlace")) +  
+  labs(title = "State Level Predictions (2024)",x = "", y = "", fill = "Predicted Party") +
+  my_blog_theme()
+
+```
+
+**Updating My Prediction Model**
+
+My prediction model is based on Alan Abramowitz's "Time for Change" model, which was extremely accurate in predicting the 2016 election. However, I expand into a few more variables, while also trying to avoid over-fitting. The variables I used, specifically, are historic two party vote share, latest polling averages, economic indicators (GDP, RDPI, unemployment), June approval rating, and incumbency.
+
+I used a few different methods to try to create an accurate model. For starters, I used lagged vote share to enhance predictive power and better account for historic trends. I also used a Lasso regression, because Lasso simplifies model interpretation and enhances focus on the most important predictors. It handles multicollinearity well, which has more stable estimates and  predictive accuracy. Finally, after running this regression, I accounting for the weighted error to update my prediction.
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+
+# Process state-level polling data.
+d_pollav_state <- d_state_polls |>
+  group_by(year, state, party) |>
+  filter(state %in% c("Arizona", "Georgia", "Michigan", "Nevada", 
+                      "North Carolina", "Pennsylvania", "Wisconsin"),
+         year >= 1980) |>
+  mutate(mean_pollav = mean(poll_support, na.rm = TRUE)) |>
+  top_n(1, poll_date) |>
+  rename(latest_pollav = poll_support) |>
+  select(-c(weeks_left, days_left, poll_date, candidate, before_convention)) |>
+  pivot_wider(names_from = party, values_from = c(latest_pollav, mean_pollav))
+
+d_econ <- d_econ |> 
+  filter((quarter == 2 & !is.na(GDP_growth_quarterly)) | 
+         (quarter == 4 & (!is.na(RDPI_growth_quarterly) | !is.na(unemployment)))) |> 
+  select(year, quarter, GDP_growth_quarterly, RDPI_growth_quarterly, unemployment) |> 
+  filter(year >= 1980)
+
+```
+
+```{r include=FALSE}
+# Merge data.
+d <- d_pollav_state |>
+  left_join(d_state_popvote, by = c("year", "state")) |>
+  left_join(d_popvote |> filter(party == "democrat"), by = "year") |>
+  left_join(d_econ, by = "year") |>
+  filter(incumbent_party) |>
+  mutate(incumbent = as.numeric(incumbent)) |>
+  filter(year >= 1980) |>
+  ungroup()
+
+# Sequester states for which we have polling data for 2024.
+states.2024 <- unique(d$state[d$year == 2024])
+d <- d |>
+  filter(state %in% states.2024)
+
+# Separate into training and testing for simple poll prediction model. 
+d_train <- d |> 
+  filter(year < 2024)
+d_test <- d |> 
+  filter(year == 2024)
+
+# Add back in lagged vote share for 2024. 
+t <- d |> 
+  filter(year >= 2016) |> 
+  arrange(year) |> 
+  group_by(state) |> 
+  mutate(
+    D_pv2p_lag1 = lag(D_pv2p, 1),
+    R_pv2p_lag1 = lag(R_pv2p, 1), 
+    D_pv2p_lag2 = lag(D_pv2p, 2),
+    R_pv2p_lag2 = lag(R_pv2p, 2)) |> 
+  filter(year == 2024) |> 
+  select(state, year, D_pv2p, R_pv2p, D_pv2p_lag1, R_pv2p_lag1, D_pv2p_lag2, R_pv2p_lag2) 
+
+simp.vars <- c("D_pv2p_lag1", "D_pv2p_lag2", "latest_pollav_DEM", "GDP_growth_quarterly", "juneapp", "incumbent", "RDPI_growth_quarterly", "unemployment")
+
+# Subset testing data to only relevant variables for our simple model. 
+d_test_simp <- d_test |> 
+  select(-c(R_pv2p, R_pv2p_lag1, R_pv2p_lag2, 
+            D_pv2p, D_pv2p_lag1, D_pv2p_lag2)) |> 
+  left_join(t, by = c("state", "year")) |> 
+  select(state, year, all_of(simp.vars))
+```
+
+
+```{r include=FALSE}
+
+#glmnet
+X_train <- model.matrix(D_pv2p ~ ., data = d_train[, c(simp.vars, "D_pv2p")])[, -1] 
+y_train <- d_train$D_pv2p
+
+#cross-validation
+cv_control <- trainControl(method = "cv", number = 10)   
+
+#Lasso model
+lasso_model <- train(
+  x = X_train,
+  y = y_train,
+  method = "glmnet",
+  trControl = cv_control,
+  tuneGrid = expand.grid(alpha = 1, lambda = seq(0.001, 0.1, by = 0.001)))
+
+X_test <- model.matrix(~ ., data = d_test_simp[, simp.vars])[, -1]   
+d_test_simp$D_pv2p_pred <- predict(lasso_model, newdata = X_test)
+
+print(d_test_simp %>% select(state, year, D_pv2p_pred))
+
+```
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Add predictions to training data
+d_train$D_pv2p_pred <- predict(lasso_model, newdata = X_train)
+
+#weighted error
+d_train <- d_train %>%
+  mutate(error = D_pv2p_pred - D_pv2p)  
+
+d_train <- d_train %>% 
+  mutate(weight = 1)  
+
+#weighted mean absolute error 
+weighted_error <- sum(abs(d_train$error) * d_train$weight) / sum(d_train$weight)
+
+d_test_simp <- d_test_simp %>%
+  mutate(D_pv2p_adjusted = D_pv2p_pred - weighted_error)
+
+adjusted_pv2p <- print(d_test_simp %>% select(state,D_pv2p_adjusted))
+
+final_pred <- adjusted_pv2p |>
+  mutate(Winner = ifelse(D_pv2p_adjusted >= 50, "Democrat", "Republican"))
+
+kable(final_pred)
+
+```
+
+```{r include=FALSE}
+
+prediction_results <- data.frame(
+  state = tolower(c(
+    "Alabama", "Alaska", "Arizona", "Arkansas", "California", 
+    "Colorado", "Connecticut", "Delaware", "District of Columbia", 
+    "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", 
+    "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", 
+    "Maine", "Maryland", "Massachusetts", "Michigan", 
+    "Minnesota", "Mississippi", "Missouri", "Montana", 
+    "Nebraska", "Nevada", "New Hampshire", "New Jersey", 
+    "New Mexico", "New York", "North Carolina", 
+    "North Dakota", "Ohio", "Oklahoma", "Oregon", 
+    "Pennsylvania", "Rhode Island", "South Carolina", 
+    "South Dakota", "Tennessee", "Texas", "Utah", 
+    "Vermont", "Virginia", "Washington", "West Virginia", 
+    "Wisconsin", "Wyoming")),
+  party = c(
+    "Republican", "Republican", "Democrat", "Republican", "Democrat", 
+    "Democrat", "Democrat", "Democrat", "Democrat", "Republican", 
+    "Democrat", "Democrat", "Republican", "Democrat", "Republican", 
+    "Republican", "Republican", "Republican", "Republican", "Democrat", 
+    "Democrat", "Democrat", "Democrat", "Democrat", "Republican", 
+    "Republican", "Republican", "Republican", "Democrat", "Democrat", 
+    "Democrat", "Democrat", "Democrat", "Democrat", 
+    "Republican", "Republican", "Republican", "Democrat", "Democrat", 
+    "Democrat", "Republican", "Republican", "Republican", 
+    "Republican", "Republican", "Democrat", "Democrat", "Democrat", 
+    "Republican", "Democrat", "Republican"
+  )) |>
+  left_join(d_ec |> 
+              filter(year == 2024) |> 
+              select(state, electors), by = c("state" = "state"))
+  
+
+us_map_prediction <- map_data("state")
+
+us_map_prediction <- us_map_prediction |> 
+  left_join(d_ec |> 
+      filter(year == 2024) |> 
+      mutate(state = tolower(state)), 
+      by = c("region" = "state"))
+
+
+# Merge the US map with the party data
+us_map_prediction <- us_map_prediction |>
+  left_join(prediction_results, by = c("region" = "state")) |>
+  mutate(party = ifelse(region == "district of columbia", "Democrat", party))
+```
+
+The updated map below estimates how states will vote in the 2024 election, according to my model. Currently, it appears that all the swing states will turn blue.
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+
+ggplot(data = us_map_prediction, aes(x = long, y = lat, group = group, fill = party)) +
+  geom_polygon(color = "white") +
+  coord_fixed(1.3) +
+  scale_fill_manual(values = c("Democrat" = "dodgerblue3", "Republican" = "indianred3")) +
+  labs(title = "2024 Election Prediction", x = "", y = "", fill = "Party") +
+  my_blog_theme()
+
+```
+
+As you can see below, my prediction model this week shows that Kamala Harris will defeat Donald Trump by a landslide. Since this is highly unprobable, I will devote the next section to areas where my prediction can be improved for the final model next week.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+ggplot(prediction_results, aes(x = party, y = electors, fill = party)) +
+  geom_bar(stat = "identity") +
+  geom_hline(yintercept = 270, linetype = "dashed", color = "black") +
+  scale_fill_manual(values = c("Democrat" = "dodgerblue3", "Republican" = "indianred3")) +
+  labs(title = "Total Electoral Votes by Party",
+       y = "Total Electors",
+       x = "Party") +
+  my_blog_theme() 
+```
+
+**Improvements for Next Week**
+
+I am definitely not confident in my current model, despite the fact that I believe I used all the predictive indicators that I have found significant over the past 8 weeks. There are a few things that I would like to correct over the next week before Election Day arrives. For one, I would like to run the same regression on a state-level, as opposed to the national level. Additionally, I would like to review the variables we've discussed, including campaign spending, field offices, demographics, etc. On the other hand, I may have used too many variables, in which case I will simplify my model further to avoid over-fitting. 
+
+**Sources**
+
+https://www.nytimes.com/2024/10/28/us/politics/trump-msg-rally-speaker-remarks.html
+
+https://centerforpolitics.org/crystalball/2024-president/ 
