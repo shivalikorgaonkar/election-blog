@@ -42,26 +42,26 @@ I used a few different methods to try to create an accurate model. For starters,
 ## # A tibble: 7 × 2
 ##   state          D_pv2p_adjusted
 ##   <chr>                    <dbl>
-## 1 Arizona                   56.4
-## 2 Georgia                   56.2
-## 3 Michigan                  57.8
-## 4 Nevada                    58.0
-## 5 North Carolina            56.6
-## 6 Pennsylvania              57.5
-## 7 Wisconsin                 58.3
+## 1 Arizona                   55.9
+## 2 Georgia                   55.7
+## 3 Michigan                  57.3
+## 4 Nevada                    57.5
+## 5 North Carolina            56.1
+## 6 Pennsylvania              57.1
+## 7 Wisconsin                 57.8
 ```
 
 
 
 |state          | D_pv2p_adjusted|Winner   |
 |:--------------|---------------:|:--------|
-|Arizona        |        56.39268|Democrat |
-|Georgia        |        56.21768|Democrat |
-|Michigan       |        57.76461|Democrat |
-|Nevada         |        58.01514|Democrat |
-|North Carolina |        56.59124|Democrat |
-|Pennsylvania   |        57.53703|Democrat |
-|Wisconsin      |        58.27187|Democrat |
+|Arizona        |        55.92754|Democrat |
+|Georgia        |        55.74964|Democrat |
+|Michigan       |        57.29133|Democrat |
+|Nevada         |        57.54824|Democrat |
+|North Carolina |        56.12297|Democrat |
+|Pennsylvania   |        57.06537|Democrat |
+|Wisconsin      |        57.78875|Democrat |
 
 
 
@@ -82,3 +82,5 @@ I am definitely not confident in my current model, despite the fact that I belie
 https://www.nytimes.com/2024/10/28/us/politics/trump-msg-rally-speaker-remarks.html
 
 https://centerforpolitics.org/crystalball/2024-president/ 
+
+https://www.ibm.com/topics/lasso-regression#:~:text=Lasso%20regression%20is%20a%20regularization,regularization%20for%20linear%20regression%20models.

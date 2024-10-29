@@ -376,3 +376,5 @@ I am definitely not confident in my current model, despite the fact that I belie
 https://www.nytimes.com/2024/10/28/us/politics/trump-msg-rally-speaker-remarks.html
 
 https://centerforpolitics.org/crystalball/2024-president/ 
+
+https://www.ibm.com/topics/lasso-regression#:~:text=Lasso%20regression%20is%20a%20regularization,regularization%20for%20linear%20regression%20models.
