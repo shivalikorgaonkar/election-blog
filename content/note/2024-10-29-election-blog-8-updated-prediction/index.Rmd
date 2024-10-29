@@ -1,5 +1,5 @@
 ---
-title: Election Blog #8: Updated Prediction
+title: 'Election Blog 8: Updated Prediction'
 author: Shivali Korgaonkar
 date: '2024-10-27'
 slug: final-election-predictions
@@ -154,7 +154,7 @@ us_map <- us_map |>
 
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, results=}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 #Creating the Map
 ggplot(data = us_map, aes(x = long, y = lat, group = group, fill = factor(party))) +
@@ -262,6 +262,8 @@ d_test_simp$D_pv2p_pred <- predict(lasso_model, newdata = X_test)
 print(d_test_simp %>% select(state, year, D_pv2p_pred))
 
 ```
+
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 # Add predictions to training data
 d_train$D_pv2p_pred <- predict(lasso_model, newdata = X_train)
@@ -374,5 +376,3 @@ I am definitely not confident in my current model, despite the fact that I belie
 https://www.nytimes.com/2024/10/28/us/politics/trump-msg-rally-speaker-remarks.html
 
 https://centerforpolitics.org/crystalball/2024-president/ 
-
-https://www.ibm.com/topics/lasso-regression#:~:text=Lasso%20regression%20is%20a%20regularization,regularization%20for%20linear%20regression%20models.

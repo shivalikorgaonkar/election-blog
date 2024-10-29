@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Election Blog 8: Updated Prediction | A minimal Hugo website</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    
+  </head>
+
+  <body>
+    <nav>
+    <ul class="menu">
+      
+      <li><a href="/">Home</a></li>
+      
+      <li><a href="/about/">About</a></li>
+      
+      <li><a href="/categories/">Categories</a></li>
+      
+      <li><a href="/tags/">Tags</a></li>
+      
+      <li><a href="/index.xml">Subscribe</a></li>
+      
+    </ul>
+    <hr/>
+    </nav>
+
+<div class="article-meta">
+<h1><span class="title">Election Blog 8: Updated Prediction</span></h1>
+<h2 class="author">Shivali Korgaonkar</h2>
+<h2 class="date">2024/10/27</h2>
+</div>
+
+<main>
+<p><strong>Introduction</strong></p>
+<p>As ballots begin to roll in, tension and excitement around the election are building. Donald Trump hosted a rally at Madison Square Garden with numerous speakers, building the MAGA spirit in a classic, controversial fashion. Kamala Harris has begun her final week campaigning with Barack Obama at her right hand. Polls continue to conflict, but one key factor remains: this election will be very tight.</p>
+<p>In this final prediction blog, I will be editing my prediction model to be cohesive and thorough, based on the lessons I have learned over the past 8 weeks in this course. As a class, we have looked at different election indicators, including the economy, demographics, shocks, campaigning, and more. My final model will include some of these indicators that I deemed to be predictive of this election, and excluded others that I have previously calculated to be statistically insignificant. By doing this, I hope to curate the best prediction possible, especially in the swing states of this election, which are Arizona, Georgia, Michigan, Nevada, North Carolina, Pennsylvania, and Wisconsin.</p>
+<p><strong>Analyzing State Party Preferences</strong></p>
+<p>The map below lays out the party alignment of the states, based on how they voted in 2020. The identified Swing States are established through multiple sources, cited at the bottom of this blog. Assuming these state preferences continue, the current electoral college votes establish <strong>226 votes for Kamala Harris and 219 votes for Donald Trump.</strong> This leaves <strong>93 votes up in the air from the swing states</strong>.</p>
+<img src="https://example.org/note/2024/10/27/final-election-predictions/index_files/figure-html/unnamed-chunk-3-1.png" width="672" />
+<p><strong>Updating My Prediction Model</strong></p>
+<p>My prediction model is based on Alan Abramowitz&rsquo;s &ldquo;Time for Change&rdquo; model, which was extremely accurate in predicting the 2016 election. However, I expand into a few more variables, while also trying to avoid over-fitting. The variables I used, specifically, are historic two party vote share, latest polling averages, economic indicators (GDP, RDPI, unemployment), June approval rating, and incumbency.</p>
+<p>I used a few different methods to try to create an accurate model. For starters, I used lagged vote share to enhance predictive power and better account for historic trends. I also used a Lasso regression, because Lasso simplifies model interpretation and enhances focus on the most important predictors. It handles multicollinearity well, which has more stable estimates and  predictive accuracy. Finally, after running this regression, I accounting for the weighted error to update my prediction.</p>
+<pre><code>## # A tibble: 7 × 2
+##   state          D_pv2p_adjusted
+##   &lt;chr&gt;                    &lt;dbl&gt;
+## 1 Arizona                   56.4
+## 2 Georgia                   56.2
+## 3 Michigan                  57.8
+## 4 Nevada                    58.0
+## 5 North Carolina            56.6
+## 6 Pennsylvania              57.5
+## 7 Wisconsin                 58.3
+</code></pre>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">state</th>
+          <th style="text-align: right">D_pv2p_adjusted</th>
+          <th style="text-align: left">Winner</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">Arizona</td>
+          <td style="text-align: right">56.39268</td>
+          <td style="text-align: left">Democrat</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Georgia</td>
+          <td style="text-align: right">56.21768</td>
+          <td style="text-align: left">Democrat</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Michigan</td>
+          <td style="text-align: right">57.76461</td>
+          <td style="text-align: left">Democrat</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Nevada</td>
+          <td style="text-align: right">58.01514</td>
+          <td style="text-align: left">Democrat</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">North Carolina</td>
+          <td style="text-align: right">56.59124</td>
+          <td style="text-align: left">Democrat</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Pennsylvania</td>
+          <td style="text-align: right">57.53703</td>
+          <td style="text-align: left">Democrat</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Wisconsin</td>
+          <td style="text-align: right">58.27187</td>
+          <td style="text-align: left">Democrat</td>
+      </tr>
+  </tbody>
+</table>
+<p>The updated map below estimates how states will vote in the 2024 election, according to my model. Currently, it appears that all the swing states will turn blue.</p>
+<p>As you can see below, my prediction model this week shows that Kamala Harris will defeat Donald Trump by a landslide. Since this is highly unprobable, I will devote the next section to areas where my prediction can be improved for the final model next week.</p>
+<img src="https://example.org/note/2024/10/27/final-election-predictions/index_files/figure-html/unnamed-chunk-10-1.png" width="672" />
+<p><strong>Improvements for Next Week</strong></p>
+<p>I am definitely not confident in my current model, despite the fact that I believe I used all the predictive indicators that I have found significant over the past 8 weeks. There are a few things that I would like to correct over the next week before Election Day arrives. For one, I would like to run the same regression on a state-level, as opposed to the national level. Additionally, I would like to review the variables we&rsquo;ve discussed, including campaign spending, field offices, demographics, etc. On the other hand, I may have used too many variables, in which case I will simplify my model further to avoid over-fitting.</p>
+<p><strong>Sources</strong></p>
+<p><a href="https://www.nytimes.com/2024/10/28/us/politics/trump-msg-rally-speaker-remarks.html">https://www.nytimes.com/2024/10/28/us/politics/trump-msg-rally-speaker-remarks.html</a></p>
+<p><a href="https://centerforpolitics.org/crystalball/2024-president/">https://centerforpolitics.org/crystalball/2024-president/</a></p>
+
+</main>
+
+  <footer>
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<script src="//cdn.jsdelivr.net/combine/npm/katex/dist/katex.min.js,npm/katex/dist/contrib/auto-render.min.js,npm/@xiee/utils/js/render-katex.js" defer></script>
+
+<script src="//cdn.jsdelivr.net/npm/@xiee/utils/js/center-img.min.js" defer></script>
+
+  
+  <hr/>
+  © <a href="https://yihui.org">Yihui Xie</a> 2017 &ndash; 2024 | <a href="https://github.com/yihui">Github</a> | <a href="https://twitter.com/xieyihui">Twitter</a>
+  
+  </footer>
+  </body>
+</html>
+

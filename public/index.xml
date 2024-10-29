@@ -6,8 +6,15 @@
     <description>Recent content in Home on A minimal Hugo website</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 20 Oct 2024 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 27 Oct 2024 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://example.org/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Election Blog 8: Updated Prediction</title>
+      <link>https://example.org/note/2024/10/27/final-election-predictions/</link>
+      <pubDate>Sun, 27 Oct 2024 00:00:00 +0000</pubDate>
+      <guid>https://example.org/note/2024/10/27/final-election-predictions/</guid>
+      <description>&lt;p&gt;&lt;strong&gt;Introduction&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;p&gt;As ballots begin to roll in, tension and excitement around the election are building. Donald Trump hosted a rally at Madison Square Garden with numerous speakers, building the MAGA spirit in a classic, controversial fashion. Kamala Harris has begun her final week campaigning with Barack Obama at her right hand. Polls continue to conflict, but one key factor remains: this election will be very tight.&lt;/p&gt;&#xA;&lt;p&gt;In this final prediction blog, I will be editing my prediction model to be cohesive and thorough, based on the lessons I have learned over the past 8 weeks in this course. As a class, we have looked at different election indicators, including the economy, demographics, shocks, campaigning, and more. My final model will include some of these indicators that I deemed to be predictive of this election, and excluded others that I have previously calculated to be statistically insignificant. By doing this, I hope to curate the best prediction possible, especially in the swing states of this election, which are Arizona, Georgia, Michigan, Nevada, North Carolina, Pennsylvania, and Wisconsin.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Election Blog #7: The Ground Game</title>
       <link>https://example.org/note/2024/10/20/election-blog-7-the-ground-game/</link>
