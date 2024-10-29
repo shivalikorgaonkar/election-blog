@@ -281,7 +281,7 @@ weighted_error <- sum(abs(d_train$error) * d_train$weight) / sum(d_train$weight)
 d_test_simp <- d_test_simp %>%
   mutate(D_pv2p_adjusted = D_pv2p_pred - weighted_error)
 
-adjusted_pv2p <- print(d_test_simp %>% select(state,D_pv2p_adjusted))
+adjusted_pv2p <- d_test_simp %>% select(state,D_pv2p_adjusted)
 
 final_pred <- adjusted_pv2p |>
   mutate(Winner = ifelse(D_pv2p_adjusted >= 50, "Democrat", "Republican"))
@@ -342,7 +342,7 @@ us_map_prediction <- us_map_prediction |>
 
 The updated map below estimates how states will vote in the 2024 election, according to my model. Currently, it appears that all the swing states will turn blue.
 
-```{r message=FALSE, warning=FALSE, include=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 ggplot(data = us_map_prediction, aes(x = long, y = lat, group = group, fill = party)) +
   geom_polygon(color = "white") +

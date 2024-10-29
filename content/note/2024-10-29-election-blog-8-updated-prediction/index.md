@@ -38,36 +38,21 @@ I used a few different methods to try to create an accurate model. For starters,
 
 
 
-```
-## # A tibble: 7 × 2
-##   state          D_pv2p_adjusted
-##   <chr>                    <dbl>
-## 1 Arizona                   55.9
-## 2 Georgia                   55.7
-## 3 Michigan                  57.3
-## 4 Nevada                    57.5
-## 5 North Carolina            56.1
-## 6 Pennsylvania              57.1
-## 7 Wisconsin                 57.8
-```
-
-
-
 |state          | D_pv2p_adjusted|Winner   |
 |:--------------|---------------:|:--------|
-|Arizona        |        55.92754|Democrat |
-|Georgia        |        55.74964|Democrat |
-|Michigan       |        57.29133|Democrat |
-|Nevada         |        57.54824|Democrat |
-|North Carolina |        56.12297|Democrat |
-|Pennsylvania   |        57.06537|Democrat |
-|Wisconsin      |        57.78875|Democrat |
+|Arizona        |        56.47179|Democrat |
+|Georgia        |        56.29728|Democrat |
+|Michigan       |        57.84509|Democrat |
+|Nevada         |        58.09455|Democrat |
+|North Carolina |        56.67088|Democrat |
+|Pennsylvania   |        57.61724|Democrat |
+|Wisconsin      |        58.35401|Democrat |
 
 
 
 The updated map below estimates how states will vote in the 2024 election, according to my model. Currently, it appears that all the swing states will turn blue.
 
-
+<img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-9-1.png" width="672" />
 
 As you can see below, my prediction model this week shows that Kamala Harris will defeat Donald Trump by a landslide. Since this is highly unprobable, I will devote the next section to areas where my prediction can be improved for the final model next week.
 
