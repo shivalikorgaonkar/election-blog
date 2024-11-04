@@ -38,16 +38,7 @@ I've decided to stick with a LASSO regression for prediction in my model. LASSO 
 
 
 
-
-|state          | Adjusted Democratic 2-Party Vote Share|Winner   |
-|:--------------|--------------------------------------:|:--------|
-|Arizona        |                               50.31952|Democrat |
-|Georgia        |                               50.21222|Democrat |
-|Michigan       |                               51.85806|Democrat |
-|Nevada         |                               52.29263|Democrat |
-|North Carolina |                               50.63740|Democrat |
-|Pennsylvania   |                               51.65998|Democrat |
-|Wisconsin      |                               51.87389|Democrat |
+<img src="../../../../../Desktop/electionblog.png" width="551" />
 
 Above, we can see that my model predicts Arizona and Georgia to be the only two swing states that turn red, ultimately leading to Kamala Harris winning the election. However, it's evident that the margin of victory is very minimal with a popular vote share between 49 and 51 percent. For this reason, I decided to see how much the results would be impacted with the inclusion of the 95% confidence interval.
 

@@ -241,6 +241,7 @@ I've decided to stick with a LASSO regression for prediction in my model. LASSO 
 
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
+
 set.seed(02138)
 #glmnet
 X_train <- model.matrix(D_pv2p ~ ., data = d_train[, c(simp.vars, "D_pv2p")])[, -1] 
@@ -261,6 +262,7 @@ X_test <- model.matrix(~ ., data = d_test_simp[, simp.vars])[, -1]
 d_test_simp$D_pv2p_pred <- predict(lasso_model, newdata = X_test)
 
 print(d_test_simp %>% select(state, year, D_pv2p_pred))
+
 ```
 
 
@@ -287,7 +289,7 @@ final_pred <- adjusted_pv2p |>
   mutate(Winner = ifelse(D_pv2p_adjusted >= 50, "Democrat", "Republican")) |>
   rename("Adjusted Democratic 2-Party Vote Share" = D_pv2p_adjusted)
 
-kable(final_pred)
+knitr::include_graphics("~/Desktop/electionblog.png")
 
 ```
 
