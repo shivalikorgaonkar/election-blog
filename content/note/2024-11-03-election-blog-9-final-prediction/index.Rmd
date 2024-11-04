@@ -223,7 +223,7 @@ t <- d |>
   filter(year == 2024) |> 
   select(state, year, D_pv2p, R_pv2p, D_pv2p_lag1, R_pv2p_lag1, D_pv2p_lag2, R_pv2p_lag2) 
 
-simp.vars <- c("D_pv2p_lag1", "D_pv2p_lag2", "latest_pollav_DEM", "mean_pollav_DEM", "GDP_growth_quarterly", "unemployment", "incumbent")
+simp.vars <- c("D_pv2p_lag1", "D_pv2p_lag2", "latest_pollav_DEM", "mean_pollav_DEM", "GDP_growth_quarterly", "incumbent","unemployment")
 
 # Subset testing data to only relevant variables for our simple model. 
 d_test_simp <- d_test |> 
@@ -391,7 +391,7 @@ ggplot(data = us_map_prediction, aes(x = long, y = lat, group = group, fill = pa
 
 ```
 
-**My final model shows that Kamala Harris will defeat Donald Trump**. As I've emphasized throughout the past nine weeks, I don't think this election will be a landslide victory, so I am not completely confident in the results I have come to, since they give Harris a strong upperhand.
+**My final model shows that Kamala Harris will defeat Donald Trump**. As I've emphasized throughout the past nine weeks, I don't think this election will be a landslide victory, so I am not completely confident in the results I have come to, since they give Harris a strong upper hand.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 

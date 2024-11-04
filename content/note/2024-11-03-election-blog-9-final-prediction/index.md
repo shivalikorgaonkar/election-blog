@@ -41,13 +41,13 @@ I've decided to stick with a LASSO regression for prediction in my model. LASSO 
 
 |state          | Adjusted Democratic 2-Party Vote Share|Winner   |
 |:--------------|--------------------------------------:|:--------|
-|Arizona        |                               50.31881|Democrat |
-|Georgia        |                               50.21152|Democrat |
-|Michigan       |                               51.85735|Democrat |
-|Nevada         |                               52.29192|Democrat |
-|North Carolina |                               50.63669|Democrat |
-|Pennsylvania   |                               51.65927|Democrat |
-|Wisconsin      |                               51.87318|Democrat |
+|Arizona        |                               50.31952|Democrat |
+|Georgia        |                               50.21222|Democrat |
+|Michigan       |                               51.85806|Democrat |
+|Nevada         |                               52.29263|Democrat |
+|North Carolina |                               50.63740|Democrat |
+|Pennsylvania   |                               51.65998|Democrat |
+|Wisconsin      |                               51.87389|Democrat |
 
 Above, we can see that my model predicts Arizona and Georgia to be the only two swing states that turn red, ultimately leading to Kamala Harris winning the election. However, it's evident that the margin of victory is very minimal with a popular vote share between 49 and 51 percent. For this reason, I decided to see how much the results would be impacted with the inclusion of the 95% confidence interval.
 
@@ -56,13 +56,13 @@ Using the 95% confidence interval, we can see that the lower interval leads to a
 
 |state          | Adjusted 2-Party Vote Share| Lower_Interval| Upper_Interval|Winner   |Winner_Lower |Winner_Upper |
 |:--------------|---------------------------:|--------------:|--------------:|:--------|:------------|:------------|
-|Arizona        |                    50.31881|       48.63681|       52.00082|Democrat |Republican   |Democrat     |
-|Georgia        |                    50.21152|       48.52951|       51.89352|Democrat |Republican   |Democrat     |
-|Michigan       |                    51.85735|       50.17535|       53.53936|Democrat |Democrat     |Democrat     |
-|Nevada         |                    52.29192|       50.60991|       53.97393|Democrat |Democrat     |Democrat     |
-|North Carolina |                    50.63669|       48.95469|       52.31870|Democrat |Republican   |Democrat     |
-|Pennsylvania   |                    51.65927|       49.97726|       53.34127|Democrat |Republican   |Democrat     |
-|Wisconsin      |                    51.87318|       50.19117|       53.55518|Democrat |Democrat     |Democrat     |
+|Arizona        |                    50.31952|       48.63752|       52.00152|Democrat |Republican   |Democrat     |
+|Georgia        |                    50.21222|       48.53023|       51.89422|Democrat |Republican   |Democrat     |
+|Michigan       |                    51.85806|       50.17607|       53.54006|Democrat |Democrat     |Democrat     |
+|Nevada         |                    52.29263|       50.61063|       53.97463|Democrat |Democrat     |Democrat     |
+|North Carolina |                    50.63740|       48.95540|       52.31940|Democrat |Republican   |Democrat     |
+|Pennsylvania   |                    51.65998|       49.97798|       53.34197|Democrat |Republican   |Democrat     |
+|Wisconsin      |                    51.87389|       50.19189|       53.55588|Democrat |Democrat     |Democrat     |
 
 
 
@@ -72,7 +72,7 @@ For the sake of visualizing my prediction, I have looked at the adjusted vote sh
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-10-1.png" width="672" />
 
-**My final model shows that Kamala Harris will defeat Donald Trump**. As I've emphasized throughout the past nine weeks, I don't think this election will be a landslide victory, so I am not completely confident in the results I have come to, since they give Harris a strong upperhand.
+**My final model shows that Kamala Harris will defeat Donald Trump**. As I've emphasized throughout the past nine weeks, I don't think this election will be a landslide victory, so I am not completely confident in the results I have come to, since they give Harris a strong upper hand.
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-11-1.png" width="672" />
 
