@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Election Blog #9: Final Prediction | A minimal Hugo website</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    
+  </head>
+
+  <body>
+    <nav>
+    <ul class="menu">
+      
+      <li><a href="/">Home</a></li>
+      
+      <li><a href="/about/">About</a></li>
+      
+      <li><a href="/categories/">Categories</a></li>
+      
+      <li><a href="/tags/">Tags</a></li>
+      
+      <li><a href="/index.xml">Subscribe</a></li>
+      
+    </ul>
+    <hr/>
+    </nav>
+
+<div class="article-meta">
+<h1><span class="title">Election Blog #9: Final Prediction</span></h1>
+<h2 class="author">Shivali Korgaonkar</h2>
+<h2 class="date">2024/11/03</h2>
+</div>
+
+<main>
+<p><strong>Opening Remarks</strong></p>
+<p>T-2 days until Election Day. It&rsquo;s been an absolutely crazy few months, and I can&rsquo;t believe the culmination of all the candidates&rsquo; campaigning is coming to a close. This election result is so important, but my biggest hope is that voters turn out so different communities are represented. Tracking the election and its different variables has been unbelievably insightful, and I&rsquo;m sad this blog will be coming to an end with this blog serving as the final cap. I want to take time to thank Professor Enos and Matthew Dardet for leading an incredible class this semester. Their guidance and instruction has been instrumental to this blog.</p>
+<p><strong>Introducing This Blog</strong></p>
+<p>My model predicts the outcome of the seven swing states identified: Arizona, Georgia, Michigan, Nevada, North Carolina, Pennsylvania, and Wisconsin. The remaining states are assumed to align in the same outcome as the 2020 election. Assuming these preferences continue, the current electoral college votes establish <strong>226 votes for Kamala Harris and 219 votes for Donald Trump.</strong> This leaves <strong>93 votes up in the air from the swing states</strong>.</p>
+<img src="https://example.org/note/2024/11/03/election-blog-9-final-prediction/index_files/figure-html/unnamed-chunk-3-1.png" width="672" />
+<p><strong>My Final Election Model</strong></p>
+<p>My model is a culmination of previous&rsquo; weeks findings of important election indicators. Based on fears around over-fitting, I&rsquo;ve decided to emphasize simplicity in the number of variables I use, as exemplified by Alan Abramowitz’s “Time for Change” model. My final model will contain the variables below: democratic two-party lagged vote share, latest and mean polling averages, second quarter GDP, unemployment, and incumbency. In Week 3, I found that GDP in the second quarter was the best economic indicator. Unemployment was also important, though, especially due to its negative correlation to incumbency, which I&rsquo;ve included. Since last week, I&rsquo;ve removed June approval rating because President Biden was still in office at this point, so I don&rsquo;t think this is representative of Harris&rsquo; approval. However, I&rsquo;ve maintained the incumbency effect because Harris served under President Biden so she has an immediate history in office. The other change from last week is that I have updated polling data. I considered adding in new variables, such as campaign spending and field offices, but, as discussed in Week 7, the campaigns generally cancel each other out, so it would be unhelpful.</p>
+<p>I&rsquo;ve decided to stick with a LASSO regression for prediction in my model. LASSO puts more emphasis on variables with greater impact, in order to reduce the likelihood of over-fitting, which is something to be cautious of with election predictions, since so much changes every 4 years. I also used lagged vote share to enhance predictive power and better account for historic trends. Finally, after running the regression, I accounting for the weighted error to update my prediction. <strong>Election are hard to predict since the sample size is so small. For this reason, my mindset for this model is simplicity.</strong></p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">state</th>
+          <th style="text-align: right">Adjusted Democratic 2-Party Vote Share</th>
+          <th style="text-align: left">Winner</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">Arizona</td>
+          <td style="text-align: right">50.31881</td>
+          <td style="text-align: left">Democrat</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Georgia</td>
+          <td style="text-align: right">50.21152</td>
+          <td style="text-align: left">Democrat</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Michigan</td>
+          <td style="text-align: right">51.85735</td>
+          <td style="text-align: left">Democrat</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Nevada</td>
+          <td style="text-align: right">52.29192</td>
+          <td style="text-align: left">Democrat</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">North Carolina</td>
+          <td style="text-align: right">50.63669</td>
+          <td style="text-align: left">Democrat</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Pennsylvania</td>
+          <td style="text-align: right">51.65927</td>
+          <td style="text-align: left">Democrat</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Wisconsin</td>
+          <td style="text-align: right">51.87318</td>
+          <td style="text-align: left">Democrat</td>
+      </tr>
+  </tbody>
+</table>
+<p>Above, we can see that my model predicts Arizona and Georgia to be the only two swing states that turn red, ultimately leading to Kamala Harris winning the election. However, it&rsquo;s evident that the margin of victory is very minimal with a popular vote share between 49 and 51 percent. For this reason, I decided to see how much the results would be impacted with the inclusion of the 95% confidence interval.</p>
+<p>Using the 95% confidence interval, we can see that the lower interval leads to a Republican win, and the upper interval leads to a Democratic win, both in landslides. This goes to show how close this election will be, and how limited models will be in predicting.</p>
+<pre><code class="language-r">#Creating 95% confidence interval
+
+mean_error &lt;- mean(d_train$error)
+sd_error &lt;- sd(d_train$error)
+
+n &lt;- nrow(d_test_simp)   
+se &lt;- sd_error / sqrt(n)  # standard error of the mean prediction
+
+z_value &lt;- 1.96   
+d_test_simp &lt;- d_test_simp %&gt;%
+  mutate(
+    lower_ci = D_pv2p_adjusted - z_value * se,
+    upper_ci = D_pv2p_adjusted + z_value * se
+  )
+
+# Display the final predictions with confidence intervals
+final_pred &lt;- d_test_simp %&gt;%
+  select(state, D_pv2p_adjusted, lower_ci, upper_ci) %&gt;%
+  mutate(Winner = ifelse(D_pv2p_adjusted &gt;= 50, &quot;Democrat&quot;, &quot;Republican&quot;),
+         Winner_Lower = ifelse(lower_ci &gt;= 50, &quot;Democrat&quot;, &quot;Republican&quot;),
+         Winner_Upper = ifelse(upper_ci &gt;= 50, &quot;Democrat&quot;, &quot;Republican&quot;)) |&gt;
+  rename(&quot;Adjusted 2-Party Vote Share&quot; = D_pv2p_adjusted,
+         Lower_Interval = lower_ci,
+         Upper_Interval = upper_ci)
+
+kable(final_pred)
+</code></pre>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">state</th>
+          <th style="text-align: right">Adjusted 2-Party Vote Share</th>
+          <th style="text-align: right">Lower_Interval</th>
+          <th style="text-align: right">Upper_Interval</th>
+          <th style="text-align: left">Winner</th>
+          <th style="text-align: left">Winner_Lower</th>
+          <th style="text-align: left">Winner_Upper</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">Arizona</td>
+          <td style="text-align: right">50.31881</td>
+          <td style="text-align: right">48.63681</td>
+          <td style="text-align: right">52.00082</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">Democrat</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Georgia</td>
+          <td style="text-align: right">50.21152</td>
+          <td style="text-align: right">48.52951</td>
+          <td style="text-align: right">51.89352</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">Democrat</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Michigan</td>
+          <td style="text-align: right">51.85735</td>
+          <td style="text-align: right">50.17535</td>
+          <td style="text-align: right">53.53936</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">Democrat</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Nevada</td>
+          <td style="text-align: right">52.29192</td>
+          <td style="text-align: right">50.60991</td>
+          <td style="text-align: right">53.97393</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">Democrat</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">North Carolina</td>
+          <td style="text-align: right">50.63669</td>
+          <td style="text-align: right">48.95469</td>
+          <td style="text-align: right">52.31870</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">Democrat</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Pennsylvania</td>
+          <td style="text-align: right">51.65927</td>
+          <td style="text-align: right">49.97726</td>
+          <td style="text-align: right">53.34127</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: left">Democrat</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Wisconsin</td>
+          <td style="text-align: right">51.87318</td>
+          <td style="text-align: right">50.19117</td>
+          <td style="text-align: right">53.55518</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: left">Democrat</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Visualizing My Model</strong></p>
+<p>For the sake of visualizing my prediction, I have looked at the adjusted vote share, instead of the lower and upper confidence intervals. Compared to last week, this map displays that Arizona and Georgia will both vote red. The remaining swing states will remain blue, as predicted last week.</p>
+<img src="https://example.org/note/2024/11/03/election-blog-9-final-prediction/index_files/figure-html/unnamed-chunk-10-1.png" width="672" />
+<p><strong>My final model shows that Kamala Harris will defeat Donald Trump</strong>. As I&rsquo;ve emphasized throughout the past nine weeks, I don&rsquo;t think this election will be a landslide victory, so I am not completely confident in the results I have come to, since they give Harris a strong upperhand.</p>
+<img src="https://example.org/note/2024/11/03/election-blog-9-final-prediction/index_files/figure-html/unnamed-chunk-11-1.png" width="672" />
+<p>My uncertainty can be explained through the numerous anomalies we&rsquo;ve looked into that explain only this election. From the assassination attempt, to candidate switch, to campaign funding, this election has been composed of unpredictable factors. My gut tells me that Kamala Harris will win the election, albeit not by a lot. I believe this because I predict that voter turnout will be higher this year, compared to 2020. I also believe turnout among young people will be high, which is not otherwise true in US history.</p>
+
+</main>
+
+  <footer>
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<script src="//cdn.jsdelivr.net/combine/npm/katex/dist/katex.min.js,npm/katex/dist/contrib/auto-render.min.js,npm/@xiee/utils/js/render-katex.js" defer></script>
+
+<script src="//cdn.jsdelivr.net/npm/@xiee/utils/js/center-img.min.js" defer></script>
+
+  
+  <hr/>
+  © <a href="https://yihui.org">Yihui Xie</a> 2017 &ndash; 2024 | <a href="https://github.com/yihui">Github</a> | <a href="https://twitter.com/xieyihui">Twitter</a>
+  
+  </footer>
+  </body>
+</html>
+
