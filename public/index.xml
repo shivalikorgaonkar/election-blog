@@ -2,80 +2,80 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Home on A minimal Hugo website</title>
-    <link>https://example.org/</link>
+    <link>http://localhost:4321/</link>
     <description>Recent content in Home on A minimal Hugo website</description>
     <generator>Hugo</generator>
     <language>en-us</language>
     <lastBuildDate>Sun, 03 Nov 2024 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://example.org/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:4321/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Election Blog #9: Final Prediction</title>
-      <link>https://example.org/note/2024/11/03/election-blog-9-final-prediction/</link>
+      <link>http://localhost:4321/note/2024/11/03/election-blog-9-final-prediction/</link>
       <pubDate>Sun, 03 Nov 2024 00:00:00 +0000</pubDate>
-      <guid>https://example.org/note/2024/11/03/election-blog-9-final-prediction/</guid>
+      <guid>http://localhost:4321/note/2024/11/03/election-blog-9-final-prediction/</guid>
       <description>&lt;p&gt;&lt;strong&gt;Opening Remarks&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;p&gt;T-2 days until Election Day. It&amp;rsquo;s been an absolutely crazy few months, and I can&amp;rsquo;t believe the culmination of all the candidates&amp;rsquo; campaigning is coming to a close. This election result is so important, but my biggest hope is that voters turn out so different communities are represented. Tracking the election and its different variables has been unbelievably insightful, and I&amp;rsquo;m sad this blog will be coming to an end with this blog serving as the final cap. I want to take time to thank Professor Enos and Matthew Dardet for leading an incredible class this semester. Their guidance and instruction has been instrumental to this blog.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Election Blog 8: Updated Prediction</title>
-      <link>https://example.org/note/2024/10/27/final-election-predictions/</link>
+      <link>http://localhost:4321/note/2024/10/27/final-election-predictions/</link>
       <pubDate>Sun, 27 Oct 2024 00:00:00 +0000</pubDate>
-      <guid>https://example.org/note/2024/10/27/final-election-predictions/</guid>
+      <guid>http://localhost:4321/note/2024/10/27/final-election-predictions/</guid>
       <description>&lt;p&gt;&lt;strong&gt;Introduction&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;p&gt;As ballots begin to roll in, tension and excitement around the election are building. Donald Trump hosted a rally at Madison Square Garden with numerous speakers, building the MAGA spirit in a classic, controversial fashion. Kamala Harris has begun her final week campaigning with Barack Obama at her right hand. Polls continue to conflict, but one key factor remains: this election will be very tight.&lt;/p&gt;&#xA;&lt;p&gt;In this final prediction blog, I will be editing my prediction model to be cohesive and thorough, based on the lessons I have learned over the past 8 weeks in this course. As a class, we have looked at different election indicators, including the economy, demographics, shocks, campaigning, and more. My final model will include some of these indicators that I deemed to be predictive of this election, and excluded others that I have previously calculated to be statistically insignificant. By doing this, I hope to curate the best prediction possible, especially in the swing states of this election, which are Arizona, Georgia, Michigan, Nevada, North Carolina, Pennsylvania, and Wisconsin.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Election Blog #7: The Ground Game</title>
-      <link>https://example.org/note/2024/10/20/election-blog-7-the-ground-game/</link>
+      <link>http://localhost:4321/note/2024/10/20/election-blog-7-the-ground-game/</link>
       <pubDate>Sun, 20 Oct 2024 00:00:00 +0000</pubDate>
-      <guid>https://example.org/note/2024/10/20/election-blog-7-the-ground-game/</guid>
+      <guid>http://localhost:4321/note/2024/10/20/election-blog-7-the-ground-game/</guid>
       <description>&lt;p&gt;&lt;strong&gt;Introduction&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;p&gt;Last week, we investigated the impact of campaign advertisements. This week, we will look at campaign events as a strategy for candidates. The 2024 election has been extraordinary in many ways, but one of the most jarring moments traces back to a campaign event from this summer, when Donald Trump survived an assassination attempt. In-person events have a powerful effect on voters, as they carry contagious energy and rally supporters who unite in their excitement over a candidate. They also allow voters to see the way candidates deal speak to an audience and dominate a space. Oftentimes, the bigger rallies lead to an opportunity for candidates to visit local restaurants or meet with different communities. Earlier today, in fact, Trump put in a shift at a McDonald&amp;rsquo;s in Pennsylvania. Joe Biden was often seen at ice cream shops across the country. And, most importantly, a candidate&amp;rsquo;s greatest test was witnessed in their interactions with babies passed to them in rallies.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Election Blog #6: Campaign Advertising</title>
-      <link>https://example.org/note/2024/10/14/election-blog-6/</link>
+      <link>http://localhost:4321/note/2024/10/14/election-blog-6/</link>
       <pubDate>Mon, 14 Oct 2024 00:00:00 +0000</pubDate>
-      <guid>https://example.org/note/2024/10/14/election-blog-6/</guid>
+      <guid>http://localhost:4321/note/2024/10/14/election-blog-6/</guid>
       <description>&lt;p&gt;&lt;strong&gt;Introduction&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;p&gt;With 3 weeks left until Election Day, American citizens are being bombarded by campaign advertisements on their TVs, social medias, and radio stations. In fact, recent reports showcase that a total half a billion dollars will be spent on advertisements by the two campaigns, with Vice President Kamala Harris dominating this spending amount with 63 percent of the total (The New York Times 2024). In the twentieth century, candidates have taken advantage of Americans&amp;rsquo; media usage to push their policy and personal agenda, which has coined the term &amp;ldquo;Air War,&amp;rdquo; following the 2008 Election where John McCain ramped up attacks against Barack Obama leading up to election day. While ads sometimes focus on the differences in policy, other times they hit on personal discrepancies. In 1988, for example, George HW Bush called out Micheal Dukakis in the &amp;ldquo;Tank Ride&amp;rdquo; ad for being anti-war previously, yet pro-war for the sake of winning the election. This as is often credited as being the defining reason Dukakis&amp;rsquo; campaign failed (Schulte 2008). The ads are especially focused on the key battle states in an effort to convince them in these crucial next 21 days before Election Day, which can be viewed in the distribution below, detailing the 2012 spending by state. (Digiday 2024).&lt;/p&gt;</description>
     </item>
     <item>
       <title>Election Blog #5: Demographics</title>
-      <link>https://example.org/note/2024/10/06/election-blog-5-demographics/</link>
+      <link>http://localhost:4321/note/2024/10/06/election-blog-5-demographics/</link>
       <pubDate>Sun, 06 Oct 2024 00:00:00 +0000</pubDate>
-      <guid>https://example.org/note/2024/10/06/election-blog-5-demographics/</guid>
+      <guid>http://localhost:4321/note/2024/10/06/election-blog-5-demographics/</guid>
       <description>&lt;p&gt;&lt;strong&gt;Introduction&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;p&gt;There are many stereotypes surrounding voter demographics and how they can predict presidential candidate support. Whether it be sexuality, occupation, or immigration status, Americans often mentally associate different identities with different parties. In an attempt to break these stereotypes, we&amp;rsquo;ve seen groups like &amp;ldquo;Gays for Trump,&amp;rdquo; which attempt to break oxymoronic identity alignments. We&amp;rsquo;ve also seen backlash to such beliefs among communities who believe that their specific needs won&amp;rsquo;t get represented properly.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Election Blog #4: Incumbency</title>
-      <link>https://example.org/note/2024/09/29/election-blog-4-incumbency/</link>
+      <link>http://localhost:4321/note/2024/09/29/election-blog-4-incumbency/</link>
       <pubDate>Sun, 29 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://example.org/note/2024/09/29/election-blog-4-incumbency/</guid>
+      <guid>http://localhost:4321/note/2024/09/29/election-blog-4-incumbency/</guid>
       <description>&lt;p&gt;&lt;strong&gt;Introduction&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;p&gt;The 2024 Election holds a unique duel, being that it is between an incumbent president and a candidate from the incumbent administration. Many presidential models have special considerations when making election predictions based on incumbency adjustment. There are both advantages and disadvantages to incumbency. Generally, incumbents have an advantage when they have more media coverage (name recognition), campaign finance access, or &amp;ldquo;pork&amp;rdquo; (short term economic gains and credit-claiming). On the other hand, incumbents may be disadvantaged when there is a polarized electorate, recessions/disasters, or incumbency fatigue.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Election Blog #3: Polling Predictions</title>
-      <link>https://example.org/note/2024/09/22/election-blog-3/</link>
+      <link>http://localhost:4321/note/2024/09/22/election-blog-3/</link>
       <pubDate>Sun, 22 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://example.org/note/2024/09/22/election-blog-3/</guid>
+      <guid>http://localhost:4321/note/2024/09/22/election-blog-3/</guid>
       <description>&lt;p&gt;&lt;strong&gt;Introduction&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;p&gt;There are numerous different resources that prospective voters can use to track an election. Almost every new outlet has their own poll, and major election tracking sites, like FiveThirtyEight, are publicly available for anyone to monitor. There&amp;rsquo;s great debate surrounding the purpose and benefit of polls. These polls are especially useful for campaigns to track shifts in their support between states and districts. It can also allow citizens to see how fellow Americans are reacting to current events across the country. However, polls have significant limitations. Sampling errors, biased methodologies, and low response rates can skew results. Additionally, they may influence voter behavior who can see one candidate drastically succeeding in their state, convincing them to stay home on election day. Unexpected events or late voter shifts can drastically alter outcomes, making predictions unreliable, but they are still a useful resource for researchers to predict election outcomes based on history and voter preferences.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Blog #2: Economic Predictors</title>
-      <link>https://example.org/note/2024/09/12/blog-2-economic-predictors/</link>
+      <link>http://localhost:4321/note/2024/09/12/blog-2-economic-predictors/</link>
       <pubDate>Thu, 12 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://example.org/note/2024/09/12/blog-2-economic-predictors/</guid>
+      <guid>http://localhost:4321/note/2024/09/12/blog-2-economic-predictors/</guid>
       <description>&lt;p&gt;An incumbent president running for re-election reaps both benefits and barriers. For one, they are a candidate that the American people are familiar with and normalized to. That being said, the American people also have four years of work to analyze and interpret. The condition of the United States is put on the sitting Commander-in-Chief who is already in the position to lead the economy, culture, and social circumstances of their country. In the past decade, we&amp;rsquo;ve seen Former President Barack Obama benefit in his re-election campaign against Mitt Romney, having been in a post-Hurricane Sandy relief era and reviving the economy after a significant bump during his mid-terms. On the other end, we saw Former President Donald Trump face the repercussions of controversial foreign relations, poor COVID-19 relief, and high unemployment in 2020.&#xA;With this in mind, my second blog post will focus on different independent variables that can be used to predict the outcome of the 2024 election. Specifically, I will use economic variables to analyze their predictive abilities in elections between 1948 and 2020, in order to see the variable(s) best suited to predict the election in November.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Election Blog #1: Preliminary Prediction</title>
-      <link>https://example.org/note/2024/09/09/election-blog-1-preliminary-prediction/</link>
+      <link>http://localhost:4321/note/2024/09/09/election-blog-1-preliminary-prediction/</link>
       <pubDate>Mon, 09 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>https://example.org/note/2024/09/09/election-blog-1-preliminary-prediction/</guid>
+      <guid>http://localhost:4321/note/2024/09/09/election-blog-1-preliminary-prediction/</guid>
       <description>&lt;p&gt;In politics and beyond, history can be an imperative indicator of what will happen in the future. Relative to other predictive models, elections can be difficult because the sample size is small and variant. Nonetheless, voting trends can and should be used to observe national trends.&#xA;American presidential elections have historically narrowed down to the Democratic and Republican candidates&amp;rsquo; respective vote share. The graph above highlights the competitive elections that have taken place between 1948 and 2020 in the United States. The competitive nature of these elections shows promise to our strong democratic systems. They also indicate the importance of using past elections to predict future ones.&lt;/p&gt;</description>
     </item>
     <item>
       <title>About Hugo XMin</title>
-      <link>https://example.org/about/</link>
+      <link>http://localhost:4321/about/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://example.org/about/</guid>
+      <guid>http://localhost:4321/about/</guid>
       <description>&lt;p&gt;&lt;strong&gt;XMin&lt;/strong&gt; is the first Hugo theme I have designed. The original reason that I wrote it was I needed a minimal example of Hugo themes when I was writing the  &lt;a href=&#34;https://github.com/rstudio/blogdown&#34;&gt;&lt;strong&gt;blogdown&lt;/strong&gt;&lt;/a&gt; book. Basically I wanted a simple theme that supports a navigation menu, a home page, other single pages, lists of pages, blog posts, categories, tags, and RSS. That is all. Nothing fancy. In terms of CSS and JavaScript, I really want to keep them minimal. In fact, this theme does not contain any JavaScript code at all, although on this example website I did introduce some JavaScript code (still relatively simple anyway). The theme does not contain any images, either, and is pretty much a plain-text theme.&lt;/p&gt;</description>
     </item>
   </channel>
