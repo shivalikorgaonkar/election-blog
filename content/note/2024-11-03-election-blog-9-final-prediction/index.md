@@ -11,7 +11,7 @@ tags: []
 
 T-2 days until Election Day. It's been an absolutely crazy few months, and I can't believe the culmination of all the candidates' campaigning is coming to a close. This election result is so important, but my biggest hope is that voters turn out so different communities are represented. Tracking the election and its different variables has been unbelievably insightful, and I'm sad this blog will be coming to an end with this blog serving as the final cap. I want to take time to thank Professor Enos and Matthew Dardet for leading an incredible class this semester. Their guidance and instruction has been instrumental to this blog. 
 
-**Introducing This Blog**
+**Introducing The Last Blog**
 
 My model predicts the outcome of the seven swing states identified: Arizona, Georgia, Michigan, Nevada, North Carolina, Pennsylvania, and Wisconsin. The remaining states are assumed to align in the same outcome as the 2020 election. Assuming these preferences continue, the current electoral college votes establish **226 votes for Kamala Harris and 219 votes for Donald Trump.** This leaves **93 votes up in the air from the swing states**.
 
@@ -52,37 +52,6 @@ I've decided to stick with a LASSO regression for prediction in my model. LASSO 
 Above, we can see that my model predicts Arizona and Georgia to be the only two swing states that turn red, ultimately leading to Kamala Harris winning the election. However, it's evident that the margin of victory is very minimal with a popular vote share between 49 and 51 percent. For this reason, I decided to see how much the results would be impacted with the inclusion of the 95% confidence interval.
 
 Using the 95% confidence interval, we can see that the lower interval leads to a Republican win, and the upper interval leads to a Democratic win, both in landslides. This goes to show how close this election will be, and how limited models will be in predicting. 
-
-
-```r
-#Creating 95% confidence interval
-
-mean_error <- mean(d_train$error)
-sd_error <- sd(d_train$error)
-
-n <- nrow(d_test_simp)   
-se <- sd_error / sqrt(n)  # standard error of the mean prediction
-
-z_value <- 1.96   
-d_test_simp <- d_test_simp %>%
-  mutate(
-    lower_ci = D_pv2p_adjusted - z_value * se,
-    upper_ci = D_pv2p_adjusted + z_value * se
-  )
-
-# Display the final predictions with confidence intervals
-final_pred <- d_test_simp %>%
-  select(state, D_pv2p_adjusted, lower_ci, upper_ci) %>%
-  mutate(Winner = ifelse(D_pv2p_adjusted >= 50, "Democrat", "Republican"),
-         Winner_Lower = ifelse(lower_ci >= 50, "Democrat", "Republican"),
-         Winner_Upper = ifelse(upper_ci >= 50, "Democrat", "Republican")) |>
-  rename("Adjusted 2-Party Vote Share" = D_pv2p_adjusted,
-         Lower_Interval = lower_ci,
-         Upper_Interval = upper_ci)
-
-kable(final_pred)
-```
-
 
 
 |state          | Adjusted 2-Party Vote Share| Lower_Interval| Upper_Interval|Winner   |Winner_Lower |Winner_Upper |
