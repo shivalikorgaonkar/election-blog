@@ -324,8 +324,8 @@ final_pred <- d_test_simp %>%
          Lower_Interval = lower_ci,
          Upper_Interval = upper_ci)
 
-kable(final_pred)
-
+img2 <- image_read("electionblog2.png")
+print(img2)
 
 ```
 

@@ -53,15 +53,14 @@ Above, we can see that my model predicts Arizona and Georgia to be the only two 
 Using the 95% confidence interval, we can see that the lower interval leads to a Republican win, and the upper interval leads to a Democratic win, both in landslides. This goes to show how close this election will be, and how limited models will be in predicting. 
 
 
-|state          | Adjusted 2-Party Vote Share| Lower_Interval| Upper_Interval|Winner   |Winner_Lower |Winner_Upper |
-|:--------------|---------------------------:|--------------:|--------------:|:--------|:------------|:------------|
-|Arizona        |                    50.31952|       48.63752|       52.00152|Democrat |Republican   |Democrat     |
-|Georgia        |                    50.21222|       48.53023|       51.89422|Democrat |Republican   |Democrat     |
-|Michigan       |                    51.85806|       50.17607|       53.54006|Democrat |Democrat     |Democrat     |
-|Nevada         |                    52.29263|       50.61063|       53.97463|Democrat |Democrat     |Democrat     |
-|North Carolina |                    50.63740|       48.95540|       52.31940|Democrat |Republican   |Democrat     |
-|Pennsylvania   |                    51.65998|       49.97798|       53.34197|Democrat |Republican   |Democrat     |
-|Wisconsin      |                    51.87389|       50.19189|       53.55588|Democrat |Democrat     |Democrat     |
+```
+## # A tibble: 1 × 7
+##   format width height colorspace matte filesize density
+##   <chr>  <int>  <int> <chr>      <lgl>    <int> <chr>  
+## 1 PNG     2798    453 sRGB       TRUE    184541 57x57
+```
+
+<img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-8-1.png" width="1399" />
 
 
 

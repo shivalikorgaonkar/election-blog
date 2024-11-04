@@ -50,84 +50,12 @@
 <img src="https://example.org/note/2024/11/03/election-blog-9-final-prediction/index_files/figure-html/unnamed-chunk-7-1.png" width="551" />
 <p>Above, we can see that my model predicts Arizona and Georgia to be the only two swing states that turn red, ultimately leading to Kamala Harris winning the election. However, it&rsquo;s evident that the margin of victory is very minimal with a popular vote share between 49 and 51 percent. For this reason, I decided to see how much the results would be impacted with the inclusion of the 95% confidence interval.</p>
 <p>Using the 95% confidence interval, we can see that the lower interval leads to a Republican win, and the upper interval leads to a Democratic win, both in landslides. This goes to show how close this election will be, and how limited models will be in predicting.</p>
-<table>
-  <thead>
-      <tr>
-          <th style="text-align: left">state</th>
-          <th style="text-align: right">Adjusted 2-Party Vote Share</th>
-          <th style="text-align: right">Lower_Interval</th>
-          <th style="text-align: right">Upper_Interval</th>
-          <th style="text-align: left">Winner</th>
-          <th style="text-align: left">Winner_Lower</th>
-          <th style="text-align: left">Winner_Upper</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td style="text-align: left">Arizona</td>
-          <td style="text-align: right">50.31952</td>
-          <td style="text-align: right">48.63752</td>
-          <td style="text-align: right">52.00152</td>
-          <td style="text-align: left">Democrat</td>
-          <td style="text-align: left">Republican</td>
-          <td style="text-align: left">Democrat</td>
-      </tr>
-      <tr>
-          <td style="text-align: left">Georgia</td>
-          <td style="text-align: right">50.21222</td>
-          <td style="text-align: right">48.53023</td>
-          <td style="text-align: right">51.89422</td>
-          <td style="text-align: left">Democrat</td>
-          <td style="text-align: left">Republican</td>
-          <td style="text-align: left">Democrat</td>
-      </tr>
-      <tr>
-          <td style="text-align: left">Michigan</td>
-          <td style="text-align: right">51.85806</td>
-          <td style="text-align: right">50.17607</td>
-          <td style="text-align: right">53.54006</td>
-          <td style="text-align: left">Democrat</td>
-          <td style="text-align: left">Democrat</td>
-          <td style="text-align: left">Democrat</td>
-      </tr>
-      <tr>
-          <td style="text-align: left">Nevada</td>
-          <td style="text-align: right">52.29263</td>
-          <td style="text-align: right">50.61063</td>
-          <td style="text-align: right">53.97463</td>
-          <td style="text-align: left">Democrat</td>
-          <td style="text-align: left">Democrat</td>
-          <td style="text-align: left">Democrat</td>
-      </tr>
-      <tr>
-          <td style="text-align: left">North Carolina</td>
-          <td style="text-align: right">50.63740</td>
-          <td style="text-align: right">48.95540</td>
-          <td style="text-align: right">52.31940</td>
-          <td style="text-align: left">Democrat</td>
-          <td style="text-align: left">Republican</td>
-          <td style="text-align: left">Democrat</td>
-      </tr>
-      <tr>
-          <td style="text-align: left">Pennsylvania</td>
-          <td style="text-align: right">51.65998</td>
-          <td style="text-align: right">49.97798</td>
-          <td style="text-align: right">53.34197</td>
-          <td style="text-align: left">Democrat</td>
-          <td style="text-align: left">Republican</td>
-          <td style="text-align: left">Democrat</td>
-      </tr>
-      <tr>
-          <td style="text-align: left">Wisconsin</td>
-          <td style="text-align: right">51.87389</td>
-          <td style="text-align: right">50.19189</td>
-          <td style="text-align: right">53.55588</td>
-          <td style="text-align: left">Democrat</td>
-          <td style="text-align: left">Democrat</td>
-          <td style="text-align: left">Democrat</td>
-      </tr>
-  </tbody>
-</table>
+<pre><code>## # A tibble: 1 × 7
+##   format width height colorspace matte filesize density
+##   &lt;chr&gt;  &lt;int&gt;  &lt;int&gt; &lt;chr&gt;      &lt;lgl&gt;    &lt;int&gt; &lt;chr&gt;  
+## 1 PNG     2798    453 sRGB       TRUE    184541 57x57
+</code></pre>
+<img src="https://example.org/note/2024/11/03/election-blog-9-final-prediction/index_files/figure-html/unnamed-chunk-8-1.png" width="1399" />
 <p><strong>Visualizing My Model</strong></p>
 <p>For the sake of visualizing my prediction, I have looked at the adjusted vote share, instead of the lower and upper confidence intervals. Compared to last week, this map displays that Arizona and Georgia will both vote red. The remaining swing states will remain blue, as predicted last week.</p>
 <img src="https://example.org/note/2024/11/03/election-blog-9-final-prediction/index_files/figure-html/unnamed-chunk-10-1.png" width="672" />
