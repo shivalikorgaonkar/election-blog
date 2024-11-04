@@ -38,7 +38,15 @@ I've decided to stick with a LASSO regression for prediction in my model. LASSO 
 
 
 
-<img src="../../../../../Desktop/electionblog.png" width="551" />
+
+```
+## # A tibble: 1 × 7
+##   format width height colorspace matte filesize density
+##   <chr>  <int>  <int> <chr>      <lgl>    <int> <chr>  
+## 1 PNG     1102    445 sRGB       TRUE     85205 57x57
+```
+
+<img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-7-1.png" width="551" />
 
 Above, we can see that my model predicts Arizona and Georgia to be the only two swing states that turn red, ultimately leading to Kamala Harris winning the election. However, it's evident that the margin of victory is very minimal with a popular vote share between 49 and 51 percent. For this reason, I decided to see how much the results would be impacted with the inclusion of the 95% confidence interval.
 

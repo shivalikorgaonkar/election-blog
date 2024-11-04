@@ -289,8 +289,9 @@ final_pred <- adjusted_pv2p |>
   mutate(Winner = ifelse(D_pv2p_adjusted >= 50, "Democrat", "Republican")) |>
   rename("Adjusted Democratic 2-Party Vote Share" = D_pv2p_adjusted)
 
-knitr::include_graphics("~/Desktop/electionblog.png")
-
+library(magick)
+img <- image_read("electionblog.png")
+print(img)
 ```
 
 Above, we can see that my model predicts Arizona and Georgia to be the only two swing states that turn red, ultimately leading to Kamala Harris winning the election. However, it's evident that the margin of victory is very minimal with a popular vote share between 49 and 51 percent. For this reason, I decided to see how much the results would be impacted with the inclusion of the 95% confidence interval.
