@@ -470,7 +470,7 @@ ggplot(states_2024, aes(fill = factor(winner))) +
 
 While I correctly assumed that every state besides the swing states would match 2020 results, my model incorrectly predicted that Trump would manage to swing all 7 swing states red. Further, my model overestimated Harris' popular vote share in every state, which can be seen in the error column. The state I had the best prediction for was Georgia, which makes sense because Georgia has one of the greatest number of polls, so its accuracy has been better since 2016. Essentially, most pollsters were most accurate in Georgia, and since my model was heavily reliant on polls, it fits that Georgia performed the best in mine too. Interestingly, Arizona was the only other state I accurately predicted, yet it had my second highest margin of error---after Nevada. Additionally, a small win in my model was that, between Week 8 and 9, I accurately updated my prediction for Georgia and Nevada. I do think it's useful to note, also, that my lower 95% confidence interval would've been much more accurate, likely because of the tight race that polls were predicting. Later in this blog, I will dive further into hypotheses of why my model failed. 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, include=FALSE}
 
 state_outcomes <- read_csv("~/Downloads/state_votes_pres_2024.csv")
 
@@ -487,6 +487,9 @@ results <- results |>
          Actual_Harris_2pv = 100 * harris_votes/(harris_votes + trump_votes)) |>
   select(state, Predicted_Harris_2pv, Predicted_Winner, Actual_Harris_2pv, Actual_Winner) |>
   mutate(Error = Predicted_Harris_2pv - Actual_Harris_2pv)
+```
+
+```{r echo=FALSE}
 
 kable(results,
       caption = "Comparing 2024 Democratic Vote Share Prediction and Outcome")
@@ -495,7 +498,7 @@ kable(results,
 
 The evaluation metrics for my 2024 election model provide some important insights into its performance in predicting the Democratic vote share. The bias of -2.11 indicates that, on average, my model overestimates the Democratic vote share by approximately 2.11 percentage points, suggesting it tends to predict higher vote totals for Democrats than actually occurred. The Mean Squared Error (MSE) of 4.96 reflects  that my model's predictions deviate significantly from the actual results. The Root Mean Squared Error (RMSE) of 2.11 reveals that on average, my predictions are off by 2.11 percentage points. 
 
-```{r}
+```{r include=FALSE}
 #Bias
 mean(results$Actual_Harris_2pv - results$Predicted_Harris_2pv)
 
@@ -512,6 +515,9 @@ eval_metrics <- data.frame(
   Metric = c("Bias", "Mean Squared Error", "Root Mean Squared Error"),
   Error = c(-2.108902, 4.9599, 2.108902)
 )
+```
+
+```{r echo=FALSE}
 
 kable(eval_metrics,
       caption = "2024 Prediction Evaluation Metrics")
@@ -522,7 +528,7 @@ kable(eval_metrics,
 
 Across the country, Trump made impressive progress in gaining more voters than he was able to in 2020. Once again, the polls were were unable to predict this progress, either overestimating Harris or underestimating Trump. This year, Trump built support with white women, Black men, Latino voters, young voters, and suburban voters. The map below shows these voting shifts across counties overwhelming in favor of Trump, relative to his vote share in 2020.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, include=FALSE}
 counties_2024 <- counties(cb = TRUE, resolution = "5m", year = 2023) |> 
   shift_geometry() |> 
   mutate(GEOID = as.numeric(GEOID)) |> 
@@ -544,6 +550,9 @@ county_pop_2024 <- read_csv("~/Downloads/PopulationEstimates.csv") |>
   select(FIPStxt, POP_ESTIMATE_2023)
 counties_2024 <- counties_2024 |> 
   left_join(county_pop_2024, by = c("GEOID" = "FIPStxt"))
+```
+
+```{r echo=FALSE}
 
 counties_2024 |> 
   ggplot() +
