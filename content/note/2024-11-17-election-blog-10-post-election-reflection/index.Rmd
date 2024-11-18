@@ -1,0 +1,607 @@
+---
+title: 'Election Blog #10: Post-Election Reflection'
+author: Shivali Korgaonkar
+date: '2024-11-17'
+slug: election-blog-10-post-election-reflection
+categories: []
+tags: []
+---
+
+**Introduction**
+
+On Tuesday, November 5th, I sat with my entire blocking group in our Eliot House dorm, huddled around a small TV, each anxiously nibbling on the picnic of snacks we had bought in preparation. With four of us being Government concentrators, Election Night was an exciting, but also nerve-wrecking moment. While we all recalled Election Nights since 2012, this one held particular significance, since it was the first time we were able to cast our own ballot. On top of that, no election before had felt as critical as the one in front of our eyes that night. Bouncing between MSNBC's Steve Kornacki and Fox New's Bill Hemmer, we watched the election map coverage from 7PM to 1AM. Supplemented by The New York Time's election coverage and X doom scrolling, the night took us by complete surprise. After months and months of campaign analysis and predictive polling, Donald J. Trump has been elected the 47th President of the United States of America. 
+
+To be clear, the winner was not what surprised me and my roommates. But instead, the magnitude of his victory was astonishing. Across numerous sites, analysts disagreed on who would win this election, but almost all agreed that it would be close. Yet, Trump declared victory in every single swing state, and saw voting shifts in a large majority of counties, relative to 2020. He made great progress among Black and Latino voters, as well as middle-class families. In this blog, I will analyze the election results relative to my own prediction model. I hypothesize that the results fit into an international pattern of backlash against incumbent parties, driven by inflation and post-pandemic economic challenges, leading to most U.S. voter groups swinging toward Republicans. However, key exceptions, such as swing states and urban areas, suggest nuanced shifts, including decreased racial polarization and growing class influence in politics.
+
+**Reviewing My Model**
+
+To recap, my model predicted the outcome of the seven swing states established: Arizona, Georgia, Michigan, Nevada, North Carolina, Pennsylvania, and Wisconsin. The remaining states were assumed to align with the 2020 election outcome. My model contained the following variables: democratic two-party lagged vote share, latest and mean polling averages, second quarter GDP, unemployment, and incumbency. I used a LASSO regression and also accounted for weighted error. As you can see below, my model predicted that Kamala Harris would win all swing states besides Arizona and Georgia. 
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+####----------------------------------------------------------#
+#### Preamble
+####----------------------------------------------------------#
+
+# Load libraries.
+## install via `install.packages("name")`
+library(car)
+library(caret)
+library(cowplot)
+library(curl)
+library(CVXR)
+library(foreign)
+library(geofacet)
+library(glmnet)
+library(haven)
+library(janitor)
+library(kableExtra)
+library(maps)
+library(mlr3)
+library(randomForest)
+library(ranger)
+library(RColorBrewer)
+library(rstan)
+library(scales)
+library(sf)
+library(shinystan)
+library(tidyverse)
+library(viridis)
+library(tigris)
+library(tidycensus)
+library(censable)
+library(ggpubr)
+library(ggthemes)
+library(mgcv)
+library(mgcViz)
+library(readstata13)
+library(scales)
+library(sf)
+library(spData)
+library(stargazer)
+library(tidygeocoder)
+library(tmap)
+library(tmaptools)
+
+my_blog_theme <- function() {
+  theme(
+    panel.border = element_blank(),
+    panel.background = element_rect(fill = "gray92"),
+    plot.title = element_text(size = 18, hjust = 0.8, color = "gray16", face = "bold", family = "Times New Roman"), 
+    plot.subtitle = element_text(size = 14, color = "black", hjust = 0.5, family = "Times New Roman"),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    axis.text = element_text(size = 10, family = "Times New Roman"),
+    axis.line = element_line(colour = "black"),
+    axis.title = element_text(size = 12, family = "Times New Roman"),
+    legend.position = "right",
+    legend.text = element_text(size = 12))
+  
+}
+
+####----------------------------------------------------------#
+#### Read, merge, and process data.
+####----------------------------------------------------------#
+
+# Read popular vote datasets. 
+d_popvote <- read_csv("~/Downloads/popvote_1948_2020.csv")
+d_state_popvote <- read_csv("~/Downloads/state_popvote_1948_2020.csv")
+
+# Read elector distribution dataset. 
+d_ec <- read_csv("~/Downloads/corrected_ec_1948_2024.csv")
+
+# Read ads datasets. 
+ad_campaigns <- read_csv("~/Downloads/ad_campaigns_2000-2012.csv")
+ad_creative <- read_csv("~/Downloads/ad_creative_2000-2012.csv")
+ads_2020 <- read_csv("~/Downloads/ads_2020.csv")
+facebook_ads_2020 <- read_csv("~/Downloads/facebook_ads_2020.csv")
+facebook_ads_biden_2020 <- read_csv("~/Downloads/facebook_ads_biden_2020.csv")
+campaign_spending <- read_csv("~/Downloads/FEC_contributions_by_state_2008_2024.csv")
+
+# Read polling data. 
+d_polls <- read_csv("~/Downloads/national_polls_1968-2024 (2).csv")
+d_state_polls <- read_csv("~/Downloads/state_polls_1968-2024 (2).csv")
+
+# Read turnout data. 
+d_turnout <- read_csv("~/Downloads/state_turnout_1980_2022.csv")
+
+# Read county turnout. 
+d_county_turnout <- read_csv("~/Downloads/county_turnout.csv")
+
+# Read state-level demographics.
+d_state_demog <- read_csv("~/Downloads/demographics.csv")
+
+# Read county demographics. 
+d_county_demog <- read_csv("~/Downloads/county_demographics.csv")
+
+# Read campaign events datasets. 
+d_campaign_events <- read_csv("~/Downloads/campaigns_2016_2024.csv")[,-1]
+
+fo_2012 <- read_csv("~/Downloads/fieldoffice_2012_bycounty.csv")
+fo_dem <- read_csv("~/Downloads/fieldoffice_2004-2012_dems.csv")
+
+d_econ <- read_csv("~/Downloads/fred_econ.csv")
+
+```
+
+```{r include=FALSE}
+
+d_ec <- d_ec |> 
+      filter(year == 2024) |> 
+      mutate(state = tolower(state))
+  
+# Create Electoral College Map dataset
+us_map <- map_data("state") |> 
+  left_join(d_ec, by = c("region" = "state"))
+
+voting_results <- data.frame(
+  state = tolower(c(
+    "Alabama", "Alaska", "Arizona", "Arkansas", "California", 
+    "Colorado", "Connecticut", "Delaware", "District of Columbia", "Florida", 
+    "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", 
+    "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", 
+    "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", 
+    "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", 
+    "New Jersey", "New Mexico", "New York", "North Carolina", 
+    "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", 
+    "Rhode Island", "South Carolina", "South Dakota", "Tennessee", 
+    "Texas", "Utah", "Vermont", "Virginia", "Washington", 
+    "West Virginia", "Wisconsin", "Wyoming"
+  )),
+  party = c(
+    "Republican", "Republican", "Swing State", "Republican", "Democrat", 
+    "Democrat", "Democrat", "Democrat", "Democrat", "Republican", 
+    "Swing State", "Democrat", "Republican", "Democrat", "Republican", 
+    "Republican", "Republican", "Republican", "Republican", "Democrat", 
+    "Democrat", "Democrat", "Swing State", "Democrat", "Republican", 
+    "Republican", "Republican", "Republican", "Swing State", "Democrat", 
+    "Democrat", "Democrat", "Democrat", "Swing State", 
+    "Republican", "Republican", "Republican", "Democrat", "Swing State", 
+    "Democrat", "Republican", "Republican", "Republican", 
+    "Republican", "Republican", "Democrat", "Democrat", "Democrat", 
+    "Republican", "Swing State", "Republican"
+  )) |> 
+  left_join(d_ec |> 
+              filter(year == 2024) |> 
+              select(state, electors), by = c("state" = "state"))
+
+us_map <- us_map |> 
+  left_join(voting_results, by = c("region" = "state")) |> 
+  mutate(party = ifelse(region == "district of columbia", "Democrat", party))
+
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+
+# Process state-level polling data.
+d_pollav_state <- d_state_polls |>
+  group_by(year, state, party) |>
+  filter(state %in% c("Arizona", "Georgia", "Michigan", "Nevada", 
+                      "North Carolina", "Pennsylvania", "Wisconsin"),
+         year >= 1980) |>
+  mutate(mean_pollav = mean(poll_support, na.rm = TRUE)) |>
+  top_n(1, poll_date) |>
+  rename(latest_pollav = poll_support) |>
+  select(-c(weeks_left, days_left, poll_date, candidate, before_convention)) |>
+  pivot_wider(names_from = party, values_from = c(latest_pollav, mean_pollav))
+
+d_econ <- d_econ |> 
+  filter((quarter == 2 & !is.na(GDP_growth_quarterly)) | 
+         (quarter == 4 & (!is.na(CPI) | !is.na(unemployment)))) |> 
+  select(year, quarter, GDP_growth_quarterly, CPI, unemployment) |> 
+  filter(year >= 1980)
+
+```
+
+```{r include=FALSE}
+# Merge data.
+d <- d_pollav_state |>
+  left_join(d_state_popvote, by = c("year", "state")) |>
+  left_join(d_popvote |> filter(party == "democrat"), by = "year") |>
+  left_join(d_econ, by = "year") |>
+  filter(incumbent_party) |>
+  mutate(incumbent = as.numeric(incumbent)) |>
+  filter(year >= 1980) |>
+  ungroup()
+
+# Sequester states for which we have polling data for 2024.
+states.2024 <- unique(d$state[d$year == 2024])
+d <- d |>
+  filter(state %in% states.2024)
+
+# Separate into training and testing for simple poll prediction model. 
+d_train <- d |> 
+  filter(year < 2024)
+d_test <- d |> 
+  filter(year == 2024)
+
+# Add back in lagged vote share for 2024. 
+t <- d |> 
+  filter(year >= 2016) |> 
+  arrange(year) |> 
+  group_by(state) |> 
+  mutate(
+    D_pv2p_lag1 = lag(D_pv2p, 1),
+    R_pv2p_lag1 = lag(R_pv2p, 1), 
+    D_pv2p_lag2 = lag(D_pv2p, 2),
+    R_pv2p_lag2 = lag(R_pv2p, 2)) |> 
+  filter(year == 2024) |> 
+  select(state, year, D_pv2p, R_pv2p, D_pv2p_lag1, R_pv2p_lag1, D_pv2p_lag2, R_pv2p_lag2) 
+
+simp.vars <- c("D_pv2p_lag1", "D_pv2p_lag2", "latest_pollav_DEM", "mean_pollav_DEM", "GDP_growth_quarterly", "incumbent","unemployment")
+
+# Subset testing data to only relevant variables for our simple model. 
+d_test_simp <- d_test |> 
+  select(-c(R_pv2p, R_pv2p_lag1, R_pv2p_lag2, 
+            D_pv2p, D_pv2p_lag1, D_pv2p_lag2)) |> 
+  left_join(t, by = c("state", "year")) |> 
+  select(state, year, all_of(simp.vars))
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+
+set.seed(02138)
+#glmnet
+X_train <- model.matrix(D_pv2p ~ ., data = d_train[, c(simp.vars, "D_pv2p")])[, -1] 
+y_train <- d_train$D_pv2p
+
+#cross-validation
+cv_control <- trainControl(method = "cv", number = 10)   
+
+#Lasso model
+lasso_model <- train(
+  x = X_train,
+  y = y_train,
+  method = "glmnet",
+  trControl = cv_control,
+  tuneGrid = expand.grid(alpha = 1, lambda = seq(0.001, 0.1, by = 0.001)))
+
+X_test <- model.matrix(~ ., data = d_test_simp[, simp.vars])[, -1]   
+d_test_simp$D_pv2p_pred <- predict(lasso_model, newdata = X_test)
+
+print(d_test_simp %>% select(state, year, D_pv2p_pred))
+
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+# Add predictions to training data
+d_train$D_pv2p_pred <- predict(lasso_model, newdata = X_train)
+
+#weighted error
+d_train <- d_train %>%
+  mutate(error = D_pv2p_pred - D_pv2p)  
+
+d_train <- d_train %>% 
+  mutate(weight = 1)  
+
+#weighted mean absolute error 
+weighted_error <- sum(abs(d_train$error) * d_train$weight) / sum(d_train$weight)
+
+d_test_simp <- d_test_simp %>%
+  mutate(D_pv2p_adjusted = D_pv2p_pred - weighted_error)
+
+adjusted_pv2p <- d_test_simp %>% select(state,D_pv2p_adjusted)
+
+final_pred <- adjusted_pv2p |>
+  mutate(Winner = ifelse(D_pv2p_adjusted >= 50, "Democrat", "Republican")) |>
+  rename("Adjusted Democratic 2-Party Vote Share" = D_pv2p_adjusted)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#Creating 95% confidence interval
+
+mean_error <- mean(d_train$error)
+sd_error <- sd(d_train$error)
+
+n <- nrow(d_test_simp)   
+se <- sd_error / sqrt(n)  # standard error of the mean prediction
+
+z_value <- 1.96   
+d_test_simp <- d_test_simp %>%
+  mutate(
+    lower_ci = D_pv2p_adjusted - z_value * se,
+    upper_ci = D_pv2p_adjusted + z_value * se
+  )
+
+# Display the final predictions with confidence intervals
+final_pred <- d_test_simp %>%
+  select(state, D_pv2p_adjusted, lower_ci, upper_ci) %>%
+  mutate(Winner = ifelse(D_pv2p_adjusted >= 50, "Democrat", "Republican"),
+         Winner_Lower = ifelse(lower_ci >= 50, "Democrat", "Republican"),
+         Winner_Upper = ifelse(upper_ci >= 50, "Democrat", "Republican")) |>
+  rename("Adjusted 2-Party Vote Share" = D_pv2p_adjusted,
+         Lower_Interval = lower_ci,
+         Upper_Interval = upper_ci)
+
+```
+
+```{r include=FALSE}
+
+prediction_results <- data.frame(
+  state = tolower(c(
+    "Alabama", "Alaska", "Arizona", "Arkansas", "California", 
+    "Colorado", "Connecticut", "Delaware", "District of Columbia", 
+    "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", 
+    "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", 
+    "Maine", "Maryland", "Massachusetts", "Michigan", 
+    "Minnesota", "Mississippi", "Missouri", "Montana", 
+    "Nebraska", "Nevada", "New Hampshire", "New Jersey", 
+    "New Mexico", "New York", "North Carolina", 
+    "North Dakota", "Ohio", "Oklahoma", "Oregon", 
+    "Pennsylvania", "Rhode Island", "South Carolina", 
+    "South Dakota", "Tennessee", "Texas", "Utah", 
+    "Vermont", "Virginia", "Washington", "West Virginia", 
+    "Wisconsin", "Wyoming")),
+  party = c(
+    "Republican", "Republican", "Republican", "Republican", "Democrat", 
+    "Democrat", "Democrat", "Democrat", "Democrat", "Republican", 
+    "Republican", "Democrat", "Republican", "Democrat", "Republican", 
+    "Republican", "Republican", "Republican", "Republican", "Democrat", 
+    "Democrat", "Democrat", "Democrat", "Democrat", "Republican", 
+    "Republican", "Republican", "Republican", "Democrat", "Democrat", 
+    "Democrat", "Democrat", "Democrat", "Democrat", 
+    "Republican", "Republican", "Republican", "Democrat", "Democrat", 
+    "Democrat", "Republican", "Republican", "Republican", 
+    "Republican", "Republican", "Democrat", "Democrat", "Democrat", 
+    "Republican", "Democrat", "Republican"
+  )) |>
+  left_join(d_ec |> 
+              filter(year == 2024) |> 
+              select(state, electors), by = c("state" = "state"))
+  
+
+us_map_prediction <- map_data("state")
+
+us_map_prediction <- us_map_prediction |> 
+  left_join(d_ec |> 
+      filter(year == 2024) |> 
+      mutate(state = tolower(state)), 
+      by = c("region" = "state"))
+
+
+# Merge the US map with the party data
+us_map_prediction <- us_map_prediction |>
+  left_join(prediction_results, by = c("region" = "state")) |>
+  mutate(party = ifelse(region == "district of columbia", "Democrat", party))
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+ggplot(data = us_map_prediction, aes(x = long, y = lat, group = group, fill = party)) +
+  geom_polygon(color = "white") +
+  coord_fixed(1.3) +
+  scale_fill_manual(values = c("Democrat" = "dodgerblue3", "Republican" = "indianred3")) +
+  labs(title = "2024 Election Prediction", x = "", y = "", fill = "Party") +
+  my_blog_theme()
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+ggplot(prediction_results, aes(x = party, y = electors, fill = party)) +
+  geom_bar(stat = "identity") +
+  geom_hline(yintercept = 270, linetype = "dashed", color = "black") +
+  scale_fill_manual(values = c("Democrat" = "dodgerblue3", "Republican" = "indianred3")) +
+  labs(title = "Total Electoral Votes by Party",
+       y = "Total Electors",
+       x = "Party") +
+  my_blog_theme() 
+```
+
+However, because my margin of victory was minimal with a popular vote share between 49 and 51 percent, I included a 95% confidence interval. In these results, the lower interval gave Trump the popular vote win in every swing state besides Nevada, while the upper interval gave Harris the popular vote win in every swing state.
+
+**How Accurate Was I? (Hint: Not Very)**
+
+The final results of the election gave **Trump 312 electoral votes and Harris 226 electoral votes**. Trump also won the popular vote with 50.1 percent of the vote share. Ultimately, Trump was victorious in all seven of the established swing states, giving him a margin of victory that left many pollsters in shock.
+
+```{r include=FALSE}
+
+# Read 2024 results datasets. 
+d_state_2024 <- read_csv("~/Downloads/state_votes_pres_2024.csv")[-1, 1:6]
+d_county_2024 <- read_csv("~/Downloads/county_votes_pres_2024.csv")[-1, 1:6]
+d_county_2020 <- read_csv("~/Downloads/county_votes_pres_2020.csv")[-1, 1:6]
+
+
+# Process 2024 state and county-level data. 
+d_state_2024 <- d_state_2024 |> 
+  mutate(FIPS = as.numeric(FIPS), 
+         votes_trump = as.numeric(`Donald J. Trump`), 
+         votes_harris = as.numeric(`Kamala D. Harris`), 
+         votes = as.numeric(`Total Vote`), 
+         trump_pv = votes_trump/votes, 
+         harris_pv = votes_harris/votes, 
+         trump_2pv = votes_trump/(votes_trump + votes_harris), 
+         harris_2pv = votes_harris/(votes_trump + votes_harris)) |> 
+  mutate(winner = case_when(votes_trump > votes_harris ~ "REP", 
+                            .default = "DEM")) |> 
+  select(FIPS, `Geographic Name`, `Geographic Subtype`, votes_trump, votes_harris, votes, 
+         winner, trump_pv, harris_pv, trump_2pv, harris_2pv)
+
+d_county_2024 <- d_county_2024 |>
+  mutate(FIPS = as.numeric(FIPS),
+         votes_trump = as.numeric(`Donald J. Trump`), 
+         votes_harris = as.numeric(`Kamala D. Harris`), 
+         votes = as.numeric(`Total Vote`), 
+         trump_pv = votes_trump/votes, 
+         harris_pv = votes_harris/votes, 
+         trump_2pv = votes_trump/(votes_trump + votes_harris), 
+         harris_2pv = votes_harris/(votes_trump + votes_harris)) |> 
+  mutate(winner = case_when(votes_trump > votes_harris ~ "REP", 
+                            .default = "DEM")) |> 
+  select(FIPS, `Geographic Name`, `Geographic Subtype`, votes_trump, votes_harris, votes, 
+         winner, trump_pv, harris_pv, trump_2pv, harris_2pv)
+
+d_county_2020 <- d_county_2020 |> 
+  mutate(FIPS = as.numeric(FIPS),
+         votes_trump_2020 = as.numeric(`Donald J. Trump`), 
+         votes_biden_2020 = as.numeric(`Joseph R. Biden Jr.`), 
+         votes_2020 = as.numeric(`Total Vote`), 
+         trump_pv_2020 = votes_trump_2020/votes_2020, 
+         biden_pv_2020 = votes_biden_2020/votes_2020, 
+         trump_2pv_2020 = votes_trump_2020/(votes_trump_2020 + votes_biden_2020), 
+         biden_2pv_2020 = votes_biden_2020/(votes_trump_2020 + votes_biden_2020)) |> 
+  mutate(winner_2020 = case_when(votes_trump_2020 > votes_biden_2020 ~ "REP", 
+                            .default = "DEM")) |> 
+  select(FIPS, `Geographic Name`, `Geographic Subtype`, votes_trump_2020, votes_biden_2020, votes_2020, 
+         winner_2020, trump_pv_2020, biden_pv_2020, trump_2pv_2020, biden_2pv_2020)
+
+
+```
+
+```{r echo=FALSE}
+
+library(tigris)
+library(sf)
+library(dplyr)
+library(tidyr)
+
+states_2024 <- states(cb = TRUE, year = 2023) |> 
+  shift_geometry() |> 
+  mutate(GEOID = as.numeric(GEOID)) |> 
+  left_join(d_state_2024, by = c("GEOID" = "FIPS")) |> 
+  drop_na()
+
+ggplot(states_2024, aes(fill = factor(winner))) + 
+  geom_sf() + 
+  scale_fill_manual(values = c("DEM" = "dodgerblue3", "REP" = "indianred3")) + 
+  my_blog_theme() + 
+  labs(title = "2024 Presidential Election Results by State", 
+       fill = "Winner") + 
+  theme(legend.position = "bottom") 
+
+```
+
+While I correctly assumed that every state besides the swing states would match 2020 results, my model incorrectly predicted that Trump would manage to swing all 7 swing states red. Further, my model overestimated Harris' popular vote share in every state, which can be seen in the error column. The state I had the best prediction for was Georgia, which makes sense because Georgia has one of the greatest number of polls, so its accuracy has been better since 2016. Essentially, most pollsters were most accurate in Georgia, and since my model was heavily reliant on polls, it fits that Georgia performed the best in mine too. Interestingly, Arizona was the only other state I accurately predicted, yet it had my second highest margin of error---after Nevada. Additionally, a small win in my model was that, between Week 8 and 9, I accurately updated my prediction for Georgia and Nevada. I do think it's useful to note, also, that my lower 95% confidence interval would've been much more accurate, likely because of the tight race that polls were predicting. Later in this blog, I will dive further into hypotheses of why my model failed. 
+
+```{r echo=FALSE}
+
+state_outcomes <- read_csv("~/Downloads/state_votes_pres_2024.csv")
+
+results <- data.frame(
+  state = c("Arizona", "Georgia", "Michigan", "Nevada", "North Carolina", "Pennsylvania", "Wisconsin"),
+  Predicted_Harris_2pv = c(49.82948, 49.74125, 51.33334, 51.73468, 50.14996, 51.14048, 51.35674),
+  Predicted_Winner = c("Republican", "Republican", "Democrat", "Democrat", "Democrat", "Democrat", "Democrat"),
+  Actual_Winner = c("Republican", "Republican", "Republican", "Republican", "Republican", "Republican", "Republican"))
+
+results <- results |>
+  left_join(state_outcomes, by = c("state" = "Geographic Name")) |>
+  mutate(harris_votes = as.numeric(`Kamala D. Harris`),
+         trump_votes = as.numeric(`Donald J. Trump`),
+         Actual_Harris_2pv = 100 * harris_votes/(harris_votes + trump_votes)) |>
+  select(state, Predicted_Harris_2pv, Predicted_Winner, Actual_Harris_2pv, Actual_Winner) |>
+  mutate(Error = Predicted_Harris_2pv - Actual_Harris_2pv)
+
+kable(results)
+
+```
+
+The evaluation metrics for my 2024 election model provide some important insights into its performance in predicting the Democratic vote share. The bias of -2.11 indicates that, on average, my model overestimates the Democratic vote share by approximately 2.11 percentage points, suggesting it tends to predict higher vote totals for Democrats than actually occurred. The Mean Squared Error (MSE) of 4.96 reflects  that my model's predictions deviate significantly from the actual results. The Root Mean Squared Error (RMSE) of 2.11 reveals that on average, my predictions are off by 2.11 percentage points. 
+
+```{r}
+#Bias
+mean(results$Actual_Harris_2pv - results$Predicted_Harris_2pv)
+
+#MSE
+mean((results$Actual_Harris_2pv - results$Predicted_Harris_2pv)^2)
+
+#RMSE
+sqrt(mean(results$Actual_Harris_2pv - results$Predicted_Harris_2pv)^2)
+
+#MAE
+mean(abs(results$Actual_Harris_2pv - results$Predicted_Harris_2pv))
+
+eval_metrics <- data.frame(
+  Metric = c("Bias", "Mean Squared Error", "Root Mean Squared Error"),
+  Error = c(-2.108902, 4.9599, 2.108902)
+)
+
+kable(eval_metrics,
+      caption = "2024 Prediction Evaluation Metrics")
+
+```
+
+**Why Was My Model Inaccurate?**
+
+Across the country, Trump made impressive progress in gaining more voters than he was able to in 2020. Once again, the polls were were unable to predict this progress, either overestimating Harris or underestimating Trump. This year, Trump built support with white women, Black men, Latino voters, young voters, and suburban voters. The map below shows these voting shifts across counties overwhelming in favor of Trump, relative to his vote share in 2020.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+counties_2024 <- counties(cb = TRUE, resolution = "5m", year = 2023) |> 
+  shift_geometry() |> 
+  mutate(GEOID = as.numeric(GEOID)) |> 
+  left_join(d_county_2024, by = c("GEOID" = "FIPS")) |> 
+  left_join(d_county_2020, by = c("GEOID" = "FIPS")) |>
+  mutate(shift = (trump_pv - trump_pv_2020) * 100, 
+         shift_dir = case_when(shift > 0 ~ "REP", 
+                               shift < 0 ~ "DEM", 
+                               TRUE ~ "No Change"),
+         centroid = st_centroid(geometry), 
+         centroid_long = st_coordinates(centroid)[,1],
+         centroid_lat = st_coordinates(centroid)[,2],
+         scale_factor = 1e4, 
+         end_long = centroid_long + scale_factor * shift,
+         end_lat = centroid_lat + scale_factor * shift) |>
+  drop_na()
+county_pop_2024 <- read_csv("~/Downloads/PopulationEstimates.csv") |> 
+  mutate(FIPStxt = as.numeric(FIPStxt)) |>
+  select(FIPStxt, POP_ESTIMATE_2023)
+counties_2024 <- counties_2024 |> 
+  left_join(county_pop_2024, by = c("GEOID" = "FIPStxt"))
+
+counties_2024 |> 
+  ggplot() +
+  geom_sf(fill = "gray95", color = "darkgrey") +   
+  geom_curve(aes(x = centroid_long, 
+                 y = centroid_lat,
+                 xend = end_long, 
+                 yend = end_lat,
+                 color = shift_dir),
+              arrow = arrow(length = unit(0.1, "cm"), type = "closed"),   
+              curvature = 0.2,  
+              size = 0.2) +
+  scale_color_manual(values = c("DEM" = "dodgerblue3", "REP" = "indianred1")) +
+  theme_void() +
+  labs(title = "Presidential Voting Shifts by County Across the US",
+       subtitle = "Democratic vs. Republican Gains")
+
+```
+
+Now, I will list a few reasons why my model failed in predicting the presidential outcome.
+
+1. **Polling Data**: As mentioned throughout this blog, my model included latest polling averages and mean polling averages as two of the six variables used. However, as seen in 2016 and 2020, polls have been unsuccessful in predicting Trump support, often underestimating his vote share. For example, the three polls I followed most closely were the New York Times, FiveThirtyEight, and RealClearPolitics---all of which predicted a Harris win. Since the polling data I used for my model came from FiveThirtyEight, there was an overestimation in her success that my model did not control for. In the Trump era of politics, polls have shifted in his direction much more in the week leading up to the election. This year, among voters who made their decision in the final week of the campaign, 54% chose Trump, while 42% selected Harris. Among those who decided in the last few days, 47% supported Trump and 41% backed Harris. *I hypothesize that my model, thus, would've been more effective using only the last week's polling data, though still, I will now further discuss why polling data is tricky with Trump as a candidate.*
+
+2. **Candidate-Specific Effect**: To begin, Trump has transformed political preference distinctions. His dramatic character and controversial language has made his support across different demographics hard to predict. For example, a week before election day, people may have assumed that women would protest his anti-abortion stances, Latino voters would protest his rhetoric around immigration, and Muslim voters would protest his Islamophobic legislation. Yet, none of this was seen to be true. Similarly, polls have been unable to crack the secrecy in voter surveys. People have continued to falsify their preferences, presumably as a result of Trump's controversial takes, making surveys unrepresentative of election day outcomes. 
+There is also definitely an candidate-specific effect that hurt Harris, but was hard to quantify in my model, and many others. For one, it's hard to ignore the fact that Harris is a Black and Indian woman running for the highest office in the United States. Voters hold prejudice in their assumption of what a strong commander-in-chief looks like, and oftentimes, it is not a woman. Further, Harris was heavily burdened by a shortened campaign that only lasted 15 weeks. While the beginning of her campaign was filled with energy (and donations), she was ultimately cursed by President Biden's legacy. People's ultimate distrust for the Democratic party, and specifically the economy, in combination with a shortened campaign, left Harris unable to build her own individual platform, outside of Biden. *In order to combat the Harris Effect, I would have included Biden's June approval rating and created a variable to address implicit bias towards the race and gender of candidates*, which I will workshop in the next section.
+
+3. **Economic Circumstances**: Inflation proved to be a much bigger factor in this election than GDP, due to international context. The Financial Times reported a fascinating finding that "Every governing party facing election in a developed country this year lost vote share, the first time this has ever happened." I'm glad I added unemployment as an economic indicator, but *I should've also included inflation, on top of Biden's june approval rating.*
+
+4. **Personal Bias**: Finally, upon reflection, I've come to understand how much personal bias plays into manipulation of election models. I, personally, tweaked my model based on what I saw to be likely versus unlikely, and I was ultimately hurt by this. Specifically, before finalizing my Week 8 and 9 models, I had numerous outcomes, two of which showcased a complete Republican sweep and a complete Democratic sweep. Having bias from my knowledge on other polling sites, I was misinformed in believing that this election would be close, so I didn't believe that a sweep was a likely outcome. Now, I know that I was misled in this belief. There is not much I can do now to account for this, but it is a finding I came away with, and found valuable in thinking about in the future.
+
+**Testing My Hypotheses**
+
+To summarize, I would have made the following changes to my model: **Trump-Specific Effect, Harris-Specific Effect, inflation variable, Biden's June approval rating, less emphasis on polling.**
+
+* Trump-Specific Effect: Luckily, this is Trump's third time running for President, so there were two other examples of how polling predictions versus actual outcome played out. I would've looked at how 2016 and 2020 data varied between prediction and outcome, and applied that inaccuracy to my model to ensure that Trump was not being underestimated.
+
+* Harris-Specific Effect: This effect is slightly harder to quantify, because Hillary Clinton is the only comparable candidate to test misogyny, but she is a white woman so the racial implications don't apply. For this reason, I would apply a small weight on polling data that focused on favorability questions, such as "Who is a stronger leader?", "Who is more charismatic?", etc.. I believe that implicit biases could be showcased in this personality questions. 
+
+* Inflation variable: Quite simply, I would apply the 2023-2024 inflation variable onto Harris' vote share model, as it would showcase the frustrations that voters across the world put on incumbent parties during elections.
+
+* Biden's June approval rating: I would apply Biden's June approval rating, since I hypothesized that Harris was hurt by the incumbent's last few months of campaigning.
+
+* Less emphasis on polling: I would just include the last week of polling data, and apply a smaller weight to it.
+
+**Looking Back**
+
+Overall, I've had an extremely enjoyable time following this election, and have learned so much as a data scientist, historian, and government analyst. As I've already discussed my quantitative lessons from this semester, I will also discuss some qualitative ones. One, elections are hard to predict due to the limited number of elections that have been happened. It's difficult to use data from 1948 to model a 2024 election, but due to the constraints, we often have to. I wonder what would've changed if I spent more time looking into elections from 2000 and on, as opposed to elections starting almost a century ago. I also would have liked to spend more time researching the polls that I used in my model. While I'm sure that FiveThirtyEight experts did better than I could've, I would've liked to see if there would be an improvement from hand-selecting a few polls based on my own evaluation. Additionally, as much as I have hypothesized improvements in this blog, I stand by my approach that simplicity is key to an election prediction. At the end of the day, fundamental economic variables seem to be the best predictor, so I am happy with my use of those. 
+
+**Sources**
+
+https://abcnews.go.com/538/states-accurate-polls/story?id=115108709
+
+https://www.ft.com/content/e8ac09ea-c300-4249-af7d-109003afb893
+
+https://hls.harvard.edu/today/election-law-experts-provide-post-election-insights-and-analysis/
+
+https://www.brookings.edu/articles/the-polls-underestimated-trumps-support-again/
+
+https://www.usnews.com/news/national-news/articles/2024-11-06/how-5-key-demographic-groups-helped-trump-win-the-2024-election
+
+https://www.nytimes.com/2024/11/07/us/politics/biden-harris-campaign.html

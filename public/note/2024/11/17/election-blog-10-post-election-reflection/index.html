@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Election Blog #10: Post-Election Reflection | A minimal Hugo website</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    
+  </head>
+
+  <body>
+    <nav>
+    <ul class="menu">
+      
+      <li><a href="/">Home</a></li>
+      
+      <li><a href="/about/">About</a></li>
+      
+      <li><a href="/categories/">Categories</a></li>
+      
+      <li><a href="/tags/">Tags</a></li>
+      
+      <li><a href="/index.xml">Subscribe</a></li>
+      
+    </ul>
+    <hr/>
+    </nav>
+
+<div class="article-meta">
+<h1><span class="title">Election Blog #10: Post-Election Reflection</span></h1>
+<h2 class="author">Shivali Korgaonkar</h2>
+<h2 class="date">2024/11/17</h2>
+</div>
+
+<main>
+<p><strong>Introduction</strong></p>
+<p>On Tuesday, November 5th, I sat with my entire blocking group in our Eliot House dorm, huddled around a small TV, each anxiously nibbling on the picnic of snacks we had bought in preparation. With four of us being Government concentrators, Election Night was an exciting, but also nerve-wrecking moment. While we all recalled Election Nights since 2012, this one held particular significance, since it was the first time we were able to cast our own ballot. On top of that, no election before had felt as critical as the one in front of our eyes that night. Bouncing between MSNBC&rsquo;s Steve Kornacki and Fox New&rsquo;s Bill Hemmer, we watched the election map coverage from 7PM to 1AM. Supplemented by The New York Time&rsquo;s election coverage and X doom scrolling, the night took us by complete surprise. After months and months of campaign analysis and predictive polling, Donald J. Trump has been elected the 47th President of the United States of America.</p>
+<p>To be clear, the winner was not what surprised me and my roommates. But instead, the magnitude of his victory was astonishing. Across numerous sites, analysts disagreed on who would win this election, but almost all agreed that it would be close. Yet, Trump declared victory in every single swing state, and saw voting shifts in a large majority of counties, relative to 2020. He made great progress among Black and Latino voters, as well as middle-class families. In this blog, I will analyze the election results relative to my own prediction model. I hypothesize that the results fit into an international pattern of backlash against incumbent parties, driven by inflation and post-pandemic economic challenges, leading to most U.S. voter groups swinging toward Republicans. However, key exceptions, such as swing states and urban areas, suggest nuanced shifts, including decreased racial polarization and growing class influence in politics.</p>
+<p><strong>Reviewing My Model</strong></p>
+<p>To recap, my model predicted the outcome of the seven swing states established: Arizona, Georgia, Michigan, Nevada, North Carolina, Pennsylvania, and Wisconsin. The remaining states were assumed to align with the 2020 election outcome. My model contained the following variables: democratic two-party lagged vote share, latest and mean polling averages, second quarter GDP, unemployment, and incumbency. I used a LASSO regression and also accounted for weighted error. As you can see below, my model predicted that Kamala Harris would win all swing states besides Arizona and Georgia.</p>
+<img src="https://example.org/note/2024/11/17/election-blog-10-post-election-reflection/index_files/figure-html/unnamed-chunk-9-1.png" width="672" />
+<img src="https://example.org/note/2024/11/17/election-blog-10-post-election-reflection/index_files/figure-html/unnamed-chunk-10-1.png" width="672" />
+<p>However, because my margin of victory was minimal with a popular vote share between 49 and 51 percent, I included a 95% confidence interval. In these results, the lower interval gave Trump the popular vote win in every swing state besides Nevada, while the upper interval gave Harris the popular vote win in every swing state.</p>
+<p><strong>How Accurate Was I? (Hint: Not Very)</strong></p>
+<p>The final results of the election gave <strong>Trump 312 electoral votes and Harris 226 electoral votes</strong>. Trump also won the popular vote with 50.1 percent of the vote share. Ultimately, Trump was victorious in all seven of the established swing states, giving him a margin of victory that left many pollsters in shock.</p>
+<pre><code>## 
+  |                                                                            
+  |                                                                      |   0%
+  |                                                                            
+  |                                                                      |   1%
+  |                                                                            
+  |=                                                                     |   1%
+  |                                                                            
+  |=                                                                     |   2%
+  |                                                                            
+  |==                                                                    |   3%
+  |                                                                            
+  |==                                                                    |   4%
+  |                                                                            
+  |===                                                                   |   5%
+  |                                                                            
+  |====                                                                  |   5%
+  |                                                                            
+  |====                                                                  |   6%
+  |                                                                            
+  |=====                                                                 |   7%
+  |                                                                            
+  |======                                                                |   8%
+  |                                                                            
+  |=======                                                               |   9%
+  |                                                                            
+  |=======                                                               |  10%
+  |                                                                            
+  |========                                                              |  11%
+  |                                                                            
+  |=========                                                             |  13%
+  |                                                                            
+  |==========                                                            |  14%
+  |                                                                            
+  |===========                                                           |  15%
+  |                                                                            
+  |============                                                          |  18%
+  |                                                                            
+  |=============                                                         |  19%
+  |                                                                            
+  |==============                                                        |  20%
+  |                                                                            
+  |===============                                                       |  21%
+  |                                                                            
+  |===============                                                       |  22%
+  |                                                                            
+  |================                                                      |  23%
+  |                                                                            
+  |=================                                                     |  24%
+  |                                                                            
+  |====================                                                  |  28%
+  |                                                                            
+  |====================                                                  |  29%
+  |                                                                            
+  |=====================                                                 |  30%
+  |                                                                            
+  |======================                                                |  31%
+  |                                                                            
+  |======================                                                |  32%
+  |                                                                            
+  |========================                                              |  34%
+  |                                                                            
+  |========================                                              |  35%
+  |                                                                            
+  |=========================                                             |  36%
+  |                                                                            
+  |==========================                                            |  37%
+  |                                                                            
+  |===========================                                           |  39%
+  |                                                                            
+  |============================                                          |  41%
+  |                                                                            
+  |=============================                                         |  41%
+  |                                                                            
+  |=============================                                         |  42%
+  |                                                                            
+  |==============================                                        |  43%
+  |                                                                            
+  |===============================                                       |  44%
+  |                                                                            
+  |================================                                      |  45%
+  |                                                                            
+  |================================                                      |  46%
+  |                                                                            
+  |=================================                                     |  47%
+  |                                                                            
+  |==================================                                    |  49%
+  |                                                                            
+  |===================================                                   |  51%
+  |                                                                            
+  |====================================                                  |  51%
+  |                                                                            
+  |=====================================                                 |  52%
+  |                                                                            
+  |=====================================                                 |  53%
+  |                                                                            
+  |======================================                                |  54%
+  |                                                                            
+  |======================================                                |  55%
+  |                                                                            
+  |=======================================                               |  56%
+  |                                                                            
+  |========================================                              |  57%
+  |                                                                            
+  |=========================================                             |  58%
+  |                                                                            
+  |==========================================                            |  60%
+  |                                                                            
+  |===========================================                           |  61%
+  |                                                                            
+  |===========================================                           |  62%
+  |                                                                            
+  |============================================                          |  62%
+  |                                                                            
+  |============================================                          |  63%
+  |                                                                            
+  |=============================================                         |  64%
+  |                                                                            
+  |=============================================                         |  65%
+  |                                                                            
+  |===================================================                   |  72%
+  |                                                                            
+  |====================================================                  |  74%
+  |                                                                            
+  |=====================================================                 |  75%
+  |                                                                            
+  |======================================================                |  78%
+  |                                                                            
+  |========================================================              |  79%
+  |                                                                            
+  |========================================================              |  80%
+  |                                                                            
+  |=========================================================             |  81%
+  |                                                                            
+  |==========================================================            |  82%
+  |                                                                            
+  |==========================================================            |  83%
+  |                                                                            
+  |============================================================          |  86%
+  |                                                                            
+  |==============================================================        |  88%
+  |                                                                            
+  |==============================================================        |  89%
+  |                                                                            
+  |===============================================================       |  89%
+  |                                                                            
+  |================================================================      |  91%
+  |                                                                            
+  |=================================================================     |  92%
+  |                                                                            
+  |=================================================================     |  93%
+  |                                                                            
+  |==================================================================    |  94%
+  |                                                                            
+  |===================================================================   |  95%
+  |                                                                            
+  |====================================================================  |  97%
+  |                                                                            
+  |===================================================================== |  98%
+  |                                                                            
+  |======================================================================|  99%
+  |                                                                            
+  |======================================================================| 100%
+</code></pre>
+<img src="https://example.org/note/2024/11/17/election-blog-10-post-election-reflection/index_files/figure-html/unnamed-chunk-12-1.png" width="672" />
+<p>While I correctly assumed that every state besides the swing states would match 2020 results, my model incorrectly predicted that Trump would manage to swing all 7 swing states red. Further, my model overestimated Harris&rsquo; popular vote share in every state, which can be seen in the error column. The state I had the best prediction for was Georgia, which makes sense because Georgia has one of the greatest number of polls, so its accuracy has been better since 2016. Essentially, most pollsters were most accurate in Georgia, and since my model was heavily reliant on polls, it fits that Georgia performed the best in mine too. Interestingly, Arizona was the only other state I accurately predicted, yet it had my second highest margin of error&mdash;after Nevada. Additionally, a small win in my model was that, between Week 8 and 9, I accurately updated my prediction for Georgia and Nevada. I do think it&rsquo;s useful to note, also, that my lower 95% confidence interval would&rsquo;ve been much more accurate, likely because of the tight race that polls were predicting. Later in this blog, I will dive further into hypotheses of why my model failed.</p>
+<pre><code>## New names:
+## Rows: 52 Columns: 42
+## ── Column specification
+## ──────────────────────────────────────────────────────── Delimiter: &quot;,&quot; chr
+## (42): FIPS, Geographic Name, Geographic Subtype, Total Vote, Kamala D. H...
+## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ
+## Specify the column types or set `show_col_types = FALSE` to quiet this message.
+## • `0` -&gt; `0...31`
+## • `0` -&gt; `0...32`
+## • `0` -&gt; `0...33`
+## • `0` -&gt; `0...34`
+## • `0` -&gt; `0...35`
+## • `0` -&gt; `0...36`
+## • `0` -&gt; `0...37`
+## • `0` -&gt; `0...38`
+## • `0` -&gt; `0...39`
+## • `0` -&gt; `0...40`
+## • `0` -&gt; `0...41`
+## • `0` -&gt; `0...42`
+</code></pre>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">state</th>
+          <th style="text-align: right">Predicted_Harris_2pv</th>
+          <th style="text-align: left">Predicted_Winner</th>
+          <th style="text-align: right">Actual_Harris_2pv</th>
+          <th style="text-align: left">Actual_Winner</th>
+          <th style="text-align: right">Error</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">Arizona</td>
+          <td style="text-align: right">49.82948</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: right">47.15253</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: right">2.6769535</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Georgia</td>
+          <td style="text-align: right">49.74125</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: right">48.87845</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: right">0.8628003</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Michigan</td>
+          <td style="text-align: right">51.33334</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: right">49.30156</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: right">2.0317848</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Nevada</td>
+          <td style="text-align: right">51.73468</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: right">48.37829</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: right">3.3563924</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">North Carolina</td>
+          <td style="text-align: right">50.14996</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: right">48.29889</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: right">1.8510655</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Pennsylvania</td>
+          <td style="text-align: right">51.14048</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: right">48.98235</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: right">2.1581335</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Wisconsin</td>
+          <td style="text-align: right">51.35674</td>
+          <td style="text-align: left">Democrat</td>
+          <td style="text-align: right">49.53156</td>
+          <td style="text-align: left">Republican</td>
+          <td style="text-align: right">1.8251821</td>
+      </tr>
+  </tbody>
+</table>
+<p>The evaluation metrics for my 2024 election model provide some important insights into its performance in predicting the Democratic vote share. The bias of -2.11 indicates that, on average, my model overestimates the Democratic vote share by approximately 2.11 percentage points, suggesting it tends to predict higher vote totals for Democrats than actually occurred. The Mean Squared Error (MSE) of 4.96 reflects  that my model&rsquo;s predictions deviate significantly from the actual results. The Root Mean Squared Error (RMSE) of 2.11 reveals that on average, my predictions are off by 2.11 percentage points.</p>
+<pre><code class="language-r">#Bias
+mean(results$Actual_Harris_2pv - results$Predicted_Harris_2pv)
+</code></pre>
+<pre><code>## [1] -2.108902
+</code></pre>
+<pre><code class="language-r">#MSE
+mean((results$Actual_Harris_2pv - results$Predicted_Harris_2pv)^2)
+</code></pre>
+<pre><code>## [1] 4.9599
+</code></pre>
+<pre><code class="language-r">#RMSE
+sqrt(mean(results$Actual_Harris_2pv - results$Predicted_Harris_2pv)^2)
+</code></pre>
+<pre><code>## [1] 2.108902
+</code></pre>
+<pre><code class="language-r">#MAE
+mean(abs(results$Actual_Harris_2pv - results$Predicted_Harris_2pv))
+</code></pre>
+<pre><code>## [1] 2.108902
+</code></pre>
+<pre><code class="language-r">eval_metrics &lt;- data.frame(
+  Metric = c(&quot;Bias&quot;, &quot;Mean Squared Error&quot;, &quot;Root Mean Squared Error&quot;),
+  Error = c(-2.108902, 4.9599, 2.108902)
+)
+
+kable(eval_metrics,
+      caption = &quot;2024 Prediction Evaluation Metrics&quot;)
+</code></pre>
+<p>Table: <span id="tab:unnamed-chunk-14"></span>Table 1: 2024 Prediction Evaluation Metrics</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Metric</th>
+          <th style="text-align: right">Error</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">Bias</td>
+          <td style="text-align: right">-2.108902</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Mean Squared Error</td>
+          <td style="text-align: right">4.959900</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Root Mean Squared Error</td>
+          <td style="text-align: right">2.108902</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Why Was My Model Inaccurate?</strong></p>
+<p>Across the country, Trump made impressive progress in gaining more voters than he was able to in 2020. Once again, the polls were were unable to predict this progress, either overestimating Harris or underestimating Trump. This year, Trump built support with white women, Black men, Latino voters, young voters, and suburban voters. The map below shows these voting shifts across counties overwhelming in favor of Trump, relative to his vote share in 2020.</p>
+<pre><code>## 
+  |                                                                            
+  |                                                                      |   0%
+  |                                                                            
+  |=                                                                     |   1%
+  |                                                                            
+  |==                                                                    |   3%
+  |                                                                            
+  |===                                                                   |   4%
+  |                                                                            
+  |=====                                                                 |   7%
+  |                                                                            
+  |======                                                                |   9%
+  |                                                                            
+  |=======                                                               |  10%
+  |                                                                            
+  |========                                                              |  12%
+  |                                                                            
+  |=========                                                             |  13%
+  |                                                                            
+  |==========                                                            |  14%
+  |                                                                            
+  |==========                                                            |  15%
+  |                                                                            
+  |===========                                                           |  16%
+  |                                                                            
+  |============                                                          |  17%
+  |                                                                            
+  |=============                                                         |  18%
+  |                                                                            
+  |==============                                                        |  20%
+  |                                                                            
+  |===============                                                       |  22%
+  |                                                                            
+  |================                                                      |  23%
+  |                                                                            
+  |=================                                                     |  25%
+  |                                                                            
+  |==================                                                    |  26%
+  |                                                                            
+  |===================                                                   |  27%
+  |                                                                            
+  |====================                                                  |  28%
+  |                                                                            
+  |=====================                                                 |  30%
+  |                                                                            
+  |=====================                                                 |  31%
+  |                                                                            
+  |======================                                                |  31%
+  |                                                                            
+  |=======================                                               |  33%
+  |                                                                            
+  |========================                                              |  35%
+  |                                                                            
+  |=========================                                             |  35%
+  |                                                                            
+  |=========================                                             |  36%
+  |                                                                            
+  |==========================                                            |  37%
+  |                                                                            
+  |==========================                                            |  38%
+  |                                                                            
+  |===========================                                           |  39%
+  |                                                                            
+  |============================                                          |  40%
+  |                                                                            
+  |=============================                                         |  41%
+  |                                                                            
+  |==============================                                        |  43%
+  |                                                                            
+  |===============================                                       |  44%
+  |                                                                            
+  |================================                                      |  46%
+  |                                                                            
+  |==================================                                    |  48%
+  |                                                                            
+  |==================================                                    |  49%
+  |                                                                            
+  |===================================                                   |  50%
+  |                                                                            
+  |====================================                                  |  52%
+  |                                                                            
+  |=====================================                                 |  52%
+  |                                                                            
+  |=====================================                                 |  53%
+  |                                                                            
+  |=======================================                               |  55%
+  |                                                                            
+  |=======================================                               |  56%
+  |                                                                            
+  |========================================                              |  57%
+  |                                                                            
+  |=========================================                             |  58%
+  |                                                                            
+  |==========================================                            |  60%
+  |                                                                            
+  |===========================================                           |  61%
+  |                                                                            
+  |===========================================                           |  62%
+  |                                                                            
+  |============================================                          |  63%
+  |                                                                            
+  |=============================================                         |  64%
+  |                                                                            
+  |==============================================                        |  65%
+  |                                                                            
+  |==============================================                        |  66%
+  |                                                                            
+  |===============================================                       |  67%
+  |                                                                            
+  |================================================                      |  68%
+  |                                                                            
+  |=================================================                     |  69%
+  |                                                                            
+  |=================================================                     |  70%
+  |                                                                            
+  |==================================================                    |  71%
+  |                                                                            
+  |===================================================                   |  73%
+  |                                                                            
+  |====================================================                  |  74%
+  |                                                                            
+  |=====================================================                 |  75%
+  |                                                                            
+  |=====================================================                 |  76%
+  |                                                                            
+  |=======================================================               |  78%
+  |                                                                            
+  |========================================================              |  80%
+  |                                                                            
+  |=========================================================             |  81%
+  |                                                                            
+  |==========================================================            |  83%
+  |                                                                            
+  |==========================================================            |  84%
+  |                                                                            
+  |===========================================================           |  84%
+  |                                                                            
+  |============================================================          |  86%
+  |                                                                            
+  |=============================================================         |  87%
+  |                                                                            
+  |==============================================================        |  88%
+  |                                                                            
+  |===============================================================       |  90%
+  |                                                                            
+  |===============================================================       |  91%
+  |                                                                            
+  |================================================================      |  91%
+  |                                                                            
+  |=================================================================     |  92%
+  |                                                                            
+  |=================================================================     |  93%
+  |                                                                            
+  |==================================================================    |  94%
+  |                                                                            
+  |===================================================================   |  96%
+  |                                                                            
+  |====================================================================  |  97%
+  |                                                                            
+  |===================================================================== |  99%
+  |                                                                            
+  |======================================================================|  99%
+  |                                                                            
+  |======================================================================| 100%
+</code></pre>
+<img src="https://example.org/note/2024/11/17/election-blog-10-post-election-reflection/index_files/figure-html/unnamed-chunk-15-1.png" width="672" />
+<p>Now, I will list a few reasons why my model failed in predicting the presidential outcome.</p>
+<ol>
+<li>
+<p><strong>Polling Data</strong>: As mentioned throughout this blog, my model included latest polling averages and mean polling averages as two of the six variables used. However, as seen in 2016 and 2020, polls have been unsuccessful in predicting Trump support, often underestimating his vote share. For example, the three polls I followed most closely were the New York Times, FiveThirtyEight, and RealClearPolitics&mdash;all of which predicted a Harris win. Since the polling data I used for my model came from FiveThirtyEight, there was an overestimation in her success that my model did not control for. In the Trump era of politics, polls have shifted in his direction much more in the week leading up to the election. This year, among voters who made their decision in the final week of the campaign, 54% chose Trump, while 42% selected Harris. Among those who decided in the last few days, 47% supported Trump and 41% backed Harris. <em>I hypothesize that my model, thus, would&rsquo;ve been more effective using only the last week&rsquo;s polling data, though still, I will now further discuss why polling data is tricky with Trump as a candidate.</em></p>
+</li>
+<li>
+<p><strong>Candidate-Specific Effect</strong>: To begin, Trump has transformed political preference distinctions. His dramatic character and controversial language has made his support across different demographics hard to predict. For example, a week before election day, people may have assumed that women would protest his anti-abortion stances, Latino voters would protest his rhetoric around immigration, and Muslim voters would protest his Islamophobic legislation. Yet, none of this was seen to be true. Similarly, polls have been unable to crack the secrecy in voter surveys. People have continued to falsify their preferences, presumably as a result of Trump&rsquo;s controversial takes, making surveys unrepresentative of election day outcomes.
+There is also definitely an candidate-specific effect that hurt Harris, but was hard to quantify in my model, and many others. For one, it&rsquo;s hard to ignore the fact that Harris is a Black and Indian woman running for the highest office in the United States. Voters hold prejudice in their assumption of what a strong commander-in-chief looks like, and oftentimes, it is not a woman. Further, Harris was heavily burdened by a shortened campaign that only lasted 15 weeks. While the beginning of her campaign was filled with energy (and donations), she was ultimately cursed by President Biden&rsquo;s legacy. People&rsquo;s ultimate distrust for the Democratic party, and specifically the economy, in combination with a shortened campaign, left Harris unable to build her own individual platform, outside of Biden. <em>In order to combat the Harris Effect, I would have included Biden&rsquo;s June approval rating and created a variable to address implicit bias towards the race and gender of candidates</em>, which I will workshop in the next section.</p>
+</li>
+<li>
+<p><strong>Economic Circumstances</strong>: Inflation proved to be a much bigger factor in this election than GDP, due to international context. The Financial Times reported a fascinating finding that &ldquo;Every governing party facing election in a developed country this year lost vote share, the first time this has ever happened.&rdquo; I&rsquo;m glad I added unemployment as an economic indicator, but <em>I should&rsquo;ve also included inflation, on top of Biden&rsquo;s june approval rating.</em></p>
+</li>
+<li>
+<p><strong>Personal Bias</strong>: Finally, upon reflection, I&rsquo;ve come to understand how much personal bias plays into manipulation of election models. I, personally, tweaked my model based on what I saw to be likely versus unlikely, and I was ultimately hurt by this. Specifically, before finalizing my Week 8 and 9 models, I had numerous outcomes, two of which showcased a complete Republican sweep and a complete Democratic sweep. Having bias from my knowledge on other polling sites, I was misinformed in believing that this election would be close, so I didn&rsquo;t believe that a sweep was a likely outcome. Now, I know that I was misled in this belief. There is not much I can do now to account for this, but it is a finding I came away with, and found valuable in thinking about in the future.</p>
+</li>
+</ol>
+<p><strong>Testing My Hypotheses</strong></p>
+<p>To summarize, I would have made the following changes to my model: <strong>Trump-Specific Effect, Harris-Specific Effect, inflation variable, Biden&rsquo;s June approval rating, less emphasis on polling.</strong></p>
+<ul>
+<li>
+<p>Trump-Specific Effect: Luckily, this is Trump&rsquo;s third time running for President, so there were two other examples of how polling predictions versus actual outcome played out. I would&rsquo;ve looked at how 2016 and 2020 data varied between prediction and outcome, and applied that inaccuracy to my model to ensure that Trump was not being underestimated.</p>
+</li>
+<li>
+<p>Harris-Specific Effect: This effect is slightly harder to quantify, because Hillary Clinton is the only comparable candidate to test misogyny, but she is a white woman so the racial implications don&rsquo;t apply. For this reason, I would apply a small weight on polling data that focused on favorability questions, such as &ldquo;Who is a stronger leader?&rdquo;, &ldquo;Who is more charismatic?&rdquo;, etc.. I believe that implicit biases could be showcased in this personality questions.</p>
+</li>
+<li>
+<p>Inflation variable: Quite simply, I would apply the 2023-2024 inflation variable onto Harris&rsquo; vote share model, as it would showcase the frustrations that voters across the world put on incumbent parties during elections.</p>
+</li>
+<li>
+<p>Biden&rsquo;s June approval rating: I would apply Biden&rsquo;s June approval rating, since I hypothesized that Harris was hurt by the incumbent&rsquo;s last few months of campaigning.</p>
+</li>
+<li>
+<p>Less emphasis on polling: I would just include the last week of polling data, and apply a smaller weight to it.</p>
+</li>
+</ul>
+<p><strong>Looking Back</strong></p>
+<p>Overall, I&rsquo;ve had an extremely enjoyable time following this election, and have learned so much as a data scientist, historian, and government analyst. As I&rsquo;ve already discussed my quantitative lessons from this semester, I will also discuss some qualitative ones. One, elections are hard to predict due to the limited number of elections that have been happened. It&rsquo;s difficult to use data from 1948 to model a 2024 election, but due to the constraints, we often have to. I wonder what would&rsquo;ve changed if I spent more time looking into elections from 2000 and on, as opposed to elections starting almost a century ago. I also would have liked to spend more time researching the polls that I used in my model. While I&rsquo;m sure that FiveThirtyEight experts did better than I could&rsquo;ve, I would&rsquo;ve liked to see if there would be an improvement from hand-selecting a few polls based on my own evaluation. Additionally, as much as I have hypothesized improvements in this blog, I stand by my approach that simplicity is key to an election prediction. At the end of the day, fundamental economic variables seem to be the best predictor, so I am happy with my use of those.</p>
+<p><strong>Sources</strong></p>
+<p><a href="https://abcnews.go.com/538/states-accurate-polls/story?id=115108709">https://abcnews.go.com/538/states-accurate-polls/story?id=115108709</a></p>
+<p><a href="https://www.ft.com/content/e8ac09ea-c300-4249-af7d-109003afb893">https://www.ft.com/content/e8ac09ea-c300-4249-af7d-109003afb893</a></p>
+<p><a href="https://hls.harvard.edu/today/election-law-experts-provide-post-election-insights-and-analysis/">https://hls.harvard.edu/today/election-law-experts-provide-post-election-insights-and-analysis/</a></p>
+<p><a href="https://www.brookings.edu/articles/the-polls-underestimated-trumps-support-again/">https://www.brookings.edu/articles/the-polls-underestimated-trumps-support-again/</a></p>
+<p><a href="https://www.usnews.com/news/national-news/articles/2024-11-06/how-5-key-demographic-groups-helped-trump-win-the-2024-election">https://www.usnews.com/news/national-news/articles/2024-11-06/how-5-key-demographic-groups-helped-trump-win-the-2024-election</a></p>
+<p><a href="https://www.nytimes.com/2024/11/07/us/politics/biden-harris-campaign.html">https://www.nytimes.com/2024/11/07/us/politics/biden-harris-campaign.html</a></p>
+
+</main>
+
+  <footer>
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<script src="//cdn.jsdelivr.net/combine/npm/katex/dist/katex.min.js,npm/katex/dist/contrib/auto-render.min.js,npm/@xiee/utils/js/render-katex.js" defer></script>
+
+<script src="//cdn.jsdelivr.net/npm/@xiee/utils/js/center-img.min.js" defer></script>
+
+  
+  <hr/>
+  © <a href="https://yihui.org">Yihui Xie</a> 2017 &ndash; 2024 | <a href="https://github.com/yihui">Github</a> | <a href="https://twitter.com/xieyihui">Twitter</a>
+  
+  </footer>
+  </body>
+</html>
+
