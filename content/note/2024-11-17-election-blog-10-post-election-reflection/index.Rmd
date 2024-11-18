@@ -285,7 +285,7 @@ final_pred <- adjusted_pv2p |>
   rename("Adjusted Democratic 2-Party Vote Share" = D_pv2p_adjusted)
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, include=FALSE}
 #Creating 95% confidence interval
 
 mean_error <- mean(d_train$error)
@@ -471,7 +471,7 @@ ggplot(states_2024, aes(fill = factor(winner))) +
 
 While I correctly assumed that every state besides the swing states would match 2020 results, my model incorrectly predicted that Trump would manage to swing all 7 swing states red. Further, my model overestimated Harris' popular vote share in every state, which can be seen in the error column. The state I had the best prediction for was Georgia, which makes sense because Georgia has one of the greatest number of polls, so its accuracy has been better since 2016. Essentially, most pollsters were most accurate in Georgia, and since my model was heavily reliant on polls, it fits that Georgia performed the best in mine too. Interestingly, Arizona was the only other state I accurately predicted, yet it had my second highest margin of error---after Nevada. Additionally, a small win in my model was that, between Week 8 and 9, I accurately updated my prediction for Georgia and Nevada. I do think it's useful to note, also, that my lower 95% confidence interval would've been much more accurate, likely because of the tight race that polls were predicting. Later in this blog, I will dive further into hypotheses of why my model failed. 
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 state_outcomes <- read_csv("~/Downloads/state_votes_pres_2024.csv")
 
@@ -489,7 +489,8 @@ results <- results |>
   select(state, Predicted_Harris_2pv, Predicted_Winner, Actual_Harris_2pv, Actual_Winner) |>
   mutate(Error = Predicted_Harris_2pv - Actual_Harris_2pv)
 
-kable(results)
+kable(results,
+      caption = "Comparing 2024 Democratic Vote Share Prediction and Outcome")
 
 ```
 
