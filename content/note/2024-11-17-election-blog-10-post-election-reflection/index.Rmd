@@ -446,18 +446,17 @@ d_county_2020 <- d_county_2020 |>
 
 ```
 
-```{r echo=FALSE}
-
-library(tigris)
-library(sf)
-library(dplyr)
-library(tidyr)
+```{r include=FALSE}
 
 states_2024 <- states(cb = TRUE, year = 2023) |> 
   shift_geometry() |> 
   mutate(GEOID = as.numeric(GEOID)) |> 
   left_join(d_state_2024, by = c("GEOID" = "FIPS")) |> 
   drop_na()
+
+```
+
+```{r echo=FALSE}
 
 ggplot(states_2024, aes(fill = factor(winner))) + 
   geom_sf() + 
