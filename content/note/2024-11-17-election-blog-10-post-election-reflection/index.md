@@ -7,7 +7,7 @@ categories: []
 tags: []
 ---
 
-**Introducing Blog 10**
+**Introduction**
 
 On Tuesday, November 5th, I sat with my entire blocking group in our Eliot House dorm, huddled around a small TV, each anxiously nibbling on the picnic of snacks we had bought in preparation. With four of us being Government concentrators, Election Night was an exciting, but also nerve-wrecking moment. While we all recalled Election Nights since 2012, this one held particular significance, since it was the first time we were able to cast our own ballot. On top of that, no election before had felt as critical as the one in front of our eyes that night. Bouncing between MSNBC's Steve Kornacki and Fox New's Bill Hemmer, we watched the election map coverage from 7PM to 1AM. Supplemented by The New York Time's election coverage and X doom scrolling, the night took us by complete surprise. After months and months of campaign analysis and predictive polling, Donald J. Trump has been elected the 47th President of the United States of America. 
 
@@ -84,15 +84,6 @@ Table: <span id="tab:unnamed-chunk-17"></span>Table 2: 2024 Prediction Evaluatio
 Across the country, Trump made impressive progress in gaining more voters than he was able to in 2020. Once again, the polls were were unable to predict this progress, either overestimating Harris or underestimating Trump. This year, Trump built support with white women, Black men, Latino voters, young voters, and suburban voters. The map below shows these voting shifts across counties overwhelming in favor of Trump, relative to his vote share in 2020.
 
 
-
-
-```
-## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
-## ℹ Please use `linewidth` instead.
-## This warning is displayed once every 8 hours.
-## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-## generated.
-```
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-19-1.png" width="672" />
 

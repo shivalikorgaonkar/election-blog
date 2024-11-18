@@ -7,7 +7,7 @@ categories: []
 tags: []
 ---
 
-**Introducing Blog 10**
+**Introduction**
 
 On Tuesday, November 5th, I sat with my entire blocking group in our Eliot House dorm, huddled around a small TV, each anxiously nibbling on the picnic of snacks we had bought in preparation. With four of us being Government concentrators, Election Night was an exciting, but also nerve-wrecking moment. While we all recalled Election Nights since 2012, this one held particular significance, since it was the first time we were able to cast our own ballot. On top of that, no election before had felt as critical as the one in front of our eyes that night. Bouncing between MSNBC's Steve Kornacki and Fox New's Bill Hemmer, we watched the election map coverage from 7PM to 1AM. Supplemented by The New York Time's election coverage and X doom scrolling, the night took us by complete surprise. After months and months of campaign analysis and predictive polling, Donald J. Trump has been elected the 47th President of the United States of America. 
 
@@ -552,7 +552,7 @@ counties_2024 <- counties_2024 |>
   left_join(county_pop_2024, by = c("GEOID" = "FIPStxt"))
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 counties_2024 |> 
   ggplot() +
