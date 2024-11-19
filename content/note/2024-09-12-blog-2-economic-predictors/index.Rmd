@@ -1,5 +1,5 @@
 ---
-title: 'Blog #2: Economic Predictors'
+title: 'Election Blog #2: Economic Predictors'
 author: Shivali Korgaonkar
 date: '2024-09-12'
 slug: blog-2-economic-predictors
