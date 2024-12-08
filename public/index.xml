@@ -6,8 +6,15 @@
     <description>Recent content in Home on A minimal Hugo website</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 17 Nov 2024 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 04 Dec 2024 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://example.org/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Election Blog #11: Post-Election Analysis of Michigan</title>
+      <link>https://example.org/note/2024/12/04/election-blog-11-post-election-analysis-of-michigan/</link>
+      <pubDate>Wed, 04 Dec 2024 00:00:00 +0000</pubDate>
+      <guid>https://example.org/note/2024/12/04/election-blog-11-post-election-analysis-of-michigan/</guid>
+      <description>&lt;p&gt;&lt;strong&gt;Introduction&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;p&gt;In this election blog, I will be diving into a post-election campaign narrative of Michigan. I will begin by explaining Michigan&amp;rsquo;s demographics, history, geography, and 2024 down-ballot to contextualize the presidential election. After that, I will reflect on expert poll predictions, and contrast it to the actual results in Michigan. Finally, using election theories and existing analysis, I will pose my own hypotheses about why Michigan either followed or deviated from its predicted performance.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Election Blog #10: Post-Election Reflection</title>
       <link>https://example.org/note/2024/11/17/election-blog-10-post-election-reflection/</link>
@@ -65,7 +72,7 @@
       <description>&lt;p&gt;&lt;strong&gt;Introduction&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;p&gt;There are numerous different resources that prospective voters can use to track an election. Almost every new outlet has their own poll, and major election tracking sites, like FiveThirtyEight, are publicly available for anyone to monitor. There&amp;rsquo;s great debate surrounding the purpose and benefit of polls. These polls are especially useful for campaigns to track shifts in their support between states and districts. It can also allow citizens to see how fellow Americans are reacting to current events across the country. However, polls have significant limitations. Sampling errors, biased methodologies, and low response rates can skew results. Additionally, they may influence voter behavior who can see one candidate drastically succeeding in their state, convincing them to stay home on election day. Unexpected events or late voter shifts can drastically alter outcomes, making predictions unreliable, but they are still a useful resource for researchers to predict election outcomes based on history and voter preferences.&lt;/p&gt;</description>
     </item>
     <item>
-      <title>Blog #2: Economic Predictors</title>
+      <title>Election Blog #2: Economic Predictors</title>
       <link>https://example.org/note/2024/09/12/blog-2-economic-predictors/</link>
       <pubDate>Thu, 12 Sep 2024 00:00:00 +0000</pubDate>
       <guid>https://example.org/note/2024/09/12/blog-2-economic-predictors/</guid>
@@ -79,11 +86,11 @@
       <description>&lt;p&gt;In politics and beyond, history can be an imperative indicator of what will happen in the future. Relative to other predictive models, elections can be difficult because the sample size is small and variant. Nonetheless, voting trends can and should be used to observe national trends.&#xA;American presidential elections have historically narrowed down to the Democratic and Republican candidates&amp;rsquo; respective vote share. The graph above highlights the competitive elections that have taken place between 1948 and 2020 in the United States. The competitive nature of these elections shows promise to our strong democratic systems. They also indicate the importance of using past elections to predict future ones.&lt;/p&gt;</description>
     </item>
     <item>
-      <title>About Hugo XMin</title>
+      <title>Shivali Korgaonkar</title>
       <link>https://example.org/about/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       <guid>https://example.org/about/</guid>
-      <description>&lt;p&gt;&lt;strong&gt;XMin&lt;/strong&gt; is the first Hugo theme I have designed. The original reason that I wrote it was I needed a minimal example of Hugo themes when I was writing the  &lt;a href=&#34;https://github.com/rstudio/blogdown&#34;&gt;&lt;strong&gt;blogdown&lt;/strong&gt;&lt;/a&gt; book. Basically I wanted a simple theme that supports a navigation menu, a home page, other single pages, lists of pages, blog posts, categories, tags, and RSS. That is all. Nothing fancy. In terms of CSS and JavaScript, I really want to keep them minimal. In fact, this theme does not contain any JavaScript code at all, although on this example website I did introduce some JavaScript code (still relatively simple anyway). The theme does not contain any images, either, and is pretty much a plain-text theme.&lt;/p&gt;</description>
+      <description>&lt;p&gt;I am a student at Harvard College (&amp;lsquo;26) studying Government with a Data Science track, and a secondary in Educational Studies. I am originally from New York City, and attended Stuyvesant High School, where I played an active role in my student government and the NYC Department of Education. To learn more about my experience, please click &lt;a href=&#34;https://www.linkedin.com/in/shivali-korgaonkar-48200725b/&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;&#xA;&lt;p&gt;This blog was a semester-long project for GOV 1367: Election Analytics that I took my Junior year of college. With two previous years of foundational knowledge, I completed this project in R.&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>

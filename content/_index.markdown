@@ -2,9 +2,11 @@
 title: Home
 ---
 
+[<img src="https://simpleicons.org/icons/github.svg" style="max-width:15%;min-width:40px;float:right;" alt="Github repo" />](https://github.com/yihui/hugo-xmin)
 
-# 2024 Election Analytics Prediction Blog
+# HUGO XMIN
 
-## By Shivali Korgaonkar
+## _Keep it simple, but not simpler_
 
-Welcome to my personal blog for GOV 1347 with Professor Ryan Enos! This Fall, I will be tracking the presidential race between Vice President Kamala Harris and President Donald J. Trump. Feel free to peruse my blogs, where I track important election variables, in order to build my own prediction model. You can access the code on my [GitHub](https://github.com/shivalikorgaonkar/election-blog).
+**XMin** is a Hugo theme written by [Yihui Xie](https://yihui.org) in about four hours: half an hour was spent on the Hugo templates, and 3.5 hours were spent on styling. The main motivation for writing this theme was to provide a really minimal example to beginners of Hugo templates. This XMin theme contains about 140 lines of code in total, including the code in HTML templates and CSS (also counting empty lines).
+

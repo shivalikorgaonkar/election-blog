@@ -6,8 +6,15 @@
     <description>Recent content in Notes on A minimal Hugo website</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 17 Nov 2024 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 04 Dec 2024 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://example.org/note/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Election Blog #11: Post-Election Analysis of Michigan</title>
+      <link>https://example.org/note/2024/12/04/election-blog-11-post-election-analysis-of-michigan/</link>
+      <pubDate>Wed, 04 Dec 2024 00:00:00 +0000</pubDate>
+      <guid>https://example.org/note/2024/12/04/election-blog-11-post-election-analysis-of-michigan/</guid>
+      <description>&lt;p&gt;&lt;strong&gt;Introduction&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;p&gt;In this election blog, I will be diving into a post-election campaign narrative of Michigan. I will begin by explaining Michigan&amp;rsquo;s demographics, history, geography, and 2024 down-ballot to contextualize the presidential election. After that, I will reflect on expert poll predictions, and contrast it to the actual results in Michigan. Finally, using election theories and existing analysis, I will pose my own hypotheses about why Michigan either followed or deviated from its predicted performance.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Election Blog #10: Post-Election Reflection</title>
       <link>https://example.org/note/2024/11/17/election-blog-10-post-election-reflection/</link>
@@ -65,7 +72,7 @@
       <description>&lt;p&gt;&lt;strong&gt;Introduction&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;p&gt;There are numerous different resources that prospective voters can use to track an election. Almost every new outlet has their own poll, and major election tracking sites, like FiveThirtyEight, are publicly available for anyone to monitor. There&amp;rsquo;s great debate surrounding the purpose and benefit of polls. These polls are especially useful for campaigns to track shifts in their support between states and districts. It can also allow citizens to see how fellow Americans are reacting to current events across the country. However, polls have significant limitations. Sampling errors, biased methodologies, and low response rates can skew results. Additionally, they may influence voter behavior who can see one candidate drastically succeeding in their state, convincing them to stay home on election day. Unexpected events or late voter shifts can drastically alter outcomes, making predictions unreliable, but they are still a useful resource for researchers to predict election outcomes based on history and voter preferences.&lt;/p&gt;</description>
     </item>
     <item>
-      <title>Blog #2: Economic Predictors</title>
+      <title>Election Blog #2: Economic Predictors</title>
       <link>https://example.org/note/2024/09/12/blog-2-economic-predictors/</link>
       <pubDate>Thu, 12 Sep 2024 00:00:00 +0000</pubDate>
       <guid>https://example.org/note/2024/09/12/blog-2-economic-predictors/</guid>
