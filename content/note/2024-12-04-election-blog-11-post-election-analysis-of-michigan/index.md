@@ -39,7 +39,7 @@ A week before Election Day, Trump and Harris made a visit to Michigan to make th
 
 In our last class, we examined Lynn Vavreck's campaign theory. The theory claims that candidates can overcome unfavorable fundamentals with a strong campaign strategy. Depending on economic conditions, candidates should either adopt a "clarifying" or "insurgent" campaign approach. In a favorable economy, candidates should lead a clarifying campaign that centers the election around economic success. Conversely, when the economy is not in their favor, candidates should focus on an alternative issue with broad voter support to displace the economic narrative. This theory provides a lens to analyze the 2024 election, where voters ranked the economy as their top issue. Despite improvements in job growth, inflation, and GDP over the past year, voter perceptions of the economy were largely negative, driven by a disconnect between reality and public sentiment—-a dynamic Vavreck attributes to contrasts in media narratives and campaign messaging.
 
-Harris's failure to effectively implement Vavreck's theory likely contributed to her loss. As seen in the speech's analyzed earlier, the economy in Michigan is a pivotal issue, because of the manufacturing jobs in rural areas, as well as the unemployment crisis coupled with cost of living. Unable to leverage a clarifying campaign due to widespread pessimism about the economy, Harris pivoted to reproductive rights as her "lopsided" issue. While this issue could've been effective in other states, Michigan already established reproductive rights as a constitutional right in 2022, so voters were not focused on it. Harris also emphasized protecting democracy, a strategy that might have been effective under different circumstances, but the economy's perceived decline overshadowed her efforts. Trump, meanwhile, addressed the economy, but immigration served as his dominant lopsided issue, striking a strong chord with voters. He dominated rural counties in Michigan, increasing voter support in both Latino and Arab populations. Notably, both candidates devoted significant time to attacking one another rather than fully capitalizing on economic messaging. At the end of the day, Harris was haunted by the Biden administration's lack of help in Michigan-specific issues, such as the automotive industry and war in Gaza, and she did not have an issue strong enough to distract from that.
+Harris's failure to effectively implement Vavreck's theory likely contributed to her loss. As seen in the speech's analyzed earlier, the economy in Michigan is a pivotal issue, because of the manufacturing jobs in rural areas, as well as the unemployment crisis coupled with cost of living. Unable to leverage a clarifying campaign due to widespread pessimism about the economy, Harris pivoted to reproductive rights as her "lopsided" issue. While this issue could've been effective in other states, Michigan already established reproductive rights as a constitutional right in 2022, so voters were not focused on it. Harris also emphasized protecting democracy, a strategy that might have been effective under different circumstances, but the economy's perceived decline overshadowed her efforts. Trump, meanwhile, addressed the economy, but immigration served as his dominant lopsided issue, striking a strong chord with voters. He dominated rural counties in Michigan, increasing voter support in both Latino and Arab populations, and claiming two counties won by Biden in 2020. Notably, both candidates devoted significant time to attacking one another rather than fully capitalizing on economic messaging. At the end of the day, Harris was haunted by the Biden administration's lack of help in Michigan-specific issues, such as the automotive industry and war in Gaza, and she did not have an issue strong enough to distract from that.
 
 **Sources**
 
@@ -48,6 +48,14 @@ https://hollis.harvard.edu/primo-explore/fulldisplay?docid=TN_cdi_askewsholts_vl
 https://www.cnn.com/2024/10/09/business/economy-voters-election-data/index.html
 
 https://news.gallup.com/poll/651719/economy-important-issue-2024-presidential-vote.aspx
+
+https://www.cbsnews.com/detroit/news/harris-trump-rallies-michigan-election-day/
+
+https://ballotpedia.org/Michigan
+
+https://projects.fivethirtyeight.com/polls/president-general/2024/michigan/
+
+https://www.realclearpolling.com/polls/president/general/2024/michigan/trump-vs-harris
 
 https://www.freep.com/story/news/politics/elections/2024/11/06/trump-kamala-harris-michigan-how/76087793007/
 

@@ -40,13 +40,13 @@ I used a few different methods to try to create an accurate model. For starters,
 
 |state          | D_pv2p_adjusted|Winner   |
 |:--------------|---------------:|:--------|
-|Arizona        |        56.23924|Democrat |
-|Georgia        |        56.06326|Democrat |
-|Michigan       |        57.60847|Democrat |
-|Nevada         |        57.86115|Democrat |
-|North Carolina |        56.43675|Democrat |
-|Pennsylvania   |        57.38144|Democrat |
-|Wisconsin      |        58.11245|Democrat |
+|Arizona        |        58.33784|Democrat |
+|Georgia        |        58.17478|Democrat |
+|Michigan       |        59.74390|Democrat |
+|Nevada         |        59.96816|Democrat |
+|North Carolina |        58.54942|Democrat |
+|Pennsylvania   |        59.50959|Democrat |
+|Wisconsin      |        60.29204|Democrat |
 
 
 
